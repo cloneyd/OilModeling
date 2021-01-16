@@ -23,7 +23,7 @@ private:
 
     QString m_image_filepath;
     // grid contains QPairs with row's offset and QVector of QPointF which contains left upper corner
-    QVector<QPair<int, QVector<QPointF>>> m_grid; // QPair.first - offset from the first column, QPair.second - vector of values
+    QVector<QVector<QPair<bool, QPointF>>> m_grid; // QPair.first - belongness flag, QPair.second - vector of values
 
     Ui::GridCreatorWidget *ui;
 
@@ -41,7 +41,7 @@ public slots:
     void updateGridArea(); // connected with MainWindow (signal - updateGridButtonPressed())
 
 signals:
-    void gridChanged(const QVector<QPair<int, QVector<QPointF>>> &grid); // emitted when grid changes (emit in function: closeEvent)
+    void gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &grid); // emitted when grid changes (emit in function: closeEvent)
 
     // saves the current pixmap in MainWindow label
     void saveMapInLabel(QPixmap map); // is emitted when final map is ready (emit function: closeEvent)
@@ -56,6 +56,7 @@ private:
     void gridCreation();
     QPixmap getPixmapFromScene(); // draw a cuurent scene in QPixmap
     void extraCellsDeletion();
+    bool isBelongsToArea(const QPointF &value, const QVector<QPointF> &vector);
 };
 
 #endif

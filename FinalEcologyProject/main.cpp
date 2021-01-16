@@ -45,17 +45,17 @@ int main(int argc, char *argv[])
                      &window, SLOT(saveMapInLabel(QPixmap)));
 
     // connections between GridCreatorWidget and SurfaceContainer
-    QObject::connect(&grid_map, SIGNAL(gridChanged(const QVector<QPair<int, QVector<QPointF>>> &)),
-                     &surface, SLOT(setupGrid(const QVector<QPair<int, QVector<QPointF>>>&)));
+    QObject::connect(&grid_map, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
+                     &surface, SLOT(setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
     // connections between GridCreatorWidget and ExcelWorker
-    QObject::connect(&grid_map, SIGNAL(gridChanged(const QVector<QPair<int, QVector<QPointF>>> &)),
-                     &excel_worker, SLOT(updateHeightsFile(const QVector<QPair<int, QVector<QPointF>>> &)));
+    QObject::connect(&grid_map, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
+                     &excel_worker, SLOT(updateHeightsFile(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
 
     // connections between SurfaceContainer and ExcelWorker
-    QObject::connect(&surface, SIGNAL(heightsChanged(const QVector<QPair<int, QVector<double>>> &)),
-                     &excel_worker, SLOT(updateHeights(const QVector<QPair<int, QVector<double>>> &)));
+    QObject::connect(&surface, SIGNAL(heightsChanged(const QVector<QVector<QPair<bool, double>>> &)),
+                     &excel_worker, SLOT(updateHeights(const QVector<QVector<QPair<bool, double>>> &)));
     window.show();
     return app.exec();
 }

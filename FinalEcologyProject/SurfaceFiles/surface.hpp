@@ -15,8 +15,8 @@ class Surface: public QObject
     Q_OBJECT
 
 private:
-    QVector<QPair<int, QVector<QPointF>>> m_grid;
-    QVector<QPair<int, QVector<double>>> m_heights;
+    QVector<QVector<QPair<bool, QPointF>>> m_grid;
+    QVector<QVector<QPair<bool, double>>> m_heights;
     QtDataVisualization::Q3DSurface *m_graph;
     double m_realscale;
     QLinearGradient m_gr;
@@ -27,14 +27,14 @@ public:
 
 // Setters
 public:
-    void setGrid(const QVector<QPair<int, QVector<QPointF>>> &grid) /*noexcept*/;
-    void setHeights(const QVector<QPair<int, QVector<double>>> &heights) /*noexcept*/;
+    void setGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid) /*noexcept*/;
+    void setHeights(const QVector<QVector<QPair<bool, double>>> &heights) /*noexcept*/;
     void setScale(double scale) noexcept;
 
 // Getters
 public:
-    [[nodiscard]] const QVector<QPair<int, QVector<QPointF>>>& getGrid() const noexcept;
-    [[nodiscard]] const QVector<QPair<int, QVector<double>>>& getHeights() const noexcept;
+    [[nodiscard]] const QVector<QVector<QPair<bool, QPointF>>>& getGrid() const noexcept;
+    [[nodiscard]] const QVector<QVector<QPair<bool, double>>>& getHeights() const noexcept;
     [[nodiscard]] QPixmap getGradientPixmap() const;
 
 // Methods

@@ -34,20 +34,22 @@ Surface::~Surface() noexcept
 }
 
 // setters (public methods)
-void Surface::setGrid(const QVector<QPair<int, QVector<QPointF>>> &grid) /*noexcept*/
+void Surface::setGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid) /*noexcept*/
 {
     m_grid = grid;
     auto rows {m_grid.size() };
     for(int i{}; i < rows; ++i) {
-        auto cols{ grid[i].second.size() };
+        auto cols{ grid[i].size() };
         for(int j{}; j < cols; ++j) {
-            m_grid[i].second[j] /= m_realscale;
+            if(m_grid[i][j].first) {
+                m_grid[i][j].second /= m_realscale;
+            }
         }
     }
     m_heights.clear();
 }
 
-void Surface::setHeights(const QVector<QPair<int, QVector<double>>> &heights) /*noexcept*/
+void Surface::setHeights(const QVector<QVector<QPair<bool, double>>> &heights) /*noexcept*/
 {
     m_heights = heights;
     // FIXME: there is should be approximation
@@ -62,12 +64,12 @@ void Surface::setScale(double scale) noexcept
 
 
 // Getters (publics methods)
-const QVector<QPair<int, QVector<QPointF>>>& Surface::getGrid() const noexcept
+const QVector<QVector<QPair<bool, QPointF>>>& Surface::getGrid() const noexcept
 {
     return m_grid;
 }
 
-[[nodiscard]] const QVector<QPair<int, QVector<double>>>& Surface::getHeights() const noexcept
+[[nodiscard]] const QVector<QVector<QPair<bool, double>>>& Surface::getHeights() const noexcept
 {
     return m_heights;
 }
@@ -94,9 +96,11 @@ const QVector<QPair<int, QVector<QPointF>>>& Surface::getGrid() const noexcept
     else {
         auto rows(m_heights.size());
         for(int i{}; i < rows; ++i) {
-            auto cols{ m_heights[i].second.size() };
+            auto cols{ m_heights[i].size() };
             for(int j{}; j < cols; ++j) {
-                max_map_height = std::max(max_map_height, m_heights[i].second[j]);
+                if(m_heights[i][j].first) {
+                    max_map_height = std::max(max_map_height, m_heights[i][j].second);
+                }
             }
         }
     }
@@ -125,20 +129,24 @@ void Surface::updateMap()
     // Note: Q3DSurface standart axis a bit confusing: Y axe is the height axe
     if(m_heights.empty()) {
         for(int i{}; i < rows; ++i) {
-            auto cols{ m_grid[i].second.size() };
+            auto cols{ m_grid[i].size() };
             QVector<QVector3D> tmp(cols);
             for(int j{}; j < cols; ++j) {
-                tmp[j] = QVector3D(m_grid[i].second[j].x(), 0.f, m_grid[i].second[j].y()); // WARNING: narrow from double to float
+                if(m_grid[i][j].first) {
+                    tmp[j] = QVector3D(m_grid[i][j].second.x(), 0.f, m_grid[i][j].second.y()); // WARNING: narrow from double to float
+                }
             }
             coords[i] = std::move(tmp);
         }
     }
     else {
         for(int i{}; i < rows; ++i) {
-            auto cols{ m_grid[i].second.size() };
+            auto cols{ m_grid[i].size() };
             QVector<QVector3D> tmp(cols);
             for(int j{}; j < cols; ++j) {
-                tmp[j] = QVector3D(m_grid[i].second[j].x(), m_heights[i].second[j], m_grid[i].second[j].y()); // WARNING: narrow from double to float
+                if(m_grid[i][j].first) {
+                    tmp[j] = QVector3D(m_grid[i][j].second.x(), m_heights[i][j].second, m_grid[i][j].second.y()); // WARNING: narrow from double to float
+                }
             }
             coords[i] = std::move(tmp);
         }
@@ -148,7 +156,7 @@ void Surface::updateMap()
     float ymax{};
     float zmax{};
     for(int i{}; i < rows; ++i) {
-        auto cols{ m_grid[i].second.size() };
+        auto cols{ m_grid[i].size() };
         for(int j{}; j < cols; ++j) {
             xmax = std::max(xmax, coords[i][j].x());
             ymax = std::max(ymax, coords[i][j].y());

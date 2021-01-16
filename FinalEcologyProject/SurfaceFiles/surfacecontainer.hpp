@@ -21,18 +21,18 @@ public:
     ~SurfaceContainer() noexcept;
 
 public slots:
-    void setupGrid(const QVector<QPair<int, QVector<QPointF>>> &grid); // connected with GridCreatorWidget (signal - gridChanged(same))
+    void setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridCreatorWidget (signal - gridChanged(same))
     void setupTableWidget(TableWidget *table) const; // connected with MainWindow (signal - setupTableWidget(same)); FIXME: implicit connection with TableWidget
     void setupHeights(TableWidget *table); // connected with TableWidget (signal - closeSignal(same))
     void setupScale(double scale); // connected with QDoubleSpinBox (which is contained in MainWindow) (signal - valueChanged(same))
     void showWidget(); // connected with MainWindow (openSurfaceButtonPressed())
 
 signals:
-    void heightsChanged(const QVector<QPair<int, QVector<double>>> &heights); // emit function: setupHeights
+    void heightsChanged(const QVector<QVector<QPair<bool, double>>> &heights); // emit function: setupHeights
 
 // Helper functions
 private:
-    void interpolation(QVector<QPair<int, QVector<double>>> &heights);
+    void interpolation(QVector<QVector<QPair<bool, double>>> &heights);
 };
 
 #endif // SURFACECONTAINER_HPP

@@ -20,8 +20,8 @@ public:
     ~ExcelWorker() noexcept;
 
 public slots:
-    void updateHeightsFile(const QVector<QPair<int, QVector<QPointF>>> &grid); // connected with GridCreator widget (signal - gridChanged(same))
-    void updateHeights(const QVector<QPair<int, QVector<double>>> &heights); // connected with SurfaceContainer (signal - heightsChanged(same))
+    void updateHeightsFile(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridCreator widget (signal - gridChanged(same))
+    void updateHeights(const QVector<QVector<QPair<bool, double>>> &heights); // connected with SurfaceContainer (signal - heightsChanged(same))
     void saveHeightsFile(const QString &filepath); // connected with MainWidnow (signal - saveInExcelFileButtonPressed(same))
 };
 

@@ -120,14 +120,16 @@ void GridCreatorWidget::closeEvent(QCloseEvent *event)
     auto cell_width{ realscale * m_cell_width };
     auto cell_height{realscale * m_cell_height };
     for(int i{}; i < grid_size; ++i){
-        auto size {m_grid[i].second.size()};
+        auto size {m_grid[i].size()};
         for(int j{}; j < size; ++j) {
-            auto x{m_grid[i].second[j].x()};
-            auto y{m_grid[i].second[j].y()};
-            painter.drawLines({ QLineF(m_grid[i].second[j], QPointF(x + cell_width, y)),
-                                QLineF(QPointF(x + cell_width, y), QPointF(x + cell_width, y + cell_height)),
-                                QLineF(QPointF(x + cell_width, y + cell_height), QPointF(x, y + cell_height)),
-                                QLineF(QPointF(x, y + cell_height), m_grid[i].second[j])});
+            if(m_grid[i][j].first) {
+                auto x{ m_grid[i][j].second.x() };
+                auto y{ m_grid[i][j].second.y() };
+                painter.drawLines({ QLineF(m_grid[i][j].second, QPointF(x + cell_width, y)),
+                                    QLineF(QPointF(x + cell_width, y), QPointF(x + cell_width, y + cell_height)),
+                                    QLineF(QPointF(x + cell_width, y + cell_height), QPointF(x, y + cell_height)),
+                                    QLineF(QPointF(x, y + cell_height), m_grid[i][j].second)});
+            }
         }
     }
     painter.end();
@@ -166,14 +168,14 @@ void GridCreatorWidget::gridCreation()
     auto cell_width{ realscale * m_cell_width };
     auto cell_height{ realscale * m_cell_height };
     for(auto y{ ymin }; ymax - y > 0; y += cell_height){
-        QVector<QPointF> tmp;
+        QVector<QPair<bool, QPointF>> tmp;
         for(auto x{ xmin }; xmax - x > 0; x += cell_width){
-            tmp.append(QPointF(x, y));
+            tmp.append(qMakePair(true, QPointF(x, y)));
         }
-        m_grid.append(QPair(0, std::move(tmp)));
+        m_grid.append(std::move(tmp));
     }
 
-    extraCellsDeletion();
+    //extraCellsDeletion();
 }
 
 QPixmap GridCreatorWidget::getPixmapFromScene()
@@ -191,16 +193,12 @@ QPixmap GridCreatorWidget::getPixmapFromScene()
 void GridCreatorWidget::extraCellsDeletion()
 {
     auto rows {m_grid.size() };
-    QVector<QVector<QPointF>> grid(rows); // make a copy to work;
-    for(int i{}; i < rows; ++i) {
-        grid[i] = m_grid[i].second;
-    }
 
     QVector<QPointF> area { qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getAreaPoints() };
     std::sort(area.begin(), area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
 
     auto cell_height = screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_height;
-    auto y { grid[0][0].y() };
+    auto y { m_grid[0][0].second.y() };
     auto area_size{ area.size() };
     QVector<QPointF> lines(rows * 2);
     double max{ -1. };
@@ -222,34 +220,33 @@ void GridCreatorWidget::extraCellsDeletion()
 
     QVector<QPair<int, QVector<QPoint>>> new_grid(rows);
     for(int i{}; i < rows; ++i) {
-        auto cols{ grid[i].size() };
+        auto cols{ m_grid[i].size() };
         for(int j{}; j < cols; ++j) {
-            if(isBelongsToArea(grid[i][j], lines)) {
-                // FIXME: need to change QPair<int, QVector<QPointF>> to QPair<bool, QVector<QPointF>> as a prepare to handle a complicated areas
-            }
+            m_grid[i][j].first = isBelongsToArea(m_grid[i][j].second, lines);
         }
     }
 }
 
 bool GridCreatorWidget::isBelongsToArea(const QPointF &value, const QVector<QPointF> &vector)
 {
-     auto cell_width = screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_width;
-     auto cell_height = screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_height;
+//     auto cell_width = screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_width;
+//     auto cell_height = screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_height;
 
-     auto size{ vector.size() };
-     for(int i{}; i < size; i += 2) {
-         auto x{ value.x() };
-         auto y{ value.y() };
-         auto left_x{ vector[i].x() };
-         auto left_y{ vector[i].y() };
-         auto right_x{ vector[i + 1].x() };
-         auto right_y{ vector[i + 1].y() };
-         if(!((x >= left_x && y >= left_y && x <= right_x && y <= right_y) ||
-              (x + cell_width >= left_x && y >= left_y && x + cell_width <= right_x && y <= right_y)) ||
-              (x >= left_x && y + cell_height >= left_y && x <= right_x && y + cell_height <= right_y) ||
-              (x + cell_width >= left_x && y + cell_height >= left_y && x + cell_width <= right_x && y + cell_height <= right_y)) {
-             return false;
-         }
-     }
-     return true;
+//     auto size{ vector.size() };
+//     for(int i{}; i < size; i += 2) {
+//         auto x{ value.x() };
+//         auto y{ value.y() };
+//         auto left_x{ vector[i].x() };
+//         auto left_y{ vector[i].y() };
+//         auto right_x{ vector[i + 1].x() };
+//         auto right_y{ vector[i + 1].y() };
+//         if(!((x >= left_x && y >= left_y && x <= right_x && y <= right_y) ||
+//              (x + cell_width >= left_x && y >= left_y && x + cell_width <= right_x && y <= right_y)) ||
+//              (x >= left_x && y + cell_height >= left_y && x <= right_x && y + cell_height <= right_y) ||
+//              (x + cell_width >= left_x && y + cell_height >= left_y && x + cell_width <= right_x && y + cell_height <= right_y)) {
+//             return false;
+//         }
+//     }
+//     return true;
+    return true;
 }

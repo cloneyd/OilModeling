@@ -56,7 +56,7 @@ SurfaceContainer::~SurfaceContainer() noexcept
 
 
 // public slots
-void SurfaceContainer::setupGrid(const QVector<QPair<int, QVector<QPointF>>> &grid)
+void SurfaceContainer::setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid)
 {
     m_surface->setGrid(grid);
     m_gr_label->setPixmap(m_surface->getGradientPixmap());
@@ -72,7 +72,7 @@ void SurfaceContainer::setupTableWidget(TableWidget *table) const
     auto rows{ grid.size() };
     auto max_cols{ 0 };
     for(int i{}; i < rows; ++i) {
-        max_cols = std::max(max_cols, grid[i].second.size());
+        max_cols = std::max(max_cols, grid[i].size());
     }
 
     table->setRowCount(rows);
@@ -81,27 +81,29 @@ void SurfaceContainer::setupTableWidget(TableWidget *table) const
     auto heights{ m_surface->getHeights() };
     if(heights.empty()) {
         for(int i{}; i < rows; ++i) {
-            auto cols{ grid[i].second.size() };
-            auto offset{ grid[i].first };
+            auto cols{ grid[i].size() };
             for(int j{}; j < cols; ++j) {
-                auto item{ new QTableWidgetItem }; // WARNING: may throw; should be replaced
-                item->setBackground(QBrush(Qt::cyan));
-                item->setText("-1");
-                item->setTextAlignment(Qt::AlignCenter);
-                table->setItem(i, j + offset, item);
+                if(grid[i][j].first) {
+                    auto item{ new QTableWidgetItem }; // WARNING: may throw; should be replaced
+                    item->setBackground(QBrush(Qt::cyan));
+                    item->setText("-1");
+                    item->setTextAlignment(Qt::AlignCenter);
+                    table->setItem(i, j, item);
+                }
             }
         }
     }
     else {
         for(int i{}; i < rows; ++i) {
-            auto cols{ grid[i].second.size() };
-            auto offset{ grid[i].first };
+            auto cols{ heights[i].size() };
             for(int j{}; j < cols; ++j) {
-                auto item{ new QTableWidgetItem }; // WARNING: may throw; should be replaced
-                item->setBackground(QBrush(Qt::cyan));
-                item->setText(QString("%1").arg(heights[i].second[j]));
-                item->setTextAlignment(Qt::AlignCenter);
-                table->setItem(i, j + offset, item);
+                if(heights[i][j].first) {
+                    auto item{ new QTableWidgetItem }; // WARNING: may throw; should be replaced
+                    item->setBackground(QBrush(Qt::cyan));
+                    item->setText(QString("%1").arg(heights[i][j].second));
+                    item->setTextAlignment(Qt::AlignCenter);
+                    table->setItem(i, j, item);
+                }
             }
         }
     }
@@ -111,16 +113,17 @@ void SurfaceContainer::setupHeights(TableWidget *table)
 {
     auto grid{ m_surface->getGrid() };
     auto rows{ grid.size() };
-    QVector<QPair<int, QVector<double>>> heights(rows);
+    QVector<QVector<QPair<bool, double>>> heights(rows);
 
     for(int i{}; i < rows; ++i) {
-        auto offset{ grid[i].first };
-        auto cols{ grid[i].second.size() };
-        QVector<double> tmp(cols);
+        auto cols{ grid[i].size() };
+        QVector<QPair<bool, double>> tmp(cols);
         for(int j{}; j < cols; ++j) {
-            tmp[j] = table->item(i, j + offset)->text().toDouble();
+            if(grid[i][j].first) {
+                tmp[j] = qMakePair(grid[i][j].first, table->item(i, j)->text().toDouble());
+            }
         }
-        heights[i] = qMakePair(offset, tmp); // WARNING: extra copy
+        heights[i] = std::move(tmp); // WARNING: extra copy
     }
 
     interpolation(heights);
@@ -146,7 +149,7 @@ void SurfaceContainer::showWidget()
 
 
 // private helper methods
-void SurfaceContainer::interpolation(QVector<QPair<int, QVector<double>>> &heights)
+void SurfaceContainer::interpolation(QVector<QVector<QPair<bool, double>>> &heights)
 {
 
 }
