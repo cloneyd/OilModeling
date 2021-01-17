@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QImage>
 #include <algorithm>
+#include <cmath>
 
 // Ctors and dtor
 GridCreatorWidget::GridCreatorWidget(QWidget *parent) :
@@ -175,7 +176,7 @@ void GridCreatorWidget::gridCreation()
         m_grid.append(std::move(tmp));
     }
 
-    //extraCellsDeletion();
+    extraCellsDeletion();
 }
 
 QPixmap GridCreatorWidget::getPixmapFromScene()
@@ -190,63 +191,35 @@ QPixmap GridCreatorWidget::getPixmapFromScene()
     return pixmap;
 }
 
-void GridCreatorWidget::extraCellsDeletion()
+void GridCreatorWidget::extraCellsDeletion() // FIXME
 {
     auto rows {m_grid.size() };
 
     QVector<QPointF> area { qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getAreaPoints() };
     std::sort(area.begin(), area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
 
-    auto cell_height = screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_height;
-    auto y { m_grid[0][0].second.y() };
     auto area_size{ area.size() };
-    QVector<QPointF> lines(rows * 2);
-    double max{ -1. };
-    double min{ 1e+5 };
-    for(int i{}, j{}; i < area_size && j < rows * 2; ++i) {
-        if(y - area[i].y() < -.5) {
-            y += cell_height;
-            lines[j] = QPointF(min, y);
-            lines[j + 1] = QPointF(max, y);
-            j += 2;
-            min = 1e+5;
-            max = - 1;
-            continue;
-        }
-
-        if(area[i].x() < min) min = area[i].x();
-        else if( area[i].x() > max) max = area[i].x();
-    }
-
-    QVector<QPair<int, QVector<QPoint>>> new_grid(rows);
+    QVector<QVector<QPointF>> cells(rows); // tmp for a new grid creation
     for(int i{}; i < rows; ++i) {
-        auto cols{ m_grid[i].size() };
-        for(int j{}; j < cols; ++j) {
-            m_grid[i][j].first = isBelongsToArea(m_grid[i][j].second, lines);
+        for(int j{}; j < area_size; ++j) {
+            if(std::fabs(area[j].y() - m_grid[i][0].second.y()) < 10.)
+            {
+                cells[i].append({area[j].x(), m_grid[i][0].second.y()});
+            }
+        }
+        std::sort(cells[i].begin(), cells[i].end(), [](QPointF first, QPointF second) {return (first.x() - second.x()) < 0.; });
+    }
+
+    auto cell_width{ screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_width };
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; m_grid[i][j].second.x() + cell_width < cells[i][0].x(); ++j) { // is j < grid_cols needed?
+            m_grid[i][j].first = false;
+        }
+
+        auto cells_cols{ cells[i].size() };
+        for(int j{ m_grid[i].size() - 1 }; m_grid[i][j].second.x() > cells[i][cells_cols - 1].x() && j > 0; --j) {
+            m_grid[i][j].first = false;
         }
     }
-}
-
-bool GridCreatorWidget::isBelongsToArea(const QPointF &value, const QVector<QPointF> &vector)
-{
-//     auto cell_width = screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_width;
-//     auto cell_height = screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_height;
-
-//     auto size{ vector.size() };
-//     for(int i{}; i < size; i += 2) {
-//         auto x{ value.x() };
-//         auto y{ value.y() };
-//         auto left_x{ vector[i].x() };
-//         auto left_y{ vector[i].y() };
-//         auto right_x{ vector[i + 1].x() };
-//         auto right_y{ vector[i + 1].y() };
-//         if(!((x >= left_x && y >= left_y && x <= right_x && y <= right_y) ||
-//              (x + cell_width >= left_x && y >= left_y && x + cell_width <= right_x && y <= right_y)) ||
-//              (x >= left_x && y + cell_height >= left_y && x <= right_x && y + cell_height <= right_y) ||
-//              (x + cell_width >= left_x && y + cell_height >= left_y && x + cell_width <= right_x && y + cell_height <= right_y)) {
-//             return false;
-//         }
-//     }
-//     return true;
-    return true;
+    // FIXME: если будет разрыв в области, то будет неправильная разбивка
 }

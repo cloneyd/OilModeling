@@ -57,7 +57,7 @@ void MainWindow::openMapButtonPressed()
 void MainWindow::saveMapAsExcelButtonPressed()
 {
     QString dir = QFileDialog::getSaveFileName(this, tr("Save File"),
-                               "/home/file.xlsx",
+                               "/home/map.xlsx",
                                tr("XLSX files (*.xlsx)"));
     if(dir.isEmpty()) return;
 

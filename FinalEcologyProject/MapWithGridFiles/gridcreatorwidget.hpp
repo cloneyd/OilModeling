@@ -56,7 +56,6 @@ private:
     void gridCreation();
     QPixmap getPixmapFromScene(); // draw a cuurent scene in QPixmap
     void extraCellsDeletion();
-    bool isBelongsToArea(const QPointF &value, const QVector<QPointF> &vector);
 };
 
 #endif
