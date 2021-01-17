@@ -38,7 +38,8 @@ public slots:
     void updateScale(double scale) noexcept; // connected with QDoubleSpinBox (which is contained in MainWindow) (singal - valueChanged(same))
 
     void createGridArea(const QString &image_filepath); // connected with MainWindow (signal - createGrid(same))
-    void updateGridArea(); // connected with MainWindow (signal - updateGridButtonPressed())
+    void updateFullMap(); // connected with MainWindow (signal - updateFullMapButtonPressed())
+    void updateGrid(); // connected with MainWindow (signal - updateGridButtonPressed())
 
 signals:
     void gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &grid); // emitted when grid changes (emit in function: closeEvent)
@@ -54,6 +55,7 @@ protected:
 // helper methods
 private:
     void gridCreation();
+    void drawGrid(QPixmap& pixmap);
     QPixmap getPixmapFromScene(); // draw a cuurent scene in QPixmap
     void extraCellsDeletion();
 };

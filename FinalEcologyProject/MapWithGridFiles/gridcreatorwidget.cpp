@@ -47,6 +47,7 @@ void GridCreatorWidget::updateScale(double scale) noexcept
 void GridCreatorWidget::createGridArea(const QString &image_filepath)
 {
     m_grid.clear();
+    qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->clear();
 
     m_image_filepath = std::move(const_cast<QString&>(image_filepath)); // WARNING: const_cast
     QImage map_image;
@@ -97,47 +98,31 @@ void GridCreatorWidget::createGridArea(const QString &image_filepath)
 
 }
 
-void GridCreatorWidget::updateGridArea()
+void GridCreatorWidget::updateFullMap()
 {
     m_grid.clear();
     qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->clear();
     createGridArea(m_image_filepath);
 }
 
-
-// protected overridden functions
-void GridCreatorWidget::closeEvent(QCloseEvent *event)
+void GridCreatorWidget::updateGrid()
 {
+    m_grid.clear();
     gridCreation(); // create the grid
 
     // create the image with grid
     QPixmap pixmap{std::move(getPixmapFromScene())};
-    QPainter painter;
+    drawGrid(pixmap);
 
-    painter.begin(&pixmap);
-    painter.setPen(Qt::darkRed);
-    auto grid_size{m_grid.size()};
-    auto realscale{screen()->physicalDotsPerInch() / 2.54 / m_scale }; // number of real units in one conventional unit
-    auto cell_width{ realscale * m_cell_width };
-    auto cell_height{realscale * m_cell_height };
-    for(int i{}; i < grid_size; ++i){
-        auto size {m_grid[i].size()};
-        for(int j{}; j < size; ++j) {
-            if(m_grid[i][j].first) {
-                auto x{ m_grid[i][j].second.x() };
-                auto y{ m_grid[i][j].second.y() };
-                painter.drawLines({ QLineF(m_grid[i][j].second, QPointF(x + cell_width, y)),
-                                    QLineF(QPointF(x + cell_width, y), QPointF(x + cell_width, y + cell_height)),
-                                    QLineF(QPointF(x + cell_width, y + cell_height), QPointF(x, y + cell_height)),
-                                    QLineF(QPointF(x, y + cell_height), m_grid[i][j].second)});
-            }
-        }
-    }
-    painter.end();
-
-    qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->clear();
     emit saveMapInLabel(pixmap);
     emit gridChanged(m_grid);
+}
+
+
+// protected overridden functions
+void GridCreatorWidget::closeEvent(QCloseEvent *event)
+{
+    updateGrid();
     event->accept();
 }
 
@@ -177,6 +162,32 @@ void GridCreatorWidget::gridCreation()
     }
 
     extraCellsDeletion();
+}
+
+void GridCreatorWidget::drawGrid(QPixmap& pixmap)
+{
+    QPainter painter;
+
+    painter.begin(&pixmap);
+    painter.setPen(Qt::darkRed);
+    auto grid_size{m_grid.size()};
+    auto realscale{screen()->physicalDotsPerInch() / 2.54 / m_scale }; // number of real units in one conventional unit
+    auto cell_width{ realscale * m_cell_width };
+    auto cell_height{realscale * m_cell_height };
+    for(int i{}; i < grid_size; ++i){
+        auto size {m_grid[i].size()};
+        for(int j{}; j < size; ++j) {
+            if(m_grid[i][j].first) {
+                auto x{ m_grid[i][j].second.x() };
+                auto y{ m_grid[i][j].second.y() };
+                painter.drawLines({ QLineF(m_grid[i][j].second, QPointF(x + cell_width, y)),
+                                    QLineF(QPointF(x + cell_width, y), QPointF(x + cell_width, y + cell_height)),
+                                    QLineF(QPointF(x + cell_width, y + cell_height), QPointF(x, y + cell_height)),
+                                    QLineF(QPointF(x, y + cell_height), m_grid[i][j].second)});
+            }
+        }
+    }
+    painter.end();
 }
 
 QPixmap GridCreatorWidget::getPixmapFromScene()

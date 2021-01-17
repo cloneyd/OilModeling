@@ -31,12 +31,14 @@ public slots:
     void saveMapAsImageButtonPressed(); // connected with save_map_as_image_button (ui)
     void openMapVisualizationButtonPressed(); // connected with open_map_visualization_button (ui)
     void enterHeightsButtonPressed(); // connected with enter_heights_button (ui)
+    void updateFullMapButtonPressed(); // connected with update_map_button (ui)
     void updateGridButtonPressed(); // connected with update_grid_button (ui)
 
     void saveMapInLabel(QPixmap pm); // connected with GridCreatorWidget (signal - saveMapInLabel)
 
 signals:
     void createGrid(const QString &filepath);
+    void updateFullMap();
     void updateGrid();
 
     void openMapVisualization();

@@ -214,36 +214,6 @@
      <property name="horizontalSpacing">
       <number>6</number>
      </property>
-     <item row="1" column="2">
-      <widget class="QPushButton" name="open_map_visualization_button">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>60</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>60</height>
-        </size>
-       </property>
-       <property name="baseSize">
-        <size>
-         <width>100</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Открыть 3D
- визуализацию
- текущего объекта</string>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="2">
       <widget class="QPushButton" name="enter_heights_button">
        <property name="enabled">
@@ -271,64 +241,6 @@
         <string>Ввод высот
 (при помощи 
 программы)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QPushButton" name="save_map_as_image_button">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>60</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>60</height>
-        </size>
-       </property>
-       <property name="baseSize">
-        <size>
-         <width>100</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Сохранить карту
-(.jpeg, .png)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QPushButton" name="open_map_button">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>60</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>100</width>
-         <height>60</height>
-        </size>
-       </property>
-       <property name="baseSize">
-        <size>
-         <width>100</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Открыть карту в
-новом окне</string>
        </property>
       </widget>
      </item>
@@ -367,6 +279,36 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="open_map_visualization_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>100</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Открыть 3D
+ визуализацию
+ текущего объекта</string>
+       </property>
+      </widget>
+     </item>
      <item row="1" column="1">
       <widget class="QPushButton" name="save_map_as_excel_button">
        <property name="enabled">
@@ -396,7 +338,107 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="2">
+     <item row="1" column="0">
+      <widget class="QPushButton" name="open_map_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>100</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Открыть карту в
+новом окне</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="save_map_as_image_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>100</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Сохранить карту
+(.jpeg, .png)</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="gridLayoutWidget_2">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>90</y>
+      <width>251</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="0" column="0">
+      <widget class="QPushButton" name="update_map_button">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>100</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Перерисовать
+область на
+изображении</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
       <widget class="QPushButton" name="update_grid_button">
        <property name="enabled">
         <bool>false</bool>
@@ -410,7 +452,7 @@
        <property name="maximumSize">
         <size>
          <width>100</width>
-         <height>600</height>
+         <height>60</height>
         </size>
        </property>
        <property name="baseSize">
@@ -449,7 +491,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>129</x>
-     <y>379</y>
+     <y>401</y>
     </hint>
     <hint type="destinationlabel">
      <x>170</x>
@@ -465,7 +507,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>149</x>
-     <y>455</y>
+     <y>499</y>
     </hint>
     <hint type="destinationlabel">
      <x>179</x>
@@ -497,7 +539,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>305</x>
-     <y>464</y>
+     <y>508</y>
     </hint>
     <hint type="destinationlabel">
      <x>341</x>
@@ -538,18 +580,34 @@
    </hints>
   </connection>
   <connection>
+   <sender>update_map_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>updateFullMapButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>629</x>
+     <y>130</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>510</x>
+     <y>511</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>update_grid_button</sender>
    <signal>pressed()</signal>
    <receiver>MainWindow</receiver>
    <slot>updateGridButtonPressed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>449</x>
-     <y>512</y>
+     <x>731</x>
+     <y>145</y>
     </hint>
     <hint type="destinationlabel">
-     <x>510</x>
-     <y>511</y>
+     <x>736</x>
+     <y>195</y>
     </hint>
    </hints>
   </connection>
@@ -561,6 +619,7 @@
   <slot>saveMapAsImageButtonPressed()</slot>
   <slot>openMapVisualizationButtonPressed()</slot>
   <slot>enterHeightsButtonPressed()</slot>
+  <slot>updateFullMapButtonPressed()</slot>
   <slot>updateGridButtonPressed()</slot>
  </slots>
 </ui>

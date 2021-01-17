@@ -23,8 +23,11 @@ int main(int argc, char *argv[])
 
     QObject::connect(&window, SIGNAL(createGrid(const QString&)),
                      &grid_map, SLOT(createGridArea(const QString&)));
+    QObject::connect(&window, SIGNAL(updateFullMap()),
+                     &grid_map, SLOT(updateFullMap()));
     QObject::connect(&window, SIGNAL(updateGrid()),
-                     &grid_map, SLOT(updateGridArea()));
+                     &grid_map, SLOT(updateGrid()));
+
 
     // connections between MainWindow and SurfaceContainer
     QObject::connect(window.getScaleBox(), SIGNAL(valueChanged(double)),

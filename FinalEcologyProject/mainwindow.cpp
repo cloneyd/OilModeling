@@ -33,6 +33,7 @@ void MainWindow::loadMapButtonPressed()
     ui->save_map_as_image_button->setEnabled(true);
     ui->open_map_visualization_button->setEnabled(true);
     ui->enter_heights_button->setEnabled(true);
+    ui->update_map_button->setEnabled(true);
     ui->update_grid_button->setEnabled(true);
 
     auto width_box{ ui->cell_width_spin_box };
@@ -98,6 +99,11 @@ void MainWindow::saveMapInLabel(QPixmap pm)
     ui->map_label->clear();
     ui->map_label->setPixmap(pm);
     ui->map_label->setScaledContents(true);
+}
+
+void MainWindow::updateFullMapButtonPressed()
+{
+    emit updateFullMap();
 }
 
 void MainWindow::updateGridButtonPressed()
