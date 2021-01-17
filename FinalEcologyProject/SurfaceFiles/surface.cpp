@@ -130,7 +130,7 @@ void Surface::updateMap()
     if(m_heights.empty()) {
         for(int i{}; i < rows; ++i) {
             auto cols{ m_grid[i].size() };
-            QVector<QVector3D> tmp(cols);
+            QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
                 if(m_grid[i][j].first) {
                     tmp[j] = QVector3D(m_grid[i][j].second.x(), 0.f, m_grid[i][j].second.y()); // WARNING: narrow from double to float
@@ -142,7 +142,7 @@ void Surface::updateMap()
     else {
         for(int i{}; i < rows; ++i) {
             auto cols{ m_grid[i].size() };
-            QVector<QVector3D> tmp(cols);
+            QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
                 if(m_grid[i][j].first) {
                     tmp[j] = QVector3D(m_grid[i][j].second.x(), m_heights[i][j].second, m_grid[i][j].second.y()); // WARNING: narrow from double to float
@@ -152,15 +152,31 @@ void Surface::updateMap()
         }
     }
 
+    for(int i{}; i < rows; ++i) {
+        auto cols{ coords[i].size() };
+        for(int j{}; j < cols; ++j) {
+            if(coords[i][j].x() < 0) {
+                for(int k{}; k < cols; ++k) {
+                    if(coords[i][k].x() > 0) {
+                        coords[i][j] = coords[i][k];
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     float xmax{};
     float ymax{};
     float zmax{};
     for(int i{}; i < rows; ++i) {
-        auto cols{ m_grid[i].size() };
+        auto cols{ coords[i].size() };
         for(int j{}; j < cols; ++j) {
-            xmax = std::max(xmax, coords[i][j].x());
-            ymax = std::max(ymax, coords[i][j].y());
-            zmax = std::max(zmax, coords[i][j].z());
+            if(m_grid[i][j].first) {
+                xmax = std::max(xmax, coords[i][j].x());
+                ymax = std::max(ymax, coords[i][j].y());
+                zmax = std::max(zmax, coords[i][j].z());
+            }
         }
     }
 
@@ -187,7 +203,6 @@ void Surface::setupSeries(const QVector<QVector<QVector3D>> &coords)
     auto series{ new QtDataVisualization::QSurface3DSeries(m_graph) }; // WARNING: may throw
     series->setItemLabelFormat(QStringLiteral("@xLabel; @zLabel; @yLabel"));
     series->setDrawMode(QtDataVisualization::QSurface3DSeries::DrawSurface);
-    series->setFlatShadingEnabled(true);
     series->setBaseColor(Qt::blue);
     series->setBaseGradient(m_gr);
     series->setColorStyle(QtDataVisualization::Q3DTheme::ColorStyleRangeGradient);
@@ -211,6 +226,7 @@ void Surface::setupAxes(double xmax, double ymax, double zmax)
     m_graph->setAxisX(new QtDataVisualization::QValue3DAxis); // WARNING: may throw
     m_graph->setAxisY(new QtDataVisualization::QValue3DAxis); // WARNING: may throw
     m_graph->setAxisZ(new QtDataVisualization::QValue3DAxis); // WARNING: may throw
+    m_graph->axisX()->setReversed(true);
     m_graph->axisY()->setReversed(true);
 
     m_graph->axisX()->setLabelFormat(QString("%i м"));

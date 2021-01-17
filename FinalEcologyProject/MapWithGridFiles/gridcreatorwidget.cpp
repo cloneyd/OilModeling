@@ -90,6 +90,7 @@ void GridCreatorWidget::createGridArea(const QString &image_filepath)
     scene->setSceneRect(4., 4., width - 4., height - 4.); // implicit casts
     ui->graphics_view->setFixedSize(width, height);
     ui->graphics_view->setMaximumSize(width, height);
+    ui->graphics_view->setAlignment(Qt::AlignCenter);
     // FIXME: graphics view scale problem
 
     setWindowTitle(QString("Нарисуйте область"));
