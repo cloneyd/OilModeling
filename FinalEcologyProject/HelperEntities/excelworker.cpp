@@ -24,9 +24,9 @@ void ExcelWorker::updateHeightsFile(const QVector<QVector<QPair<bool, QPointF>>>
     m_heights_doc = new QXlsx::Document; // WARNING: may throw; should be replaced
 
     auto grid_size{ grid.size() };
+    auto cols{ grid_size > 0 ? grid[0].size() : 0 };
     QVector<QVector<QPair<bool, double>>> heights(grid_size);
     for(int i{}; i < grid_size; ++i){
-        auto cols{ grid[i].size() };
         QVector<QPair<bool, double>> tmp(cols);
         for(int j{}; j < cols; ++j) {
             tmp[j] = qMakePair(grid[i][j].first, -1);
@@ -40,9 +40,9 @@ void ExcelWorker::updateHeightsFile(const QVector<QVector<QPair<bool, QPointF>>>
 void ExcelWorker::updateHeights(const QVector<QVector<QPair<bool, double>>> &heights)
 {
     auto heights_size{ heights.size() };
+    auto cols{ heights_size > 0 ? heights[0].size() : 0 };
     for(int i{}; i < heights_size; ++i) {
-        auto size{ heights[i].size() };
-        for(int j{}; j < size; ++j) {
+        for(int j{}; j < cols; ++j) {
             if(heights[i][j].first) {
                 m_heights_doc->write(i + 1, j + 1, heights[i][j].second);
             }

@@ -70,18 +70,14 @@ void SurfaceContainer::setupTableWidget(TableWidget *table) const
 
     auto grid{ m_surface->getGrid() };
     auto rows{ grid.size() };
-    auto max_cols{ 0 };
-    for(int i{}; i < rows; ++i) {
-        max_cols = std::max(max_cols, grid[i].size());
-    }
+    auto cols{ rows > 0 ? grid[0].size() : 0 };
 
     table->setRowCount(rows);
-    table->setColumnCount(max_cols);
+    table->setColumnCount(cols);
 
     auto heights{ m_surface->getHeights() };
     if(heights.empty()) {
         for(int i{}; i < rows; ++i) {
-            auto cols{ grid[i].size() };
             for(int j{}; j < cols; ++j) {
                 if(grid[i][j].first) {
                     auto item{ new QTableWidgetItem }; // WARNING: may throw; should be replaced
@@ -95,7 +91,6 @@ void SurfaceContainer::setupTableWidget(TableWidget *table) const
     }
     else {
         for(int i{}; i < rows; ++i) {
-            auto cols{ heights[i].size() };
             for(int j{}; j < cols; ++j) {
                 if(heights[i][j].first) {
                     auto item{ new QTableWidgetItem }; // WARNING: may throw; should be replaced
@@ -113,14 +108,14 @@ void SurfaceContainer::setupHeights(TableWidget *table)
 {
     auto grid{ m_surface->getGrid() };
     auto rows{ grid.size() };
+    auto cols{ rows > 0 ? grid[0].size() : 0 };
     QVector<QVector<QPair<bool, double>>> heights(rows);
 
     for(int i{}; i < rows; ++i) {
-        auto cols{ grid[i].size() };
-        QVector<QPair<bool, double>> tmp(cols);
+        QVector<QPair<bool, double>> tmp(cols, {false, -1.});
         for(int j{}; j < cols; ++j) {
-            if(grid[i][j].first) {
-                tmp[j] = qMakePair(grid[i][j].first, table->item(i, j)->text().toDouble());
+            if(auto item = table->item(i, j); item) {
+                tmp[j] = qMakePair(true, item->text().toDouble());
             }
         }
         heights[i] = std::move(tmp); // WARNING: extra copy
@@ -145,11 +140,48 @@ void SurfaceContainer::setupScale(double scale)
 void SurfaceContainer::showWidget()
 {
     show();
+    activateWindow();
 }
 
 
 // private helper methods
 void SurfaceContainer::interpolation(QVector<QVector<QPair<bool, double>>> &heights)
 {
+    const auto &grid{ m_surface->getGrid() };
+    auto rows{ heights.size() };
+    auto cols{ rows > 0 ? heights[0].size() : 0 };
 
+    if(rows == 0 || cols == 0) {
+        return;
+    }
+
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; j < cols; ++j) {
+            if(i > 0 && i < rows - 1 && j > 0 && j < cols - 1) {
+                if(heights[i][j].first && heights[i][j].second < 0.) { // using shortcut computation
+                    if(heights[i - 1][j - 1].second > 0. && // if 4 or 8 points around (i;j) is determined
+                       heights[i - 1][j + 1].second > 0. &&
+                       heights[i + 1][j - 1].second > 0. &&
+                       heights[i + 1][j + 1].second > 0.) { // if 4 points determined
+                        double x[]{ grid[i - 1][j - 1].second.x(), grid[i - 1][j + 1].second.x() };
+                        double y[]{ grid[i - 1][j - 1].second.y(), grid[i + 1][j - 1].second.y() };
+
+                        auto cur_x{ grid[i][j].second.x() };
+                        auto cur_y{ grid[i][j].second.y() };
+                        auto f1{ heights[i - 1][j - 1].second + (cur_x - x[0]) * (heights[i + 1][j - 1].second - heights[i - 1][j - 1].second) / (x[1] - x[0]) };
+                        auto f2{ heights[i + 1][j - 1].second + (cur_x - x[0]) * (heights[i + 1][j + 1].second - heights[i + 1][j - 1].second) / (x[1] - x[0]) };
+                        heights[i][j].second = f1 + (cur_y - y[0]) * (f2 - f1) / (y[1] - y[0]);
+
+                        if(heights[i - 1][j].second > 0. &&
+                           heights[i + 1][j].second > 0. &&
+                           heights[i][j - 1].second > 0. &&
+                           heights[i][j + 1].second > 0.) { // FIXME: if 8 points is detemined
+
+                        }
+                    }
+                }
+                // else - do nothing
+            }
+        }
+    }
 }

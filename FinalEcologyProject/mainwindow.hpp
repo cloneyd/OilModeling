@@ -33,6 +33,7 @@ public slots:
     void enterHeightsButtonPressed(); // connected with enter_heights_button (ui)
     void updateFullMapButtonPressed(); // connected with update_map_button (ui)
     void updateGridButtonPressed(); // connected with update_grid_button (ui)
+    void editGridButtonPressed(); // connected with edit_grid_button (ui)
 
     void saveMapInLabel(QPixmap pm); // connected with GridCreatorWidget (signal - saveMapInLabel)
 
@@ -40,6 +41,7 @@ signals:
     void createGrid(const QString &filepath);
     void updateFullMap();
     void updateGrid();
+    void editGrid(TableWidget *table);
 
     void openMapVisualization();
     void setupTableWidget(TableWidget *table);

@@ -119,6 +119,54 @@ void GridCreatorWidget::updateGrid()
     emit gridChanged(m_grid);
 }
 
+void GridCreatorWidget::editGrid(TableWidget *table)
+{
+    auto rows{ m_grid.size() };
+    auto cols{ rows > 0 ? m_grid[0].size() : 0 };
+
+    table->setRowCount(rows);
+    table->setColumnCount(cols);
+
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; j < cols; ++j) {
+            if(m_grid[i][j].first) {
+               auto item = new QTableWidgetItem;
+               item->setBackground(QBrush(Qt::cyan));
+               item->setTextAlignment(Qt::AlignCenter);
+               item->setText("-1");
+               table->setItem(i, j, item);
+            }
+        }
+    }
+
+    connect(table, SIGNAL(closeSignal(TableWidget *)),
+            this, SLOT(tableWidgetClosed(TableWidget *)));
+}
+
+void GridCreatorWidget::tableWidgetClosed(TableWidget *table)
+{
+    disconnect(table, SIGNAL(closeSignal(TableWidget *)),
+               this, SLOT(tableWidgetClosed(TableWidget *)));
+
+    auto rows{ m_grid.size() };
+    auto cols{ rows > 0 ? m_grid[0].size() : 0 };
+
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; j < cols; ++j) {
+            if(m_grid[i][j].first) {
+                if(table->item(i, j)->text().isEmpty()) {
+                    m_grid[i][j].first = false;
+                }
+            }
+        }
+    }
+
+    auto pm{ getPixmapFromScene() };
+    drawGrid(pm);
+    emit saveMapInLabel(pm);
+    emit gridChanged(m_grid);
+}
+
 
 // protected overridden functions
 void GridCreatorWidget::closeEvent(QCloseEvent *event)
@@ -205,6 +253,7 @@ QPixmap GridCreatorWidget::getPixmapFromScene()
 
 void GridCreatorWidget::extraCellsDeletion() // FIXME
 {
+    double error{ 1e-7 }; // a comrpare error
     auto rows {m_grid.size() };
 
     QVector<QPointF> area { qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getAreaPoints() };
@@ -214,24 +263,29 @@ void GridCreatorWidget::extraCellsDeletion() // FIXME
     QVector<QVector<QPointF>> cells(rows); // tmp for a new grid creation
     for(int i{}; i < rows; ++i) {
         for(int j{}; j < area_size; ++j) {
-            if(std::fabs(area[j].y() - m_grid[i][0].second.y()) < 10.)
+            if(std::fabs(area[j].y() - m_grid[i][0].second.y()) < 10.) // 10 - error for a y value
             {
                 cells[i].append({area[j].x(), m_grid[i][0].second.y()});
             }
         }
-        std::sort(cells[i].begin(), cells[i].end(), [](QPointF first, QPointF second) {return (first.x() - second.x()) < 0.; });
+
+        // NOTE: if i trying to compare result with error (first.x()  - second.x() < error) then when first.x() == second.x()
+        // STL terminating the program
+        std::sort(cells[i].begin(), cells[i].end(), [](const QPointF &first, const QPointF &second) { return first.x() < second.x(); });
     }
 
     auto cell_width{ screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_width };
     for(int i{}; i < rows; ++i) {
-        for(int j{}; m_grid[i][j].second.x() + cell_width < cells[i][0].x(); ++j) { // is j < grid_cols needed?
+        for(int grid_size{ m_grid[i].size() }, j{}; m_grid[i][j].second.x() + cell_width - cells[i][0].x() < -error && j < grid_size; ++j) {
             m_grid[i][j].first = false;
         }
 
         auto cells_cols{ cells[i].size() };
-        for(int j{ m_grid[i].size() - 1 }; m_grid[i][j].second.x() > cells[i][cells_cols - 1].x() && j > 0; --j) {
-            m_grid[i][j].first = false;
+        for(auto k { m_grid[i].size() - 1 }; m_grid[i][k].second.x() - cells[i][cells_cols - 1].x() > error && k >= 0; --k) {
+            m_grid[i][k].first = false;
         }
+
+        // FIXME: если будет разрыв в области, то будет неправильная разбивка
     }
-    // FIXME: если будет разрыв в области, то будет неправильная разбивка
+
 }

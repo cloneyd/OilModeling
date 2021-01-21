@@ -27,6 +27,8 @@ int main(int argc, char *argv[])
                      &grid_map, SLOT(updateFullMap()));
     QObject::connect(&window, SIGNAL(updateGrid()),
                      &grid_map, SLOT(updateGrid()));
+    QObject::connect(&window, SIGNAL( editGrid(TableWidget *)),
+                     &grid_map, SLOT(editGrid(TableWidget *)));
 
 
     // connections between MainWindow and SurfaceContainer

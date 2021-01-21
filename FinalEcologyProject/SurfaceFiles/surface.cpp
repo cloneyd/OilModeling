@@ -38,8 +38,8 @@ void Surface::setGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid) /*noex
 {
     m_grid = grid;
     auto rows {m_grid.size() };
+    auto cols{ rows > 0 ? grid[0].size() : 0 };
     for(int i{}; i < rows; ++i) {
-        auto cols{ grid[i].size() };
         for(int j{}; j < cols; ++j) {
             if(m_grid[i][j].first) {
                 m_grid[i][j].second /= m_realscale;
@@ -52,7 +52,6 @@ void Surface::setGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid) /*noex
 void Surface::setHeights(const QVector<QVector<QPair<bool, double>>> &heights) /*noexcept*/
 {
     m_heights = heights;
-    // FIXME: there is should be approximation
     updateMap();
 }
 
@@ -95,8 +94,8 @@ const QVector<QVector<QPair<bool, QPointF>>>& Surface::getGrid() const noexcept
     }
     else {
         auto rows(m_heights.size());
+        auto cols{ rows > 0 ? m_heights[0].size() : 0 };
         for(int i{}; i < rows; ++i) {
-            auto cols{ m_heights[i].size() };
             for(int j{}; j < cols; ++j) {
                 if(m_heights[i][j].first) {
                     max_map_height = std::max(max_map_height, m_heights[i][j].second);
@@ -125,11 +124,11 @@ void Surface::updateMap()
     if(auto series{ m_graph->seriesList() }; !(series.empty())) m_graph->removeSeries(series.at(0)); // if m_graph have old series, it must be deleted
 
     auto rows {m_grid.size() };
+    auto cols{ rows > 0 ? m_grid[0].size() : 0 };
     QVector<QVector<QVector3D>> coords(rows);
     // Note: Q3DSurface standart axis a bit confusing: Y axe is the height axe
     if(m_heights.empty()) {
         for(int i{}; i < rows; ++i) {
-            auto cols{ m_grid[i].size() };
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
                 if(m_grid[i][j].first) {
@@ -141,7 +140,6 @@ void Surface::updateMap()
     }
     else {
         for(int i{}; i < rows; ++i) {
-            auto cols{ m_grid[i].size() };
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
                 if(m_grid[i][j].first) {
@@ -152,8 +150,22 @@ void Surface::updateMap()
         }
     }
 
+    double cell_width{};
     for(int i{}; i < rows; ++i) {
-        auto cols{ coords[i].size() };
+        bool exit_flag{};
+        for(int j{}; j < cols - 1; ++j) {
+            if(m_grid[i][j].first && m_grid[i][j + 1].first) {
+                cell_width = m_grid[i][j + 1].second.x() - m_grid[i][j + 1].second.x();
+                exit_flag = true;
+                break;
+            }
+        }
+        if(exit_flag) {
+            break;
+        }
+    }
+
+    for(int i{}; i < rows; ++i) {
         for(int j{}; j < cols; ++j) {
             if(coords[i][j].x() < 0) {
                 for(int k{}; k < cols; ++k) {
@@ -170,7 +182,6 @@ void Surface::updateMap()
     float ymax{};
     float zmax{};
     for(int i{}; i < rows; ++i) {
-        auto cols{ coords[i].size() };
         for(int j{}; j < cols; ++j) {
             if(m_grid[i][j].first) {
                 xmax = std::max(xmax, coords[i][j].x());
@@ -209,9 +220,9 @@ void Surface::setupSeries(const QVector<QVector<QVector3D>> &coords)
 
     auto array{new QtDataVisualization::QSurfaceDataArray }; // WARNING: may throw
     const auto rows{coords.size()};
+    auto cols{ rows > 0 ? coords[0].size() : 0 };
     for(int i{}; i < rows; ++i){
         auto row = new QtDataVisualization::QSurfaceDataRow; // WARNING: may throw
-        auto cols{ coords[i].size() };
         for(int j{}; j < cols; ++j){
             *row << coords[i][j];
         }

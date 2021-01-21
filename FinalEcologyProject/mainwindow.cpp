@@ -35,6 +35,7 @@ void MainWindow::loadMapButtonPressed()
     ui->enter_heights_button->setEnabled(true);
     ui->update_map_button->setEnabled(true);
     ui->update_grid_button->setEnabled(true);
+    ui->edit_grid_button->setEnabled(true);
 
     auto width_box{ ui->cell_width_spin_box };
     auto height_box{ ui->cell_height_spin_box };
@@ -53,6 +54,7 @@ void MainWindow::openMapButtonPressed()
     m_map_label->setPixmap(ui->map_label->pixmap(Qt::ReturnByValue));
     m_map_label->setScaledContents(true);
     m_map_label->show();
+    m_map_label->activateWindow();
 }
 
 void MainWindow::saveMapAsExcelButtonPressed()
@@ -92,6 +94,7 @@ void MainWindow::enterHeightsButtonPressed()
     m_table->clear();
     emit setupTableWidget(m_table);
     m_table->show();
+    m_table->activateWindow();
 }
 
 void MainWindow::saveMapInLabel(QPixmap pm)
@@ -109,6 +112,14 @@ void MainWindow::updateFullMapButtonPressed()
 void MainWindow::updateGridButtonPressed()
 {
     emit updateGrid();
+}
+
+void MainWindow::editGridButtonPressed()
+{
+    m_table->clear();
+    emit editGrid(m_table);
+    m_table->show();
+    m_table->activateWindow();
 }
 
 
