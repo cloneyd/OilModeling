@@ -57,10 +57,11 @@ protected:
 
 // helper methods
 private:
-    void gridCreation();
     void drawGrid(QPixmap& pixmap);
-    QPixmap getPixmapFromScene(); // draw a cuurent scene in QPixmap
-    void extraCellsDeletion();
+    QPixmap getPixmapFromScene(); // draw a current scene in QPixmap
+
+    void gridCreation();
+    void includeWaterObject();
 };
 
 #endif

@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     HelperEntities/excelworker.cpp \
+    HelperEntities/helper_functions.cpp \
     HelperEntities/pch.cpp \
     HelperEntities/tablewidget.cpp \
     MapWithGridFiles/gridcreatorwidget.cpp \
@@ -42,4 +43,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
-    Class_structure
+    Class_structure \
+    TODO_list

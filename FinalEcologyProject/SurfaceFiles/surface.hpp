@@ -33,8 +33,8 @@ public:
 
 // Getters
 public:
-    [[nodiscard]] const QVector<QVector<QPair<bool, QPointF>>>& getGrid() const noexcept;
-    [[nodiscard]] const QVector<QVector<QPair<bool, double>>>& getHeights() const noexcept;
+    [[nodiscard]] inline const QVector<QVector<QPair<bool, QPointF>>>& getGrid() const noexcept { return m_grid; }
+    [[nodiscard]] inline const QVector<QVector<QPair<bool, double>>>& getHeights() const noexcept { return m_heights; }
     [[nodiscard]] QPixmap getGradientPixmap() const;
 
 // Methods

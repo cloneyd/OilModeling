@@ -3,7 +3,8 @@
 // Ctors
 PaintTableScene::PaintTableScene(QObject *parent) :
     QGraphicsScene(parent),
-    m_area_points{}
+    m_water_area{},
+    m_island_area{}
 {
     // PASS
 }
@@ -12,21 +13,9 @@ PaintTableScene::PaintTableScene(QObject *parent) :
 // private slots
 void PaintTableScene::clear()
 {
-    m_area_points.clear();
+    m_water_area.clear();
+    m_island_area.clear();
     QGraphicsScene::clear();
-}
-
-
-// Public getters
-[[nodiscard]] const QVector<QPointF>& PaintTableScene::getAreaPoints() const noexcept
-{
-    return m_area_points;
-}
-
-// Public member access methods
-[[nodiscard]] QVector<QPointF>&& PaintTableScene::releaseAreaPoints() noexcept
-{
-    return std::move(m_area_points);
 }
 
 
@@ -34,14 +23,27 @@ void PaintTableScene::clear()
 void PaintTableScene::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     auto pos{ event->scenePos() };
-    m_area_points.append(pos);
-    addEllipse(pos.x(), pos.y(), 3, 3, Qt::NoPen, Qt::red);
+    if(auto button{ event->button() }; button == Qt::MouseButton::LeftButton) {
+        m_water_area.append(pos);
+        addEllipse(pos.x(), pos.y(), 3, 3, Qt::NoPen, Qt::cyan);
+    }
+    else if(button == Qt::MouseButton::RightButton) {
+        m_island_area.append(pos);
+        addEllipse(pos.x(), pos.y(), 3, 3, Qt::NoPen, Qt::red);
+    }
+    event->accept();
 }
 
 void PaintTableScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     auto pos{ event->scenePos() };
-    auto prev_point{ m_area_points.back() };
-    addLine(prev_point.x(), prev_point.y(), pos.x(), pos.y(), QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap));
-    m_area_points.append(pos);
+    if(auto buttons{ event->buttons() }; buttons.testFlag(Qt::MouseButton::LeftButton)) {
+        addLine(m_water_area.back().x(), m_water_area.back().y(), pos.x(), pos.y(), QPen(Qt::cyan, 3, Qt::SolidLine, Qt::RoundCap));
+        m_water_area.append(pos);
+    }
+    else if(buttons.testFlag(Qt::MouseButton::RightButton)) {
+        addLine(m_island_area.back().x(), m_island_area.back().y(), pos.x(), pos.y(), QPen(Qt::red, 3, Qt::SolidLine, Qt::RoundCap));
+        m_island_area.append(pos);
+    }
+    event->accept();
 }

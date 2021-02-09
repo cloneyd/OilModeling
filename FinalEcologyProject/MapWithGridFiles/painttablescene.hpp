@@ -11,7 +11,8 @@ class PaintTableScene: public QGraphicsScene
 
 private:
     // buffer for user drawn stuff
-    QVector<QPointF> m_area_points;
+    QVector<QPointF> m_water_area;
+    QVector<QPointF> m_island_area;
 
 public:
     explicit PaintTableScene(QObject *parent = nullptr);
@@ -22,12 +23,13 @@ public slots:
 
 // Getters
 public:
-    [[nodiscard]] const QVector<QPointF>& getAreaPoints() const noexcept;
+    [[nodiscard]] inline const QVector<QPointF>& getWaterObjectCoords() const noexcept { return m_water_area; }
+    [[nodiscard]] inline const QVector<QPointF>& getIslandsCoords() const noexcept { return m_island_area; }
 
 // Member access operators
 public:
     // transfer the control over m_area_points; m_area_points becomes empty
-    [[nodiscard]] QVector<QPointF>&& releaseAreaPoints() noexcept;
+    [[nodiscard]] inline QVector<QPointF>&& releaseWaterObjectCoords() noexcept { return std::move(m_water_area); }
 
 // Overridden functions
 protected:

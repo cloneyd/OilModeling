@@ -75,7 +75,7 @@ void MainWindow::saveMapAsImageButtonPressed()
     if(dir.isEmpty()) return;
 
     auto map{ ui->map_label->pixmap(Qt::ReturnByValue) };
-    map.scaled(screen()->size());
+    map.scaled(screen()->size().width()* 2 / 3, screen()->size().height() * 2 / 3); // NOTE: do not change; 2/3 - scale ratio to save a distance unit
 
     if(!map.save(dir)) {
         QMessageBox msg;
@@ -101,6 +101,7 @@ void MainWindow::saveMapInLabel(QPixmap pm)
 {
     ui->map_label->clear();
     ui->map_label->setPixmap(pm);
+    ui->map_label->resize(screen()->size().width() / 3 * 2, screen()->size().height() * 2 / 3); // NOTE: DO NOT CHANGE, 2/3 - scale ratio do save a distance unit
     ui->map_label->setScaledContents(true);
 }
 

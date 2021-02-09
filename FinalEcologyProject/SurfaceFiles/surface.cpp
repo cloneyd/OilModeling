@@ -63,16 +63,6 @@ void Surface::setScale(double scale) noexcept
 
 
 // Getters (publics methods)
-const QVector<QVector<QPair<bool, QPointF>>>& Surface::getGrid() const noexcept
-{
-    return m_grid;
-}
-
-[[nodiscard]] const QVector<QVector<QPair<bool, double>>>& Surface::getHeights() const noexcept
-{
-    return m_heights;
-}
-
 [[nodiscard]] QPixmap Surface::getGradientPixmap() const
 {
     const auto width{ 100 };

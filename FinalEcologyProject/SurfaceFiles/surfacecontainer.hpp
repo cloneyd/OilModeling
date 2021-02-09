@@ -2,6 +2,7 @@
 #define SURFACECONTAINER_HPP
 #include <QWidget>
 #include <QLabel>
+#include <array>
 
 #include "surface.hpp"
 #include "HelperEntities/pch.hpp"
@@ -33,6 +34,8 @@ signals:
 // Helper functions
 private:
     void interpolation(QVector<QVector<QPair<bool, double>>> &heights);
+    void gauss(const double(&A)[3][3], const double(&B)[3], double(&C)[3]);
+    QVector<double> approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x);
 };
 
 #endif // SURFACECONTAINER_HPP

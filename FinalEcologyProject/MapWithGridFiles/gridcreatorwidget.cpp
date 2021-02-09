@@ -8,6 +8,9 @@
 #include <algorithm>
 #include <cmath>
 
+// third party helper functions
+void showErrorMessageBox(const QString &message);
+
 // Ctors and dtor
 GridCreatorWidget::GridCreatorWidget(QWidget *parent) :
     QWidget(parent),
@@ -52,31 +55,23 @@ void GridCreatorWidget::createGridArea(const QString &image_filepath)
     m_image_filepath = std::move(const_cast<QString&>(image_filepath)); // WARNING: const_cast
     QImage map_image;
     if(!map_image.load(m_image_filepath)){
-        QMessageBox msgBox;
-        msgBox.setText(QString("Не удалось загрузить изображение.\nПожалуйста, попробуйте еще раз"));
-        msgBox.exec();
+        showErrorMessageBox(QString("Не удалось загрузить изображение.\nПожалуйста, попробуйте еще раз"));
         return;
     }
 
     if(m_cell_width < 1e-4) {
-        QMessageBox msgBox;
-        msgBox.setText(QString("Не удалось постоить сетку.\nПожалуйста, проверьте ширину ячейки и попробуйте еще раз"));
-        msgBox.exec();
+        showErrorMessageBox(QString("Не удалось постоить сетку.\nПожалуйста, проверьте ширину ячейки и попробуйте еще раз"));
         return;
     }
 
     if(m_cell_height < 1e-4) {
-        QMessageBox msgBox;
-        msgBox.setText(QString("Не удалось постоить сетку.\nПожалуйста, проверьте высоту ячейки и попробуйте еще раз"));
-        msgBox.exec();
+        showErrorMessageBox(QString("Не удалось постоить сетку.\nПожалуйста, проверьте высоту ячейки и попробуйте еще раз"));
         return;
     }
 
 
     if(m_scale < 1e-4) {
-        QMessageBox msgBox;
-        msgBox.setText(QString("Не удалось постоить сетку.\nПожалуйста, проверьте масштаб и попробуйте еще раз"));
-        msgBox.exec();
+        showErrorMessageBox(QString("Не удалось постоить сетку.\nПожалуйста, проверьте масштаб и попробуйте еще раз"));
         return;
     }
 
@@ -112,7 +107,7 @@ void GridCreatorWidget::updateGrid()
     gridCreation(); // create the grid
 
     // create the image with grid
-    QPixmap pixmap{std::move(getPixmapFromScene())};
+    QPixmap pixmap{ std::move(getPixmapFromScene()) };
     drawGrid(pixmap);
 
     emit saveMapInLabel(pixmap);
@@ -177,48 +172,12 @@ void GridCreatorWidget::closeEvent(QCloseEvent *event)
 
 
 // private methods
-void GridCreatorWidget::gridCreation()
-{
-    const auto& points{ qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getAreaPoints() }; // ref to scene points (user drawn stuff)
-
-    auto npoints = points.size();
-    if(npoints == 0) return;
-
-    auto xmin{ points[0].x() };
-    auto xmax{ xmin };
-    auto ymin{ points[0].y() };
-    auto ymax{ ymin };
-
-    for(int i{1}; i < npoints; ++i){
-        auto x{ points[i].x() };
-        auto y{ points[i].y() };
-
-        xmin = std::min(xmin, x);
-        xmax = std::max(xmax, x);
-        ymin = std::min(ymin, y);
-        ymax = std::max(ymax, y);
-    }
-
-    double realscale = screen()->physicalDotsPerInch() / 2.54 / m_scale;
-    auto cell_width{ realscale * m_cell_width };
-    auto cell_height{ realscale * m_cell_height };
-    for(auto y{ ymin }; ymax - y > 0; y += cell_height){
-        QVector<QPair<bool, QPointF>> tmp;
-        for(auto x{ xmin }; xmax - x > 0; x += cell_width){
-            tmp.append(qMakePair(true, QPointF(x, y)));
-        }
-        m_grid.append(std::move(tmp));
-    }
-
-    extraCellsDeletion();
-}
-
 void GridCreatorWidget::drawGrid(QPixmap& pixmap)
 {
     QPainter painter;
 
     painter.begin(&pixmap);
-    painter.setPen(Qt::darkRed);
+    painter.setPen(Qt::cyan);
     auto grid_size{m_grid.size()};
     auto realscale{screen()->physicalDotsPerInch() / 2.54 / m_scale }; // number of real units in one conventional unit
     auto cell_width{ realscale * m_cell_width };
@@ -251,41 +210,125 @@ QPixmap GridCreatorWidget::getPixmapFromScene()
     return pixmap;
 }
 
-void GridCreatorWidget::extraCellsDeletion() // FIXME
+void GridCreatorWidget::gridCreation()
 {
-    double error{ 1e-7 }; // a comrpare error
+    const auto& points{ qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getWaterObjectCoords() }; // ref to scene points (user drawn stuff)
+
+    auto npoints = points.size();
+    if(npoints == 0) return;
+
+    auto xmin{ points[0].x() };
+    auto xmax{ xmin };
+    auto ymin{ points[0].y() };
+    auto ymax{ ymin };
+
+    for(int i{1}; i < npoints; ++i){
+        auto x{ points[i].x() };
+        auto y{ points[i].y() };
+
+        xmin = std::min(xmin, x);
+        xmax = std::max(xmax, x);
+        ymin = std::min(ymin, y);
+        ymax = std::max(ymax, y);
+    }
+
+    double realscale = screen()->physicalDotsPerInch() / 2.54 / m_scale;
+    auto cell_width{ realscale * m_cell_width };
+    auto cell_height{ realscale * m_cell_height };
+    for(auto y{ ymin }; ymax - y > 0; y += cell_height){
+        QVector<QPair<bool, QPointF>> tmp;
+        for(auto x{ xmin }; xmax - x > 0; x += cell_width){
+            tmp.append(qMakePair(false, QPointF(x, y)));
+        }
+        m_grid.append(std::move(tmp));
+    }
+
+    if((m_scale / m_cell_height + m_scale / m_cell_width) / 2. > 3.5) {
+        QMessageBox::warning(nullptr, QString("Погрешность разбиения"), QString("Внимание:\nтак как разница между размерами ячейки и\nмасштабом слишком большая,\n возможны неточности"));
+    }
+    includeWaterObject();
+}
+
+void GridCreatorWidget::includeWaterObject() // FIXME
+{
     auto rows {m_grid.size() };
+    auto cols{ rows > 0 ? m_grid[0].size() : 0 };
+    auto cell_height{ screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_height };
+    auto cell_width{ screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_width };
 
-    QVector<QPointF> area { qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getAreaPoints() };
-    std::sort(area.begin(), area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
 
-    auto area_size{ area.size() };
-    QVector<QVector<QPointF>> cells(rows); // tmp for a new grid creation
+    QVector<QPointF> water_object_area { qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getWaterObjectCoords() };
+    auto water_area_size{ water_object_area.size() };
+    std::sort(water_object_area.begin(), water_object_area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
+    QVector<QVector<int>> water_object_width_indexes(rows);
+    QVector<QVector<int>> water_object_height_indexes(cols);
+
+// FIXME: islands exclusion
+//    QVector<QPointF> islands_area{ qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getIslandsCoords() };
+//    auto islands_area_size{ islands_area.size() };
+//    if(islands_area_size > 0) {
+//        std::sort(islands_area.begin(), islands_area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
+//    }
+
     for(int i{}; i < rows; ++i) {
-        for(int j{}; j < area_size; ++j) {
-            if(std::fabs(area[j].y() - m_grid[i][0].second.y()) < 10.) // 10 - error for a y value
-            {
-                cells[i].append({area[j].x(), m_grid[i][0].second.y()});
+        for(int j{}; j < cols; ++j) {
+            for(int k{ }; k < water_area_size; ++k) {
+                // WARNING: if the cell size will be small enough (relative to scale) there is will be empty spaces
+                if(water_object_area[k].x() >= m_grid[i][j].second.x() && // WARNING: float point number compare
+                    water_object_area[k].x() <= m_grid[i][j].second.x() + cell_width &&
+                    water_object_area[k].y() >= m_grid[i][j].second.y() &&
+                    water_object_area[k].y() <= m_grid[i][j].second.y() + cell_height) {
+                    m_grid[i][j].first = true;
+                    water_object_width_indexes[i].append(j);
+                    water_object_height_indexes[j].append(i);
+                }
             }
         }
 
-        // NOTE: if i trying to compare result with error (first.x()  - second.x() < error) then when first.x() == second.x()
-        // STL terminating the program
-        std::sort(cells[i].begin(), cells[i].end(), [](const QPointF &first, const QPointF &second) { return first.x() < second.x(); });
     }
 
-    auto cell_width{ screen()->physicalDotsPerInch() / 2.54 / m_scale * m_cell_width };
     for(int i{}; i < rows; ++i) {
-        for(int grid_size{ m_grid[i].size() }, j{}; m_grid[i][j].second.x() + cell_width - cells[i][0].x() < -error && j < grid_size; ++j) {
-            m_grid[i][j].first = false;
+        if(auto size{ water_object_width_indexes[i].size() }; size < 2) {
+            if(size == 0) {
+                water_object_width_indexes[i].append(QVector{ cols, -1 });
+            }
+            else {
+                if(i == 0) {
+                    water_object_width_indexes[i].append(water_object_width_indexes[i][0]);
+                }
+                else {
+                    water_object_width_indexes[i].append(water_object_width_indexes[i - 1][water_object_width_indexes[i - 1].size() - 1]);
+                }
+            }
         }
-
-        auto cells_cols{ cells[i].size() };
-        for(auto k { m_grid[i].size() - 1 }; m_grid[i][k].second.x() - cells[i][cells_cols - 1].x() > error && k >= 0; --k) {
-            m_grid[i][k].first = false;
-        }
-
-        // FIXME: если будет разрыв в области, то будет неправильная разбивка
     }
 
+    for(int i{}; i < cols; ++i) {
+        if(auto size{ water_object_height_indexes[i].size() }; size < 2) {
+            if(size == 0) {
+                water_object_height_indexes[i].append(QVector{ rows, -1 });
+            }
+            else {
+                if(i == 0) {
+                    water_object_height_indexes[i].append(water_object_height_indexes[i][0]);
+                }
+                else {
+                    water_object_height_indexes[i].append(water_object_height_indexes[i - 1][water_object_height_indexes[i - 1].size() - 1]);
+                }
+            }
+        }
+    }
+
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; j < cols; ++j) {
+            if(!m_grid[i][j].first) {
+                if(j > water_object_width_indexes[i][0] &&
+                    j < water_object_width_indexes[i][water_object_width_indexes[i].size() - 1] &&
+                    i > water_object_height_indexes[j][0] &&
+                    i < water_object_height_indexes[j][water_object_height_indexes[j].size() - 1]) {
+                    m_grid[i][j].first = true;
+                }
+            }
+        }
+    }
 }
