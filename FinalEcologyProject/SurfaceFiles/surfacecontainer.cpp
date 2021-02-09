@@ -114,7 +114,7 @@ void SurfaceContainer::setupHeights(TableWidget *table)
     for(int i{}; i < rows; ++i) {
         QVector<QPair<bool, double>> tmp(cols, {false, -1.});
         for(int j{}; j < cols; ++j) {
-            if(auto item = table->item(i, j); item) {
+            if(auto item = table->item(i, j); item && grid[i][j].first) {
                 if(auto text{ item->text() }; !text.isEmpty()) {
                     tmp[j] = qMakePair(true, item->text().toDouble());
                 }

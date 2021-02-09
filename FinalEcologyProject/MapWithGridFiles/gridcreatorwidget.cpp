@@ -264,11 +264,15 @@ void GridCreatorWidget::includeWaterObject() // FIXME
     QVector<QVector<int>> water_object_height_indexes(cols);
 
 // FIXME: islands exclusion
-//    QVector<QPointF> islands_area{ qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getIslandsCoords() };
-//    auto islands_area_size{ islands_area.size() };
-//    if(islands_area_size > 0) {
-//        std::sort(islands_area.begin(), islands_area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
-//    }
+    QVector<QPointF> islands_area{ qobject_cast<PaintTableScene*>(ui->graphics_view->scene())->getIslandsCoords() };
+    auto islands_area_size{ islands_area.size() };
+    QVector<QVector<int>> islands_width_indexes;
+    QVector<QVector<int>> islands_height_indexes;
+    if(islands_area_size > 0) {
+        std::sort(islands_area.begin(), islands_area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
+        islands_width_indexes.resize(rows);
+        islands_height_indexes.resize(cols);
+    }
 
     for(int i{}; i < rows; ++i) {
         for(int j{}; j < cols; ++j) {
@@ -281,6 +285,17 @@ void GridCreatorWidget::includeWaterObject() // FIXME
                     m_grid[i][j].first = true;
                     water_object_width_indexes[i].append(j);
                     water_object_height_indexes[j].append(i);
+                }
+            }
+
+            for(int k{}; k < islands_area_size; ++k) {
+                if(islands_area[k].x() >= m_grid[i][j].second.x() && // WARNING: float point number compare
+                    islands_area[k].x() <= m_grid[i][j].second.x() + cell_width &&
+                    islands_area[k].y() >= m_grid[i][j].second.y() &&
+                    islands_area[k].y() <= m_grid[i][j].second.y() + cell_height) {
+                    m_grid[i][j].first = true;
+                    islands_width_indexes[i].append(j);
+                    islands_height_indexes[j].append(i);
                 }
             }
         }
@@ -319,6 +334,40 @@ void GridCreatorWidget::includeWaterObject() // FIXME
         }
     }
 
+    if(islands_area_size > 0) {
+        for(int i{}; i < rows; ++i) {
+            if(auto size{ islands_width_indexes[i].size() }; size < 2) {
+                if(size == 0) {
+                    islands_width_indexes[i].append(QVector{ cols, -1 });
+                }
+                else {
+                    if(i == 0) {
+                        islands_width_indexes[i].append(islands_width_indexes[i][0]);
+                    }
+                    else {
+                        islands_width_indexes[i].append(islands_width_indexes[i - 1][islands_width_indexes[i - 1].size() - 1]);
+                    }
+                }
+            }
+        }
+
+       for(int i{}; i < cols; ++i) {
+            if(auto size{ islands_height_indexes[i].size() }; size < 2) {
+                if(size == 0) {
+                    islands_height_indexes[i].append(QVector{ rows, -1 });
+                }
+                else {
+                    if(i == 0) {
+                        islands_height_indexes[i].append(islands_height_indexes[i][0]);
+                    }
+                    else {
+                        islands_height_indexes[i].append(islands_height_indexes[i - 1][islands_height_indexes[i - 1].size() - 1]);
+                    }
+                }
+            }
+        }
+    }
+
     for(int i{}; i < rows; ++i) {
         for(int j{}; j < cols; ++j) {
             if(!m_grid[i][j].first) {
@@ -327,6 +376,20 @@ void GridCreatorWidget::includeWaterObject() // FIXME
                     i > water_object_height_indexes[j][0] &&
                     i < water_object_height_indexes[j][water_object_height_indexes[j].size() - 1]) {
                     m_grid[i][j].first = true;
+                }
+            }
+        }
+    }
+
+    if(islands_area_size > 0) {
+        for(int i{}; i < rows; ++i) {
+            for(int j{}; j < cols; ++j) {
+                if(j > islands_width_indexes[i][0] &&
+                    j < islands_width_indexes[i][islands_width_indexes[i].size() - 1] &&
+                    i > islands_height_indexes[j][0] &&
+                    i < islands_height_indexes[j][islands_height_indexes[j].size() - 1])
+                {
+                    m_grid[i][j].first = false;
                 }
             }
         }
