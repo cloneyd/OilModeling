@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <QTableWidgetItem>
 
+extern void showErrorMessageBox(const QString &message);
+
 // ctor and dtor
 SurfaceContainer::SurfaceContainer(QWidget *parent) :
     QWidget(parent),
@@ -17,9 +19,7 @@ SurfaceContainer::SurfaceContainer(QWidget *parent) :
 {
     auto graph = new QtDataVisualization::Q3DSurface; // WARNING: may throw; // FIXME!!!: deletion problem (leak now)
     if (!graph->hasContext()) {
-        QMessageBox msgBox;
-        msgBox.setText("Couldn't initialize the OpenGL context.");
-        msgBox.exec();
+        showErrorMessageBox(QString("Couldn't initialize the OpenGL context."));
         return;
     }
     m_container = QWidget::createWindowContainer(graph, this); // adopt the graph to container
@@ -123,7 +123,7 @@ void SurfaceContainer::setupHeights(TableWidget *table)
         heights[i] = std::move(tmp); // WARNING: extra copy
     }
 
-    interpolation(heights);
+    interpolation_and_approximation(heights);
     m_surface->setHeights(std::move(heights));
     m_gr_label->clear();
     m_gr_label->setPixmap(m_surface->getGradientPixmap());
@@ -147,7 +147,7 @@ void SurfaceContainer::showWidget()
 
 
 // private helper methods
-void SurfaceContainer::interpolation(QVector<QVector<QPair<bool, double>>> &heights)
+void SurfaceContainer::interpolation_and_approximation(QVector<QVector<QPair<bool, double>>> &heights)
 {
     const auto &grid{ m_surface->getGrid() };
     auto rows{ heights.size() };
@@ -260,6 +260,7 @@ void SurfaceContainer::interpolation(QVector<QVector<QPair<bool, double>>> &heig
         values.reserve(cols);
         interpol_values.reserve(cols);
         z.reserve(cols);
+
         for(int i{}; i < rows; ++i) {
             for(int j{}; j < cols; ++j) {
                 if(heights[i][j].first && heights[i][j].second > 0.) {
@@ -270,7 +271,8 @@ void SurfaceContainer::interpolation(QVector<QVector<QPair<bool, double>>> &heig
                     interpol_values.append(qMakePair(j, grid[i][j].second.x()));
                 }
             }
-            if(values.size() >= 3) {
+
+            if(interpol_values.size() > 0 && values.size() >= interpol_values.size()) {
                 auto aprx_value{ approximation(values, z, interpol_values) };
                 auto apr_size{ aprx_value.size() };
                 for(int j{}; j < apr_size; ++j) {
@@ -285,20 +287,20 @@ void SurfaceContainer::interpolation(QVector<QVector<QPair<bool, double>>> &heig
 
         for(int i{}; i < cols; ++i) {
             for(int j{}; j < rows; ++j) {
-                if(heights[j][i].second > 0.) {
-                    values.append(grid[j][i].second.x());
+                if(heights[j][i].first && heights[j][i].second > 0.) {
+                    values.append(grid[j][i].second.y());
                     z.append(heights[j][i].second);
                 }
                 else {
-                    interpol_values.append(qMakePair(j, grid[j][i].second.x()));
+                    interpol_values.append(qMakePair(j, grid[j][i].second.y()));
                 }
             }
 
-            if(values.size() >= 3) {
+            if(values.size() >= interpol_values.size()) {
                 auto aprx_value{ approximation(values, z, interpol_values) };
                 auto apr_size{ aprx_value.size() };
                 for(int j{}; j < apr_size; ++j) {
-                    heights[interpol_values[j].first][i].second = (heights[interpol_values[j].first][i].second + aprx_value[j]) / 2.;
+                    heights[interpol_values[j].first][i].second = aprx_value[j];
 
                 }
             }
@@ -310,10 +312,11 @@ void SurfaceContainer::interpolation(QVector<QVector<QPair<bool, double>>> &heig
     }
 }
 
-void SurfaceContainer::gauss(const double(&A)[3][3], const double(&B)[3], double(&C)[3])
+template <int size_>
+void SurfaceContainer::gauss(const double(&A)[size_][size_], const double(&B)[size_], double(&C)[size_]) const
 {
-    constexpr auto rows{ 3 };
-    const auto cols{ 4 };
+    constexpr auto rows{ size_ };
+    constexpr auto cols{ size_ + 1 };
     double expanded[rows][cols]{};
        for (int i{}; i < rows; ++i) {
            for (int j{}; j < rows; ++j) {
@@ -364,40 +367,58 @@ void SurfaceContainer::gauss(const double(&A)[3][3], const double(&B)[3], double
        }
 }
 
+#define FOO1(x) (std::sin(2. * x) * .5) // sin(x) * cos(x)
+#define FOO2(x) ((x) * (x) * (x))
+#define FOO3(x) ((x) * (x))
+#define FOO4(x) (((x) * 2.) + (x))
+#define FOO5(x) (1. / (x))
+
 QVector<double> SurfaceContainer::approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x)
 {
     auto size_{ x.size() };
-    QVector<double> fx[3];
-    fx[0].resize(size_);
-    fx[1].resize(size_);
-    fx[2].resize(size_);
-    for (int i{}; i < size_; ++i)    fx[0][i] = std::sin(x[i]) * std::cos(x[i]);
-    for (int i{}; i < size_; ++i)    fx[1][i] = x[i] * x[i] * x[i];
-    for (int i{}; i < size_; ++i)    fx[2][i] = x[i] * x[i];
+    constexpr auto num_of_fns{ 5 };
+    QVector<double> fx[num_of_fns];
 
-    double A[3][3]{};
-    for (int i{}; i < 3; ++i) {
-        for (int j{}; j < 3; ++j) {
+    for(int i{}; i < num_of_fns; ++i) {
+        fx[i].resize(size_);
+    }
+
+    for (int i{}; i < size_; ++i)   fx[0][i] = FOO1(x[i]);
+    for (int i{}; i < size_; ++i)   fx[1][i] = FOO2(x[i]);
+    for (int i{}; i < size_; ++i)   fx[2][i] = FOO3(x[i]);
+    for (int i{}; i < size_; ++i)   fx[3][i] = FOO4(x[i]);
+    for (int i{}; i < size_; ++i)   fx[4][i] = FOO5(x[i]);
+
+    double A[num_of_fns][num_of_fns]{};
+    for (int i{}; i < num_of_fns; ++i) {
+        for (int j{}; j < num_of_fns; ++j) {
             for (int k{}; k < size_; ++k) {
                 A[i][j] += fx[i][k] * fx[j][k];
             }
         }
     }
 
-    double B[3]{};
-    for (int i{}; i < 3; ++i) {
+    double B[num_of_fns]{};
+    for (int i{}; i < num_of_fns; ++i) {
         for (int j{}; j < size_; ++j) {
             B[i] += y[j] * fx[i][j];
         }
     }
 
-    double C[3]{};
+    double C[num_of_fns]{};
     gauss(A, B, C);
 
     auto inter_size{ interpol_x.size() };
     QVector<double> values(inter_size);
     for(int i{}; i < inter_size; ++i) {
-        values[i] = C[0] + C[1] * interpol_x[i].second + C[2] * interpol_x[i].second * interpol_x[i].second;
+        const auto value{ interpol_x[i].second };
+        values[i] = C[0] * FOO1(value) + C[1] * FOO2(value) + C[2] * FOO3(value) + C[3] * FOO4(value) + C[4] * FOO5(value);
     }
     return values;
 }
+
+#undef FOO1
+#undef FOO2
+#undef FOO3
+#undef FOO4
+#undef FOO5

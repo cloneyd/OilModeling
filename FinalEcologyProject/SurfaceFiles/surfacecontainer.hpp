@@ -6,7 +6,7 @@
 
 #include "surface.hpp"
 #include "HelperEntities/pch.hpp"
-#include "HelperEntities/tablewidget.hpp"
+#include "HelperEntities/Table/tablewidget.hpp"
 
 class SurfaceContainer: public QWidget
 {
@@ -33,8 +33,9 @@ signals:
 
 // Helper functions
 private:
-    void interpolation(QVector<QVector<QPair<bool, double>>> &heights);
-    void gauss(const double(&A)[3][3], const double(&B)[3], double(&C)[3]);
+    void interpolation_and_approximation(QVector<QVector<QPair<bool, double>>> &heights);
+    template <int size>
+    void gauss(const double(&A)[size][size], const double(&B)[size], double(&C)[size]) const;
     QVector<double> approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x);
 };
 

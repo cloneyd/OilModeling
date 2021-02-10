@@ -5,7 +5,7 @@
 #include <QDoubleSpinBox>
 #include <QString>
 
-#include "HelperEntities/tablewidget.hpp"
+#include "HelperEntities/Table/tablecontainer.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,7 +18,7 @@ class MainWindow : public QMainWindow
 private:
     Ui::MainWindow *ui;
     QLabel *m_map_label;
-    TableWidget *m_table;
+    TableContainer *m_table_container;
 
 public:
     MainWindow(QWidget *parent = nullptr);

@@ -6,7 +6,7 @@
 
 #include "painttablescene.hpp"
 #include "HelperEntities/pch.hpp"
-#include "HelperEntities/tablewidget.hpp"
+#include "HelperEntities/Table/tablewidget.hpp"
 
 namespace Ui {
 class GridCreatorWidget;

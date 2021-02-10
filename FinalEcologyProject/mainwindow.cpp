@@ -10,14 +10,14 @@ MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent),
           ui{ new Ui::MainWindow }, // WARNING: may throw; should be replaced
           m_map_label{ new QLabel }, // WARNING: may throw; should be replaced
-          m_table{ new TableWidget } // WARNING: may throw; should be replaced
+          m_table_container{ new TableContainer{} } // WARNING: may throw; should be replaced
 {
     ui->setupUi(this);
 }
 
 MainWindow::~MainWindow()
 {
-    delete m_table;
+    delete m_table_container;
     delete m_map_label;
     delete ui;
 }
@@ -91,10 +91,11 @@ void MainWindow::openMapVisualizationButtonPressed()
 
 void MainWindow::enterHeightsButtonPressed()
 {
-    m_table->clear();
-    emit setupTableWidget(m_table);
-    m_table->show();
-    m_table->activateWindow();
+    auto table{ m_table_container->getTableWidget() };
+    table->clear();
+    emit setupTableWidget(table);
+    m_table_container->show();
+    m_table_container->activateWindow();
 }
 
 void MainWindow::saveMapInLabel(QPixmap pm)
@@ -117,10 +118,11 @@ void MainWindow::updateGridButtonPressed()
 
 void MainWindow::editGridButtonPressed()
 {
-    m_table->clear();
-    emit editGrid(m_table);
-    m_table->show();
-    m_table->activateWindow();
+    auto table{ m_table_container->getTableWidget() };
+    table->clear();
+    emit editGrid(table);
+    m_table_container->show();
+    m_table_container->activateWindow();
 }
 
 
