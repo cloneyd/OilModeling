@@ -41,9 +41,7 @@ void Surface::setGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid) /*noex
     auto cols{ rows > 0 ? grid[0].size() : 0 };
     for(int i{}; i < rows; ++i) {
         for(int j{}; j < cols; ++j) {
-            if(m_grid[i][j].first) {
-                m_grid[i][j].second /= m_realscale;
-            }
+            m_grid[i][j].second /= m_realscale;
         }
     }
     m_heights.clear();
@@ -122,7 +120,7 @@ void Surface::updateMap()
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
                 if(m_grid[i][j].first) {
-                    tmp[j] = QVector3D(m_grid[i][j].second.x(), 0.f, m_grid[i][j].second.y()); // WARNING: narrow from double to float
+                    tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), 0.f, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
                 }
             }
             coords[i] = std::move(tmp);
@@ -133,25 +131,10 @@ void Surface::updateMap()
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
                 if(m_grid[i][j].first) {
-                    tmp[j] = QVector3D(m_grid[i][j].second.x(), m_heights[i][j].second, m_grid[i][j].second.y()); // WARNING: narrow from double to float
+                    tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), m_heights[i][j].second, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
                 }
             }
             coords[i] = std::move(tmp);
-        }
-    }
-
-    double cell_width{};
-    for(int i{}; i < rows; ++i) {
-        bool exit_flag{};
-        for(int j{}; j < cols - 1; ++j) {
-            if(m_grid[i][j].first && m_grid[i][j + 1].first) {
-                cell_width = m_grid[i][j + 1].second.x() - m_grid[i][j + 1].second.x();
-                exit_flag = true;
-                break;
-            }
-        }
-        if(exit_flag) {
-            break;
         }
     }
 

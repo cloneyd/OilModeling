@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     setWindowTitle(QString("Hydropolution"));
+    ui->water_object_type_combo_box->addItem(QString("Река"));
+    ui->water_object_type_combo_box->addItem(QString("Озеро"));
 }
 
 MainWindow::~MainWindow()

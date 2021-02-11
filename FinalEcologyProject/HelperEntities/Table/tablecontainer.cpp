@@ -1,5 +1,4 @@
 #include "tablecontainer.hpp"
-#include "ui_tablecontainer.h"
 
 #include <QScreen>
 #include <QVBoxLayout>

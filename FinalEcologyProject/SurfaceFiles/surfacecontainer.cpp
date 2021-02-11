@@ -263,12 +263,14 @@ void SurfaceContainer::interpolation_and_approximation(QVector<QVector<QPair<boo
 
         for(int i{}; i < rows; ++i) {
             for(int j{}; j < cols; ++j) {
-                if(heights[i][j].first && heights[i][j].second > 0.) {
-                    values.append(grid[i][j].second.x());
-                    z.append(heights[i][j].second);
-                }
-                else {
-                    interpol_values.append(qMakePair(j, grid[i][j].second.x()));
+                if(heights[i][j].first) {
+                    if(heights[i][j].second > 0.) {
+                        values.append(grid[i][j].second.x());
+                        z.append(heights[i][j].second);
+                    }
+                    else {
+                        interpol_values.append(qMakePair(j, grid[i][j].second.x()));
+                    }
                 }
             }
 
@@ -287,12 +289,14 @@ void SurfaceContainer::interpolation_and_approximation(QVector<QVector<QPair<boo
 
         for(int i{}; i < cols; ++i) {
             for(int j{}; j < rows; ++j) {
-                if(heights[j][i].first && heights[j][i].second > 0.) {
-                    values.append(grid[j][i].second.y());
-                    z.append(heights[j][i].second);
-                }
-                else {
-                    interpol_values.append(qMakePair(j, grid[j][i].second.y()));
+                if(heights[j][i].first) {
+                    if(heights[j][i].second > 0.) {
+                        values.append(grid[j][i].second.y());
+                        z.append(heights[j][i].second);
+                    }
+                    else {
+                        interpol_values.append(qMakePair(j, grid[j][i].second.y()));
+                    }
                 }
             }
 

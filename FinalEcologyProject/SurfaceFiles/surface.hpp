@@ -15,7 +15,7 @@ class Surface: public QObject
     Q_OBJECT
 
 private:
-    QVector<QVector<QPair<bool, QPointF>>> m_grid;
+    QVector<QVector<QPair<bool, QPointF>>> m_grid; // contains the coorinats of left upper corner in real mertres
     QVector<QVector<QPair<bool, double>>> m_heights;
     QtDataVisualization::Q3DSurface *m_graph;
     double m_realscale;

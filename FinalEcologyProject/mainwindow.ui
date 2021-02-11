@@ -192,8 +192,8 @@
    <widget class="QWidget" name="gridLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>0</x>
-      <y>340</y>
+      <x>10</x>
+      <y>380</y>
       <width>549</width>
       <height>202</height>
      </rect>
@@ -432,7 +432,8 @@
         </size>
        </property>
        <property name="text">
-        <string>Перестроить сетку</string>
+        <string>Перестроить
+сетку</string>
        </property>
       </widget>
      </item>
@@ -496,6 +497,46 @@
       </widget>
      </item>
     </layout>
+   </widget>
+   <widget class="QComboBox" name="water_object_type_combo_box">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>350</y>
+      <width>70</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>70</width>
+      <height>20</height>
+     </size>
+    </property>
+    <property name="maximumSize">
+     <size>
+      <width>70</width>
+      <height>20</height>
+     </size>
+    </property>
+    <property name="baseSize">
+     <size>
+      <width>70</width>
+      <height>20</height>
+     </size>
+    </property>
+    <property name="editable">
+     <bool>false</bool>
+    </property>
+    <property name="currentText">
+     <string/>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
