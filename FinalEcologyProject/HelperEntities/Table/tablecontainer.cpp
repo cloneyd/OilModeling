@@ -15,6 +15,7 @@ TableContainer::TableContainer(QWidget *parent) :
     m_spin_box{ new QDoubleSpinBox(this) }, // FIXME: unsafe; must be replaced
     m_table{ new TableWidget } // FIXME: unsafe; must be replaced
 {
+    setWindowTitle(QString("Таблица глубин"));
     setGeometry(30, 50, screen()->size().width() * 2 / 3, screen()->size().height() * 2 / 3);
 
     m_spin_box->setAlignment(Qt::AlignCenter);
@@ -56,7 +57,7 @@ void TableContainer::fillSelectedCells() const
 {
     auto value{ m_spin_box->value() };
     if(value <= 1e-5) {
-        showErrorMessageBox(QString("Некорректное значение в поле.\nПожалуйста, введите цифру"));
+        showErrorMessageBox(QString("Некорректное значение в поле.\nПожалуйста, введите число больше 0"));
         return;
     }
 

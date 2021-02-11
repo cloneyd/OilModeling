@@ -13,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
           m_table_container{ new TableContainer{} } // WARNING: may throw; should be replaced
 {
     ui->setupUi(this);
+
+    setWindowTitle(QString("Hydropolution"));
 }
 
 MainWindow::~MainWindow()
@@ -108,12 +110,18 @@ void MainWindow::saveMapInLabel(QPixmap pm)
 
 void MainWindow::updateFullMapButtonPressed()
 {
-    emit updateFullMap();
+    auto answer{ QMessageBox::question(this, QString("Подтвердите действие"), QString("Вы деуйствительно хотите\nредактировать сетку?\nЭто удалит ранее введеные высоты")) };
+    if(answer == QMessageBox::Yes) {
+        emit updateFullMap();
+    }
 }
 
 void MainWindow::updateGridButtonPressed()
 {
-    emit updateGrid();
+    auto answer{ QMessageBox::question(this, QString("Подтвердите действие"), QString("Вы деуйствительно хотите\nперестроить сетку?\nЭто удалит ранее введеные высоты")) };
+    if(answer == QMessageBox::Yes) {
+        emit updateGrid();
+    }
 }
 
 void MainWindow::editGridButtonPressed()
