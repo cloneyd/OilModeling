@@ -18,6 +18,7 @@ SOURCES += \
     MapWithGridFiles/painttablescene.cpp \
     SurfaceFiles/surfacecontainer.cpp \
     SurfaceFiles/surface.cpp \
+    computator.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -30,6 +31,7 @@ HEADERS += \
     MapWithGridFiles/painttablescene.hpp \
     SurfaceFiles/surfacecontainer.hpp \
     SurfaceFiles/surface.hpp \
+    computator.hpp \
     mainwindow.hpp
 
 FORMS += \

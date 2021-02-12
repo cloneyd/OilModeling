@@ -15,7 +15,7 @@ private:
     TableWidget *m_table;
 
 public:
-    explicit TableContainer(QWidget *parent = nullptr);
+    explicit TableContainer(const QString &name, QWidget *parent = nullptr);
     ~TableContainer();
 
 public slots:
@@ -25,7 +25,7 @@ public slots:
 
 // Getters
 public:
-    [[nodiscard]] inline TableWidget* getTableWidget() { return m_table; }
+    [[nodiscard]] inline TableWidget* getTableWidget() noexcept { return m_table; } // WARNING: value can be changed
 
 // Overloaded functions
 protected:

@@ -15,7 +15,8 @@ SurfaceContainer::SurfaceContainer(QWidget *parent) :
     QWidget(parent),
     m_container{}, // will be deleted automatically with widget
     m_surface{},
-    m_gr_label{ new QLabel } // WARNING: may throw; should be replaced
+    m_gr_label{ new QLabel }, // WARNING: may throw; should be replaced
+    m_deeps_table_container{ new TableContainer(QString("Таблица глубин")) } // WARNING: may throw; should be replaced
 {
     auto graph = new QtDataVisualization::Q3DSurface; // WARNING: may throw; // FIXME!!!: deletion problem (leak now)
     if (!graph->hasContext()) {
@@ -46,10 +47,15 @@ SurfaceContainer::SurfaceContainer(QWidget *parent) :
     vLayout->addWidget(heightMapGroupBox);
 
     m_surface = new Surface(graph); // WARNING: may throw; should be replaced
+
+
+    QObject::connect(m_deeps_table_container->getTableWidget(), SIGNAL(closeSignal(TableWidget *)),
+                     this, SLOT(setupHeights(TableWidget*)));
 }
 
 SurfaceContainer::~SurfaceContainer() noexcept
 {
+    delete m_deeps_table_container;
     delete m_gr_label;
     delete m_surface;
 }
@@ -63,14 +69,12 @@ void SurfaceContainer::setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &g
     m_surface->updateMap();
 }
 
-void SurfaceContainer::setupTableWidget(TableWidget *table) const
+void SurfaceContainer::setupTableWidget()
 {
-    connect(table, SIGNAL(closeSignal(TableWidget*)), // implicit connection; may cause problems with understanding
-            this, SLOT(setupHeights(TableWidget*)));
-
     auto grid{ m_surface->getGrid() };
     auto rows{ grid.size() };
     auto cols{ rows > 0 ? grid[0].size() : 0 };
+    auto table{ m_deeps_table_container->getTableWidget() };
 
     table->setRowCount(rows);
     table->setColumnCount(cols);
@@ -102,6 +106,9 @@ void SurfaceContainer::setupTableWidget(TableWidget *table) const
             }
         }
     }
+
+    m_deeps_table_container->show();
+    m_deeps_table_container->activateWindow();
 }
 
 void SurfaceContainer::setupHeights(TableWidget *table)
@@ -111,12 +118,16 @@ void SurfaceContainer::setupHeights(TableWidget *table)
     auto cols{ rows > 0 ? grid[0].size() : 0 };
     QVector<QVector<QPair<bool, double>>> heights(rows);
 
+    bool convertion_flag{};
     for(int i{}; i < rows; ++i) {
         QVector<QPair<bool, double>> tmp(cols, {false, -1.});
         for(int j{}; j < cols; ++j) {
-            if(auto item = table->item(i, j); item && grid[i][j].first) {
-                if(auto text{ item->text() }; !text.isEmpty()) {
-                    tmp[j] = qMakePair(true, item->text().toDouble());
+            if(grid[i][j].first) {
+                if(auto value{ table->item(i, j)->text().toDouble(&convertion_flag) }; convertion_flag) {
+                    tmp[j] = qMakePair(true, value);
+                }
+                else {
+                    tmp[j] = qMakePair(false, -1);
                 }
             }
         }
@@ -127,9 +138,6 @@ void SurfaceContainer::setupHeights(TableWidget *table)
     m_surface->setHeights(std::move(heights));
     m_gr_label->clear();
     m_gr_label->setPixmap(m_surface->getGradientPixmap());
-
-    disconnect(table, SIGNAL(closeSignal(TableWidget*)),
-               this, SLOT(setupTableWidget(TableWidget*)));
 
     emit heightsChanged(m_surface->getHeights());
 }

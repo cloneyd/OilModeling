@@ -2,6 +2,7 @@
 #include "HelperEntities/excelworker.hpp"
 #include "MapWithGridFiles/gridcreatorwidget.hpp"
 #include "SurfaceFiles/surfacecontainer.hpp"
+#include "computator.hpp"
 
 #include <QApplication>
 
@@ -12,6 +13,7 @@ int main(int argc, char *argv[])
     GridCreatorWidget grid_map;
     SurfaceContainer surface;
     ExcelWorker excel_worker;
+    Computator computator;
 
     // connections between MainWindow and GridCreatorWidget
     QObject::connect(window.getCellWidthBox(), SIGNAL(valueChanged(double)),
@@ -27,22 +29,29 @@ int main(int argc, char *argv[])
                      &grid_map, SLOT(updateFullMap()));
     QObject::connect(&window, SIGNAL(updateGrid()),
                      &grid_map, SLOT(updateGrid()));
-    QObject::connect(&window, SIGNAL( editGrid(TableWidget *)),
-                     &grid_map, SLOT(editGrid(TableWidget *)));
-
 
     // connections between MainWindow and SurfaceContainer
     QObject::connect(window.getScaleBox(), SIGNAL(valueChanged(double)),
                      &surface, SLOT(setupScale(double)));
 
-    QObject::connect(&window, SIGNAL(setupTableWidget(TableWidget *)),
-                     &surface, SLOT(setupTableWidget(TableWidget *)));
+    QObject::connect(&window, SIGNAL(displayDeepsTableWidget()),
+                     &surface, SLOT(setupTableWidget()));
     QObject::connect(&window, SIGNAL(openMapVisualization()),
                      &surface, SLOT(showWidget()));
 
     // connections between MainWindow and ExcelWorker
     QObject::connect(&window, SIGNAL(saveMapAsExcel(const QString &)),
                      &excel_worker, SLOT(saveHeightsFile(const QString &)));
+
+    // connections between MainWindow and Computator
+    QObject::connect(&window, SIGNAL(displaySpeedsTableWidget()),
+                     &computator, SLOT(displayXYSpeedVectorTableWidgets()));
+
+    // implicit connections between MainWindow and Computator
+    QObject::connect(window.getARatioSpinBox(), SIGNAL(valueChanged(double)),
+                     &computator, SLOT(setARatio(const double)));
+    QObject::connect(window.getWaterObjectTypeComboBox(), SIGNAL(currentIndexChanged(int)),
+                     &computator, SLOT(setWOType(int)));
 
 
     // connections between GridCreatorWidget and MainWindow
@@ -61,6 +70,11 @@ int main(int argc, char *argv[])
     // connections between SurfaceContainer and ExcelWorker
     QObject::connect(&surface, SIGNAL(heightsChanged(const QVector<QVector<QPair<bool, double>>> &)),
                      &excel_worker, SLOT(updateHeights(const QVector<QVector<QPair<bool, double>>> &)));
+
+    // connections between SurfaceContainer and Computator
+    QObject::connect(&surface, SIGNAL(heightsChanged(const QVector<QVector<QPair<bool, double>>> &)),
+                     &computator, SLOT(setupHeights(const QVector<QVector<QPair<bool, double>>> &)));
+
     window.show();
     return app.exec();
 }

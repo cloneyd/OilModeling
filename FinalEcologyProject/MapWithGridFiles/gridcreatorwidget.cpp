@@ -114,30 +114,6 @@ void GridCreatorWidget::updateGrid()
     emit gridChanged(m_grid);
 }
 
-void GridCreatorWidget::editGrid(TableWidget *table)
-{
-    auto rows{ m_grid.size() };
-    auto cols{ rows > 0 ? m_grid[0].size() : 0 };
-
-    table->setRowCount(rows);
-    table->setColumnCount(cols);
-
-    for(int i{}; i < rows; ++i) {
-        for(int j{}; j < cols; ++j) {
-            if(m_grid[i][j].first) {
-               auto item = new QTableWidgetItem;
-               item->setBackground(QBrush(Qt::cyan));
-               item->setTextAlignment(Qt::AlignCenter);
-               item->setText("-1");
-               table->setItem(i, j, item);
-            }
-        }
-    }
-
-    connect(table, SIGNAL(closeSignal(TableWidget *)),
-            this, SLOT(tableWidgetClosed(TableWidget *)));
-}
-
 void GridCreatorWidget::tableWidgetClosed(TableWidget *table)
 {
     disconnect(table, SIGNAL(closeSignal(TableWidget *)),
@@ -161,7 +137,6 @@ void GridCreatorWidget::tableWidgetClosed(TableWidget *table)
     emit saveMapInLabel(pm);
     emit gridChanged(m_grid);
 }
-
 
 // protected overridden functions
 void GridCreatorWidget::closeEvent(QCloseEvent *event)

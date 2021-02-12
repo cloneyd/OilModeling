@@ -1,5 +1,4 @@
 #include "mainwindow.hpp"
-#include "ui_mainwindow.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -9,8 +8,7 @@
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent),
           ui{ new Ui::MainWindow }, // WARNING: may throw; should be replaced
-          m_map_label{ new QLabel }, // WARNING: may throw; should be replaced
-          m_table_container{ new TableContainer{} } // WARNING: may throw; should be replaced
+          m_map_label{ new QLabel } // WARNING: may throw; should be replaced
 {
     ui->setupUi(this);
 
@@ -21,10 +19,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete m_table_container;
     delete m_map_label;
     delete ui;
 }
+
 
 // publis slots
 void MainWindow::loadMapButtonPressed()
@@ -39,7 +37,6 @@ void MainWindow::loadMapButtonPressed()
     ui->enter_heights_button->setEnabled(true);
     ui->update_map_button->setEnabled(true);
     ui->update_grid_button->setEnabled(true);
-    ui->edit_grid_button->setEnabled(true);
 
     auto width_box{ ui->cell_width_spin_box };
     auto height_box{ ui->cell_height_spin_box };
@@ -59,6 +56,11 @@ void MainWindow::openMapButtonPressed()
     m_map_label->setScaledContents(true);
     m_map_label->show();
     m_map_label->activateWindow();
+}
+
+void MainWindow::openMapVisualizationButtonPressed()
+{
+    emit openMapVisualization();
 }
 
 void MainWindow::saveMapAsExcelButtonPressed()
@@ -88,26 +90,16 @@ void MainWindow::saveMapAsImageButtonPressed()
     }
 }
 
-void MainWindow::openMapVisualizationButtonPressed()
-{
-    emit openMapVisualization();
-}
 
 void MainWindow::enterHeightsButtonPressed()
 {
-    auto table{ m_table_container->getTableWidget() };
-    table->clear();
-    emit setupTableWidget(table);
-    m_table_container->show();
-    m_table_container->activateWindow();
+    ui->enter_speed_vectors_button->setEnabled(true);
+    emit displayDeepsTableWidget();
 }
 
-void MainWindow::saveMapInLabel(QPixmap pm)
+void MainWindow::enterSpeedVectorsButtonPressed()
 {
-    ui->map_label->clear();
-    ui->map_label->setPixmap(pm);
-    ui->map_label->resize(screen()->size().width() / 3 * 2, screen()->size().height() * 2 / 3); // NOTE: DO NOT CHANGE, 2/3 - scale ratio do save a distance unit
-    ui->map_label->setScaledContents(true);
+    displaySpeedsTableWidget();
 }
 
 void MainWindow::updateFullMapButtonPressed()
@@ -126,28 +118,10 @@ void MainWindow::updateGridButtonPressed()
     }
 }
 
-void MainWindow::editGridButtonPressed()
+void MainWindow::saveMapInLabel(QPixmap pm)
 {
-    auto table{ m_table_container->getTableWidget() };
-    table->clear();
-    emit editGrid(table);
-    m_table_container->show();
-    m_table_container->activateWindow();
-}
-
-
-// public getters (methods)
-[[nodiscard]] const QDoubleSpinBox* MainWindow::getCellWidthBox() const noexcept
-{
-    return ui->cell_width_spin_box;
-}
-
-[[nodiscard]] const QDoubleSpinBox* MainWindow::getCellHeightBox() const noexcept
-{
-    return ui->cell_height_spin_box;
-}
-
-[[nodiscard]] const QDoubleSpinBox* MainWindow::getScaleBox() const noexcept
-{
-    return ui->scale_spin_box;
+    ui->map_label->clear();
+    ui->map_label->setPixmap(pm);
+    ui->map_label->resize(screen()->size().width() / 3 * 2, screen()->size().height() * 2 / 3); // NOTE: DO NOT CHANGE, 2/3 - scale ratio do save a distance unit
+    ui->map_label->setScaledContents(true);
 }

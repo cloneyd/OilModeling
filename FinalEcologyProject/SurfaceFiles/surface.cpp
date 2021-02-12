@@ -143,7 +143,7 @@ void Surface::updateMap()
             if(coords[i][j].x() < 0) {
                 for(int k{}; k < cols; ++k) {
                     if(coords[i][k].x() > 0) {
-                        coords[i][j] = coords[i][k];
+                        coords[i][j] = coords[i][k]; // FIXME
                         break;
                     }
                 }

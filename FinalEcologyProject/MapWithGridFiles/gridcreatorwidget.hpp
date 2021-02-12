@@ -41,7 +41,6 @@ public slots:
     void createGridArea(const QString &image_filepath); // connected with MainWindow (signal - createGrid(same))
     void updateFullMap(); // connected with MainWindow (signal - updateFullMapButtonPressed())
     void updateGrid(); // connected with MainWindow (signal - updateGridButtonPressed())
-    void editGrid(TableWidget *table); // connected with MainWindow (signal = editGridButtonPressed()); WARNING: makes implicit connection with TableWidget
     void tableWidgetClosed(TableWidget *table); // connected with TableWidget (signal - closeSignal(TableWidget)); WARNING: makes implicit disconnection with TableWidget
 
 signals:

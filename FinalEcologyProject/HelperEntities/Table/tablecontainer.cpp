@@ -8,13 +8,13 @@ extern void showErrorMessageBox(const QString &msg);
 
 
 // Ctor and dtor
-TableContainer::TableContainer(QWidget *parent) :
+TableContainer::TableContainer(const QString &name, QWidget *parent) :
     QWidget(parent),
     m_init_button{ new QPushButton(QString("Инициализировать\nвыделенные значения"),this) }, // FIXME: unsafe; must be replaced
     m_spin_box{ new QDoubleSpinBox(this) }, // FIXME: unsafe; must be replaced
     m_table{ new TableWidget } // FIXME: unsafe; must be replaced
 {
-    setWindowTitle(QString("Таблица глубин"));
+    setWindowTitle(name);
     setGeometry(30, 50, screen()->size().width() * 2 / 3, screen()->size().height() * 2 / 3);
 
     m_spin_box->setAlignment(Qt::AlignCenter);
