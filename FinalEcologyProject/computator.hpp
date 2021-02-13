@@ -38,7 +38,7 @@ public slots:
     void setupYSpeedVectors(TableWidget *table); // connected with TableWidget(signal - closeSignal(same))
 
     void setARatio(double value) noexcept;
-    void setWOType(int wo_index);
+    void setWOType(int wo_index) noexcept;
 };
 
 #endif // COMPUTATIONS_HPP

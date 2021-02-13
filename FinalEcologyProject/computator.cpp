@@ -161,7 +161,7 @@ void Computator::setARatio(double ratio) noexcept
     m_az_ratio = ratio;
 }
 
-void Computator::setWOType(int index_type)
+void Computator::setWOType(int index_type) noexcept
 {
     if(index_type == 0)
     {
