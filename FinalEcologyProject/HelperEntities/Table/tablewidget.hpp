@@ -1,4 +1,3 @@
-
 #ifndef TABLEWIDGET_HPP
 #define TABLEWIDGET_HPP
 #include <QTableWidget>

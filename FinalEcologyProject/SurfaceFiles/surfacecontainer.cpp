@@ -5,8 +5,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGroupBox>
-#include <algorithm>
 #include <QTableWidgetItem>
+
+// STL
+#include <algorithm>
 
 extern void showErrorMessageBox(const QString &message);
 

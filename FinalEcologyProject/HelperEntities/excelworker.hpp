@@ -5,7 +5,7 @@
 
 #include "xlsxdocument.h"
 #include "pch.hpp"
-//#define XLSX_NO_LIB
+//#define XLSX_NO_LIB // ??
 
 class ExcelWorker : public QObject
 {

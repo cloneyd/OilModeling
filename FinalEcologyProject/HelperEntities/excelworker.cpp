@@ -3,6 +3,10 @@
 #include <algorithm>
 #include <QMessageBox>
 
+// third party functions
+extern void showErrorMessageBox(const QString &msg);
+
+
 // ctor and dtor
 ExcelWorker::ExcelWorker():
     QObject(nullptr),
@@ -53,9 +57,7 @@ void ExcelWorker::updateHeights(const QVector<QVector<QPair<bool, double>>> &hei
 void ExcelWorker::saveHeightsFile(const QString &filepath)
 {
     if(!m_heights_doc->saveAs(filepath)) {
-        QMessageBox msg;
-        msg.setText(QString("Не удалось сохранить файл.\nПожалуйста, попробуйте еще раз"));
-        msg.exec();
+        showErrorMessageBox(QString("Не удалось сохранить файл.\nПожалуйста, попробуйте еще раз"));
         return;
     }
 }

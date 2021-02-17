@@ -2,11 +2,11 @@
 #define SURFACECONTAINER_HPP
 #include <QWidget>
 #include <QLabel>
-#include <array>
 
 #include "surface.hpp"
 #include "HelperEntities/pch.hpp"
 #include "HelperEntities/Table/tablecontainer.hpp"
+#include <QDoubleValidator>
 
 class SurfaceContainer: public QWidget
 {
@@ -18,6 +18,7 @@ private:
     QLabel *m_gr_label;
     TableContainer *m_deeps_table_container;
 
+    QDoubleValidator *m_table_validator;
 public:
     explicit SurfaceContainer(QWidget *parent = nullptr);
     ~SurfaceContainer() noexcept;
