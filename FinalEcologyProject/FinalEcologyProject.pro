@@ -39,7 +39,7 @@ FORMS += \
     mainwindow.ui
 
 QT += datavisualization
-include(../../QtXlsxWriter/src/xlsx/qtxlsx.pri)
+include(../QtXlsxWriter/src/xlsx/qtxlsx.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

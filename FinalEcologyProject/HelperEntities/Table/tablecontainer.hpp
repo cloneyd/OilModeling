@@ -19,7 +19,7 @@ public:
     ~TableContainer();
 
 public slots:
-    void show();
+    void show(); // overriden QWidget::show()
 
     void fillSelectedCells() const; // connected with QPushButton(m_init_buttom) pressed()
 
