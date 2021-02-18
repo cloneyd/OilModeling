@@ -48,4 +48,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     Class_structure \
+    CodeStyle \
     TODO_list
