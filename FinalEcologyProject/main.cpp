@@ -16,11 +16,11 @@ int main(int argc, char *argv[])
     Computator computator;
 
     // connections between MainWindow and GridCreatorWidget
-    QObject::connect(window.getCellWidthBox(), SIGNAL(valueChanged(double)),
+    QObject::connect(window.getCellWidthBox(), SIGNAL(valueChanged(double)), // -
                      &grid_map, SLOT(updateCellWidth(double)));
-    QObject::connect(window.getCellHeightBox(), SIGNAL(valueChanged(double)),
+    QObject::connect(window.getCellHeightBox(), SIGNAL(valueChanged(double)), // -
                      &grid_map, SLOT(updateCellHeight(double)));
-    QObject::connect(window.getScaleBox(), SIGNAL(valueChanged(double)),
+    QObject::connect(window.getScaleBox(), SIGNAL(valueChanged(double)), // -
                      &grid_map, SLOT(updateScale(double)));
 
     QObject::connect(&window, SIGNAL(createGrid(const QString&)),
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
                      &grid_map, SLOT(updateGrid()));
 
     // connections between MainWindow and SurfaceContainer
-    QObject::connect(window.getScaleBox(), SIGNAL(valueChanged(double)),
+    QObject::connect(window.getScaleBox(), SIGNAL(valueChanged(double)), // -
                      &surface, SLOT(setupScale(double)));
 
     QObject::connect(&window, SIGNAL(displayDeepsTableWidget()),
@@ -48,9 +48,9 @@ int main(int argc, char *argv[])
                      &computator, SLOT(displayXYSpeedVectorTableWidgets()));
 
     // implicit connections between MainWindow and Computator
-    QObject::connect(window.getARatioSpinBox(), SIGNAL(valueChanged(double)),
+    QObject::connect(window.getARatioSpinBox(), SIGNAL(valueChanged(double)), // -
                      &computator, SLOT(setARatio(const double)));
-    QObject::connect(window.getWaterObjectTypeComboBox(), SIGNAL(currentIndexChanged(int)),
+    QObject::connect(window.getWaterObjectTypeComboBox(), SIGNAL(currentIndexChanged(int)), // -
                      &computator, SLOT(setWOType(int)));
 
 
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
                      &window, SLOT(saveMapInLabel(QPixmap)));
 
     // connections between GridCreatorWidget and SurfaceContainer
-    QObject::connect(&grid_map, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
+    QObject::connect(&grid_map, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)), // -
                      &surface, SLOT(setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
     // connections between GridCreatorWidget and ExcelWorker
