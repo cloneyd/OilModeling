@@ -11,9 +11,11 @@ extern void showErrorMessageBox(const QString &msg);
 TableContainer::TableContainer(const QString &name, QWidget *parent) :
     QWidget(parent),
     m_init_button(QString("Инициализировать\nвыделенные значения"),this),
+    m_save_changes_button(QString("Сохранить изменения"), this),
     m_spin_box(this),
     m_table(this),
-    m_layout(this)
+    m_layout(this),
+    m_buttons_layout{}
 {
     setWindowTitle(name);
 
@@ -26,12 +28,21 @@ TableContainer::TableContainer(const QString &name, QWidget *parent) :
     m_spin_box.setSingleStep(.5);
     m_spin_box.setDecimals(3);
 
+    m_init_button.setFixedSize(150, 40);
+    m_save_changes_button.setFixedSize(150, 40);
+
     m_layout.addWidget(&m_table);
-    m_layout.addWidget(&m_init_button);
     m_layout.addWidget(&m_spin_box);
+
+    m_buttons_layout.addWidget(&m_save_changes_button);
+    m_buttons_layout.addWidget(&m_init_button);
+    m_layout.addLayout(&m_buttons_layout);
 
     connect(&m_init_button, SIGNAL(pressed()),
             this, SLOT(fillSelectedCells()));
+
+    connect(&m_save_changes_button, SIGNAL(pressed()),
+            this, SLOT(saveButtonPressed()));
 }
 
 TableContainer::~TableContainer()
@@ -52,6 +63,11 @@ void TableContainer::fillSelectedCells() const
     for(auto&& item : selected_items) {
         item->setText(QString("%1").arg(value));
     }
+}
+
+void TableContainer::saveButtonPressed()
+{
+    emit saveButtonPressed(m_table);
 }
 
 

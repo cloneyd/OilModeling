@@ -25,15 +25,30 @@ int main(int argc, char *argv[])
     QObject::connect(&window, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)),
                      &grid_handler, SLOT(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)));
 
+
     // connections between MainWindow and Visualization3DContainer
     QObject::connect(window.getScaleDoubleSpinBox(), SIGNAL(valueChanged(double)),
                      &graphics3D, SLOT(setupScale(double)));
+    QObject::connect(&window, SIGNAL(saveHeightsFromTable(QTableWidget &)),
+                     &graphics3D, SLOT(setupHeights(QTableWidget &)));
 
     // connections between MainWindow and Computator
     QObject::connect(window.getARatioDoubleSpinBox(), SIGNAL(valueChanged(double)),
                      &computator, SLOT(setARatio(double)));
     QObject::connect(window.getWaterObjectComboBox(), SIGNAL(currentIndexChanged(int)),
                      &computator, SLOT(setWOType(int)));
+    QObject::connect(&window, SIGNAL(saveXSpeedsFromTable(QTableWidget &)),
+                     &computator, SLOT(getXSpeedsFromTable(QTableWidget &)));
+    QObject::connect(&window, SIGNAL(saveYSpeedsFromTable(QTableWidget &)),
+                     &computator, SLOT(getYSpeedsFromTable(QTableWidget &)));
+
+    // connections between MainWindow and ExcelWorker
+    QObject::connect(&window, SIGNAL(saveMapAsExcel(const QString &)),
+                     &excel_worker, SLOT(saveHeightsFile(const QString &)));
+    QObject::connect(&window, SIGNAL(loadHeightsFromFileSender(const QString &)),
+                     &excel_worker, SLOT(loadHeightsFromFile(const QString &)));
+    QObject::connect(&window, SIGNAL(saveSpeedsAsExcel(const QString &)),
+                     &excel_worker, SLOT(saveSpeedsAsExcel(const QString &)));
 
 
     // connections between GridHandler and MainWindow
@@ -44,15 +59,35 @@ int main(int argc, char *argv[])
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
                      &graphics3D, SLOT(setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
-
     // connections between GridHandler and ExcelWorker
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
                      &excel_worker, SLOT(acceptGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
 
+
+    // connections between Visualization3DContainer and MainWindow
+    QObject::connect(&graphics3D, SIGNAL(heightsChanged(const QVector<QVector<QPair<bool, double>>> &)),
+                     &window, SLOT(updateDepthTableValues(const QVector<QVector<QPair<bool, double>>> &)));
+
+    // connections between Visualization3DContainer and Computator
+    QObject::connect(&graphics3D, SIGNAL(heightsChanged(const QVector<QVector<QPair<bool, double>>> &)),
+                     &computator, SLOT(setupHeights(const QVector<QVector<QPair<bool, double>>> &)));
+
     // connectons between Visualization3DContainer and ExcelWorker
     QObject::connect(&graphics3D, SIGNAL(heightsChanged(const QVector<QVector<QPair<bool, double>>> &)),
                      &excel_worker, SLOT(updateHeights(const QVector<QVector<QPair<bool, double>>> &)));
+
+
+    // connections between Computator and ExcelWorker
+    QObject::connect(&computator, SIGNAL(xSpeedChanged(const QVector<QVector<double>> &)),
+                     &excel_worker, SLOT(updateXSpeeds(const QVector<QVector<double>> &)));
+    QObject::connect(&computator, SIGNAL(ySpeedChanged(const QVector<QVector<double>> &)),
+                     &excel_worker, SLOT(updateYSpeeds(const QVector<QVector<double>> &)));
+
+
+    // connections  between ExcelWorker and Visualization3DContainer
+    QObject::connect(&excel_worker, SIGNAL(heightsLoaded(QVector<QVector<QPair<bool, double>>> &)),
+                     &graphics3D, SLOT(setupHeights(QVector<QVector<QPair<bool, double>>> &)));
 
     window.show();
     return app.exec();

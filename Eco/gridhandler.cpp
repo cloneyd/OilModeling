@@ -21,6 +21,8 @@ GridHandler::GridHandler() :
 // public slots
 void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area)
 {
+    m_grid.clear();
+
     auto water_object_area_size{ water_object_area.size() };
     if(water_object_area_size == 0) return;
 

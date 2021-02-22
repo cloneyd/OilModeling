@@ -6,1645 +6,1217 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1338</width>
-    <height>901</height>
+    <width>1528</width>
+    <height>940</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QToolBox" name="display_info_tool_box">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>150</y>
-      <width>971</width>
-      <height>611</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>1</number>
-    </property>
-    <widget class="QWidget" name="map_image_widget">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>971</width>
-       <height>503</height>
-      </rect>
-     </property>
-     <attribute name="label">
-      <string>Карта</string>
-     </attribute>
-     <widget class="QWebEngineView" name="map_web_engine" native="true">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>971</width>
-        <height>451</height>
-       </rect>
-      </property>
-     </widget>
-     <widget class="QLabel" name="data_service_name_label">
-      <property name="geometry">
-       <rect>
-        <x>440</x>
-        <y>450</y>
-        <width>381</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="whatsThis">
-       <UInt>0</UInt>
-      </property>
-      <property name="layoutDirection">
-       <enum>Qt::LeftToRight</enum>
-      </property>
-      <property name="text">
-       <string>Данные предоставленны сервисом:</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-      </property>
-     </widget>
-     <widget class="QLabel" name="current_service_name_label">
-      <property name="geometry">
-       <rect>
-        <x>830</x>
-        <y>450</y>
-        <width>131</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Текущий сервис</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="painting_page">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>971</width>
-       <height>503</height>
-      </rect>
-     </property>
-     <attribute name="label">
-      <string>Выделить водный объект</string>
-     </attribute>
-     <widget class="QDialogButtonBox" name="save_changes_button_box">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>800</x>
-        <y>460</y>
-        <width>167</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="standardButtons">
-       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-      </property>
-     </widget>
-     <widget class="QWidget" name="red_map_handle_2" native="true">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>971</width>
-        <height>451</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>971</width>
-        <height>451</height>
-       </size>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <widget class="QGraphicsView" name="map_editor_graphics_view">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>953</width>
-           <height>433</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>953</width>
-           <height>453</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="relief_page">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>971</width>
-       <height>503</height>
-      </rect>
-     </property>
-     <attribute name="label">
-      <string>Подводный рельеф</string>
-     </attribute>
-     <widget class="QTabWidget" name="relief_tab_page">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>971</width>
-        <height>491</height>
-       </rect>
-      </property>
-      <property name="currentIndex">
-       <number>-1</number>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="winds_direction_page">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>971</width>
-       <height>503</height>
-      </rect>
-     </property>
-     <attribute name="label">
-      <string>Направление ветров</string>
-     </attribute>
-     <layout class="QGridLayout" name="gridLayout_4">
-      <item row="0" column="0">
-       <widget class="QTabWidget" name="winds_direction_tab">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTabWidget" name="main_panel_tab_widget">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>56</red>
+              <green>37</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Shadow">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>18</red>
+              <green>59</green>
+              <blue>54</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>56</red>
+              <green>37</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Shadow">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>18</red>
+              <green>59</green>
+              <blue>54</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>120</red>
+              <green>120</green>
+              <blue>120</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Shadow">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>120</green>
+              <blue>215</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
         <property name="currentIndex">
          <number>1</number>
         </property>
-        <widget class="QWidget" name="winds_image_container_tab">
+        <property name="documentMode">
+         <bool>false</bool>
+        </property>
+        <property name="tabsClosable">
+         <bool>false</bool>
+        </property>
+        <property name="movable">
+         <bool>false</bool>
+        </property>
+        <widget class="QWidget" name="enter_data_tab">
          <attribute name="title">
-          <string>Карта</string>
+          <string>Ввод</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_2">
-          <item row="0" column="0">
-           <widget class="QLabel" name="map_with_winds_label">
-            <property name="text">
-             <string>TextLabel</string>
-            </property>
-           </widget>
+         <widget class="QLabel" name="x_coordinate_label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>16</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>X:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="y_coordinate_label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>60</y>
+            <width>16</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Y:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="scale_label">
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>20</y>
+            <width>61</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Масштаб:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="water_object_type_label">
+          <property name="geometry">
+           <rect>
+            <x>490</x>
+            <y>10</y>
+            <width>131</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Тип водного объекта:</string>
+          </property>
+         </widget>
+         <widget class="Line" name="tab_widget_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>690</x>
+            <y>10</y>
+            <width>16</width>
+            <height>81</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="x_coordinate_double_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>12</y>
+            <width>91</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="decimals">
+           <number>7</number>
+          </property>
+          <property name="maximum">
+           <double>99.000000000000000</double>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="y_coordinate_double_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>60</y>
+            <width>91</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="decimals">
+           <number>7</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="cell_width_label">
+          <property name="geometry">
+           <rect>
+            <x>280</x>
+            <y>10</y>
+            <width>101</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Ширина ячейки</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="cell_height_label">
+          <property name="geometry">
+           <rect>
+            <x>280</x>
+            <y>60</y>
+            <width>101</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Высота ячейки</string>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="cell_width_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>380</x>
+            <y>20</y>
+            <width>91</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>500000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="cell_height_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>380</x>
+            <y>60</y>
+            <width>91</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>500000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::DefaultStepType</enum>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="water_object_type_combo_box">
+          <property name="geometry">
+           <rect>
+            <x>500</x>
+            <y>60</y>
+            <width>101</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>70</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="editable">
+           <bool>false</bool>
+          </property>
+          <property name="currentText">
+           <string>Река</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Река</string>
+           </property>
           </item>
-         </layout>
+          <item>
+           <property name="text">
+            <string>Озеро</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QPushButton" name="load_from_pc_button">
+          <property name="geometry">
+           <rect>
+            <x>830</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Загрузить
+ изображение</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="scale_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>60</y>
+            <width>91</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="showGroupSeparator" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>1000000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="load_from_site_button">
+          <property name="geometry">
+           <rect>
+            <x>720</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Загрузить с сайта</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="edit_image_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>940</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Редактировать</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
         </widget>
-        <widget class="QWidget" name="x_vectors_table">
+        <widget class="QWidget" name="output_data_tab">
          <attribute name="title">
-          <string>Таблица OX</string>
+          <string>Вывод</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_5"/>
+         <widget class="Line" name="save_wind_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>20</y>
+            <width>16</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="Line" name="sav_map_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>300</x>
+            <y>20</y>
+            <width>16</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="map_save_format_combo_box">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>320</x>
+            <y>60</y>
+            <width>75</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>.xlsx</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.jpg</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.png</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.jpeg</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QLabel" name="map_saver_format_label">
+          <property name="geometry">
+           <rect>
+            <x>320</x>
+            <y>30</y>
+            <width>171</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Сохранить карту в формате:</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="save_map_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>410</x>
+            <y>60</y>
+            <width>80</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>OK</string>
+          </property>
+         </widget>
+         <widget class="Line" name="save_in_zip_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>500</x>
+            <y>20</y>
+            <width>16</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="open_map_visualization_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>30</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Открыть 3D
+ визуализацию
+ текущего объекта</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="save_in_zip_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>529</x>
+            <y>20</y>
+            <width>281</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>23</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Создать ZIP</string>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>../../../../Downloads/zip.png</normaloff>../../../../Downloads/zip.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="wind_save_format_combo_box">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>120</x>
+            <y>60</y>
+            <width>75</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>.xlsx</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.png</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.jpeg</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QPushButton" name="save_wind_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>60</y>
+            <width>80</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>OK</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="wind_saver_format_label">
+          <property name="geometry">
+           <rect>
+            <x>120</x>
+            <y>30</y>
+            <width>171</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Сохранить ветер в формате:</string>
+          </property>
+         </widget>
         </widget>
-        <widget class="QWidget" name="y_vectors_table">
+        <widget class="QWidget" name="wind_tab">
          <attribute name="title">
-          <string>Таблица OY</string>
+          <string>Ветер</string>
          </attribute>
+         <widget class="QPushButton" name="computate_pressures_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>270</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Рассчитать 
+значения
+ давлений</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="enter_speed_vectors_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>390</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Ввести значения
+векторов
+ скоростей</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QWidget" name="horizontalLayoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>40</y>
+            <width>220</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QLabel" name="ratio_label">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент А&lt;span style=&quot; vertical-align:sub;&quot;&gt;z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="ratio_double_spin_box">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>9999.989999999999782</double>
+             </property>
+             <property name="singleStep">
+              <double>0.500000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.001000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="relief_tab">
+         <attribute name="title">
+          <string>Рельеф</string>
+         </attribute>
+         <widget class="QPushButton" name="enter_heights_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>600</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Ввод высот
+(при помощи 
+программы)</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="load_heights_from_file_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>20</y>
+            <width>171</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Загрузить таблицу глубин</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="save_heights_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>50</y>
+            <width>171</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Сохранить таблицу глубин</string>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QToolBox" name="display_info_tool_box">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>1280</width>
+            <height>720</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>1280</width>
+            <height>720</height>
+           </size>
+          </property>
+          <property name="currentIndex">
+           <number>3</number>
+          </property>
+          <widget class="QWidget" name="map_image_widget">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1280</width>
+             <height>612</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Карта</string>
+           </attribute>
+           <widget class="QWebEngineView" name="map_web_engine" native="true">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>971</width>
+              <height>451</height>
+             </rect>
+            </property>
+           </widget>
+           <widget class="QLabel" name="data_service_name_label">
+            <property name="geometry">
+             <rect>
+              <x>440</x>
+              <y>450</y>
+              <width>381</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="whatsThis">
+             <UInt>0</UInt>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="text">
+             <string>Данные предоставленны сервисом:</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+           </widget>
+           <widget class="QLabel" name="current_service_name_label">
+            <property name="geometry">
+             <rect>
+              <x>830</x>
+              <y>450</y>
+              <width>131</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Текущий сервис</string>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="map_image_page">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1280</width>
+             <height>612</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Изображение сеточной области</string>
+           </attribute>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="grid_map_label">
+              <property name="text">
+               <string>Карта</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="relief_page">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1280</width>
+             <height>612</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Подводный рельеф</string>
+           </attribute>
+           <widget class="QTabWidget" name="relief_tab_page">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>971</width>
+              <height>491</height>
+             </rect>
+            </property>
+            <property name="currentIndex">
+             <number>-1</number>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="winds_direction_page">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1280</width>
+             <height>612</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Направление ветров</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="0">
+             <widget class="QTabWidget" name="winds_direction_tab">
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="winds_image_container_tab">
+               <attribute name="title">
+                <string>Карта</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_2">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="map_with_winds_label">
+                  <property name="text">
+                   <string>TextLabel</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="saved_in_current_session_files_group_box">
+          <property name="minimumSize">
+           <size>
+            <width>220</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>220</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>Текущий проект</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="0">
+            <widget class="QListWidget" name="saved_files_list_box"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
-    </widget>
-   </widget>
-   <widget class="QTabWidget" name="main_panel_tab_widget">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>1211</width>
-      <height>141</height>
-     </rect>
-    </property>
-    <property name="palette">
-     <palette>
-      <active>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>56</red>
-          <green>37</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Base">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Window">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>150</red>
-          <green>187</green>
-          <blue>124</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Shadow">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>150</red>
-          <green>187</green>
-          <blue>124</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>18</red>
-          <green>59</green>
-          <blue>54</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </active>
-      <inactive>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>56</red>
-          <green>37</green>
-          <blue>0</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Base">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>255</red>
-          <green>255</green>
-          <blue>255</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Window">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>150</red>
-          <green>187</green>
-          <blue>124</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Shadow">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>150</red>
-          <green>187</green>
-          <blue>124</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>18</red>
-          <green>59</green>
-          <blue>54</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </inactive>
-      <disabled>
-       <colorrole role="WindowText">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>120</red>
-          <green>120</green>
-          <blue>120</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Base">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>150</red>
-          <green>187</green>
-          <blue>124</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Window">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>150</red>
-          <green>187</green>
-          <blue>124</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Shadow">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>150</red>
-          <green>187</green>
-          <blue>124</blue>
-         </color>
-        </brush>
-       </colorrole>
-       <colorrole role="Highlight">
-        <brush brushstyle="SolidPattern">
-         <color alpha="255">
-          <red>0</red>
-          <green>120</green>
-          <blue>215</blue>
-         </color>
-        </brush>
-       </colorrole>
-      </disabled>
-     </palette>
-    </property>
-    <property name="currentIndex">
-     <number>1</number>
-    </property>
-    <property name="documentMode">
-     <bool>false</bool>
-    </property>
-    <property name="tabsClosable">
-     <bool>false</bool>
-    </property>
-    <property name="movable">
-     <bool>false</bool>
-    </property>
-    <widget class="QWidget" name="enter_data_tab">
-     <attribute name="title">
-      <string>Ввод</string>
-     </attribute>
-     <widget class="QLabel" name="x_coordinate_label">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>16</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>X:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="y_coordinate_label">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>60</y>
-        <width>16</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Y:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="scale_label">
-      <property name="geometry">
-       <rect>
-        <x>160</x>
-        <y>20</y>
-        <width>61</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Масштаб:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="water_object_type_label">
-      <property name="geometry">
-       <rect>
-        <x>490</x>
-        <y>10</y>
-        <width>131</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Тип водного объекта:</string>
-      </property>
-     </widget>
-     <widget class="Line" name="tab_widget_delimeter_line">
-      <property name="geometry">
-       <rect>
-        <x>690</x>
-        <y>10</y>
-        <width>16</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="x_coordinate_double_spin_box">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>12</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="decimals">
-       <number>7</number>
-      </property>
-      <property name="maximum">
-       <double>99.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="y_coordinate_double_spin_box">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>60</y>
-        <width>91</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="decimals">
-       <number>7</number>
-      </property>
-     </widget>
-     <widget class="QLabel" name="cell_width_label">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>10</y>
-        <width>101</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Ширина ячейки</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="cell_height_label">
-      <property name="geometry">
-       <rect>
-        <x>280</x>
-        <y>60</y>
-        <width>101</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Высота ячейки</string>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="cell_width_spin_box">
-      <property name="geometry">
-       <rect>
-        <x>380</x>
-        <y>20</y>
-        <width>91</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-      <property name="decimals">
-       <number>3</number>
-      </property>
-      <property name="maximum">
-       <double>500000.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>0.500000000000000</double>
-      </property>
-      <property name="value">
-       <double>10.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="cell_height_spin_box">
-      <property name="geometry">
-       <rect>
-        <x>380</x>
-        <y>60</y>
-        <width>91</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-      <property name="decimals">
-       <number>3</number>
-      </property>
-      <property name="maximum">
-       <double>500000.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>0.500000000000000</double>
-      </property>
-      <property name="stepType">
-       <enum>QAbstractSpinBox::DefaultStepType</enum>
-      </property>
-      <property name="value">
-       <double>10.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="water_object_type_combo_box">
-      <property name="geometry">
-       <rect>
-        <x>500</x>
-        <y>60</y>
-        <width>101</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>0</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>70</width>
-        <height>20</height>
-       </size>
-      </property>
-      <property name="editable">
-       <bool>false</bool>
-      </property>
-      <property name="currentText">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="load_from_pc_button">
-      <property name="geometry">
-       <rect>
-        <x>830</x>
-        <y>20</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Загрузить
- изображение</string>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
-     </widget>
-     <widget class="QDoubleSpinBox" name="scale_spin_box">
-      <property name="geometry">
-       <rect>
-        <x>160</x>
-        <y>60</y>
-        <width>91</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-      <property name="showGroupSeparator" stdset="0">
-       <bool>false</bool>
-      </property>
-      <property name="decimals">
-       <number>3</number>
-      </property>
-      <property name="maximum">
-       <double>1000000.000000000000000</double>
-      </property>
-      <property name="singleStep">
-       <double>0.500000000000000</double>
-      </property>
-      <property name="value">
-       <double>10.000000000000000</double>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="load_from_site_button">
-      <property name="geometry">
-       <rect>
-        <x>720</x>
-        <y>20</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Загрузить с сайта</string>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="edit_image_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>940</x>
-        <y>20</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Редактировать</string>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="drawing_tab">
-     <attribute name="title">
-      <string>Рисовать</string>
-     </attribute>
-     <widget class="Line" name="enter_data_delimeter_line">
-      <property name="geometry">
-       <rect>
-        <x>80</x>
-        <y>10</y>
-        <width>16</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>50</weight>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="accept_changes_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>1010</x>
-        <y>20</y>
-        <width>80</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>23</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Сохранить</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/save.png</normaloff>C:/Users/Downloads/save.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>40</width>
-        <height>40</height>
-       </size>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="discard_all_changes_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>1100</x>
-        <y>20</y>
-        <width>80</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>23</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Отменить</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/cansel.png</normaloff>C:/Users/Downloads/cansel.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>60</width>
-        <height>60</height>
-       </size>
-      </property>
-     </widget>
-     <widget class="Line" name="save_changes_delimeter_line">
-      <property name="geometry">
-       <rect>
-        <x>990</x>
-        <y>10</y>
-        <width>16</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>50</weight>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="discard_last_changes_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>110</x>
-        <y>20</y>
-        <width>31</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Отменить</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/arrow_1.png</normaloff>C:/Users/Downloads/arrow_1.png</iconset>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="return_last_changes_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>20</y>
-        <width>31</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Повторить действие</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/arrow_2.png</normaloff>C:/Users/Downloads/arrow_2.png</iconset>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="enable_grid_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>870</x>
-        <y>20</y>
-        <width>121</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Включить сетку</string>
-      </property>
-     </widget>
-     <widget class="Line" name="brush_setting_delimeter_line">
-      <property name="geometry">
-       <rect>
-        <x>190</x>
-        <y>10</y>
-        <width>16</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>50</weight>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QLabel" name="brush_label">
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>10</y>
-        <width>61</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Кисть:</string>
-      </property>
-     </widget>
-     <widget class="QSlider" name="thickness_horizontal_slider">
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>70</y>
-        <width>201</width>
-        <height>18</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-     <widget class="QLabel" name="thickness_label">
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>40</y>
-        <width>61</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Толщина:</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="brush_type_1_button">
-      <property name="geometry">
-       <rect>
-        <x>258</x>
-        <y>10</y>
-        <width>31</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>1</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/arrow_2.png</normaloff>C:/Users/Downloads/arrow_2.png</iconset>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="brush_type_2_button">
-      <property name="geometry">
-       <rect>
-        <x>300</x>
-        <y>10</y>
-        <width>31</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>2</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/arrow_2.png</normaloff>C:/Users/Downloads/arrow_2.png</iconset>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="brush_type_3_button">
-      <property name="geometry">
-       <rect>
-        <x>342</x>
-        <y>10</y>
-        <width>31</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>3</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/arrow_2.png</normaloff>C:/Users/Downloads/arrow_2.png</iconset>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="brush_type_4_button">
-      <property name="geometry">
-       <rect>
-        <x>384</x>
-        <y>10</y>
-        <width>31</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>4</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/arrow_2.png</normaloff>C:/Users/Downloads/arrow_2.png</iconset>
-      </property>
-     </widget>
-     <widget class="Line" name="display_delimeter_line">
-      <property name="geometry">
-       <rect>
-        <x>560</x>
-        <y>10</y>
-        <width>16</width>
-        <height>81</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <weight>50</weight>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QLabel" name="border_label">
-      <property name="geometry">
-       <rect>
-        <x>440</x>
-        <y>10</y>
-        <width>61</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Граница:</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="shadow_nonWO_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>870</x>
-        <y>60</y>
-        <width>121</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Затемнить</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="grid_display_label">
-      <property name="geometry">
-       <rect>
-        <x>750</x>
-        <y>20</y>
-        <width>91</width>
-        <height>21</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Отображение:</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="update_map_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>20</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Перерисовать
-область на
-изображении</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="update_grid_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>590</x>
-        <y>30</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Перестроить
-сетку</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="output_data_tab">
-     <attribute name="title">
-      <string>Вывод</string>
-     </attribute>
-     <widget class="Line" name="save_wind_delimeter_line">
-      <property name="geometry">
-       <rect>
-        <x>100</x>
-        <y>20</y>
-        <width>16</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="Line" name="sav_map_delimeter_line">
-      <property name="geometry">
-       <rect>
-        <x>300</x>
-        <y>20</y>
-        <width>16</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="map_save_format_combo_box">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>320</x>
-        <y>60</y>
-        <width>75</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <item>
-       <property name="text">
-        <string>.pdf</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>.png</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>.jpeg</string>
-       </property>
-      </item>
-     </widget>
-     <widget class="QLabel" name="map_saver_format_label">
-      <property name="geometry">
-       <rect>
-        <x>320</x>
-        <y>30</y>
-        <width>171</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Сохранить карту в формате:</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="save_map_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>410</x>
-        <y>60</y>
-        <width>80</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>OK</string>
-      </property>
-     </widget>
-     <widget class="Line" name="save_in_zip_delimeter_line">
-      <property name="geometry">
-       <rect>
-        <x>500</x>
-        <y>20</y>
-        <width>16</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="open_map_visualization_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>30</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Открыть 3D
- визуализацию
- текущего объекта</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="save_in_zip_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>529</x>
-        <y>20</y>
-        <width>281</width>
-        <height>71</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>23</pointsize>
-       </font>
-      </property>
-      <property name="text">
-       <string>Создать ZIP</string>
-      </property>
-      <property name="icon">
-       <iconset>
-        <normaloff>C:/Users/Downloads/zip.png</normaloff>C:/Users/Downloads/zip.png</iconset>
-      </property>
-      <property name="iconSize">
-       <size>
-        <width>40</width>
-        <height>40</height>
-       </size>
-      </property>
-     </widget>
-     <widget class="QComboBox" name="wind_save_format_combo_box">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>120</x>
-        <y>60</y>
-        <width>75</width>
-        <height>24</height>
-       </rect>
-      </property>
-      <item>
-       <property name="text">
-        <string>.pdf</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>.png</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>.jpeg</string>
-       </property>
-      </item>
-     </widget>
-     <widget class="QPushButton" name="save_wind_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>210</x>
-        <y>60</y>
-        <width>80</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>OK</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="wind_saver_format_label">
-      <property name="geometry">
-       <rect>
-        <x>120</x>
-        <y>30</y>
-        <width>171</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Сохранить ветер в формате:</string>
-      </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="wind_tab">
-     <attribute name="title">
-      <string>Ветер</string>
-     </attribute>
-     <widget class="QPushButton" name="computate_pressures_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>270</x>
-        <y>20</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Рассчитать 
-значения
- давлений</string>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="enter_speed_vectors_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>390</x>
-        <y>20</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Ввести значения
-векторов
- скоростей</string>
-      </property>
-      <property name="flat">
-       <bool>false</bool>
-      </property>
-     </widget>
-     <widget class="QWidget" name="horizontalLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>40</y>
-        <width>220</width>
-        <height>41</height>
-       </rect>
-      </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QLabel" name="ratio_label">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент А&lt;span style=&quot; vertical-align:sub;&quot;&gt;z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QDoubleSpinBox" name="ratio_double_spin_box">
-         <property name="decimals">
-          <number>4</number>
-         </property>
-         <property name="maximum">
-          <double>9999.989999999999782</double>
-         </property>
-         <property name="singleStep">
-          <double>0.500000000000000</double>
-         </property>
-         <property name="value">
-          <double>0.001000000000000</double>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="relief_tab">
-     <attribute name="title">
-      <string>Рельеф</string>
-     </attribute>
-     <widget class="QPushButton" name="enter_heights_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>10</y>
-        <width>100</width>
-        <height>60</height>
-       </rect>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>100</width>
-        <height>60</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>100</width>
-        <height>600</height>
-       </size>
-      </property>
-      <property name="baseSize">
-       <size>
-        <width>100</width>
-        <height>50</height>
-       </size>
-      </property>
-      <property name="text">
-       <string>Ввод высот
-(при помощи 
-программы)</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="load_heights_from_file_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>160</x>
-        <y>20</y>
-        <width>171</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Загрузить таблицу глубин</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="save_heights_button">
-      <property name="enabled">
-       <bool>false</bool>
-      </property>
-      <property name="geometry">
-       <rect>
-        <x>160</x>
-        <y>50</y>
-        <width>171</width>
-        <height>25</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Сохранить таблицу глубин</string>
-      </property>
-     </widget>
-    </widget>
-   </widget>
-   <widget class="QGroupBox" name="saved_in_current_session_files_group_box">
-    <property name="geometry">
-     <rect>
-      <x>990</x>
-      <y>150</y>
-      <width>221</width>
-      <height>591</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Текущий проект</string>
-    </property>
-    <layout class="QGridLayout" name="gridLayout_6">
-     <item row="0" column="0">
-      <widget class="QListWidget" name="saved_files_list_box"/>
-     </item>
-    </layout>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1338</width>
+     <width>1528</width>
      <height>20</height>
     </rect>
    </property>
@@ -1678,22 +1250,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>load_from_site_button</sender>
-   <signal>pressed()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>loadFronSiteButtonPressed()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>747</x>
-     <y>103</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1222</x>
-     <y>91</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>edit_image_button</sender>
    <signal>pressed()</signal>
    <receiver>MainWindow</receiver>
@@ -1710,18 +1266,130 @@
    </hints>
   </connection>
   <connection>
-   <sender>save_changes_button_box</sender>
-   <signal>clicked(QAbstractButton*)</signal>
+   <sender>load_from_site_button</sender>
+   <signal>pressed()</signal>
    <receiver>MainWindow</receiver>
-   <slot>saveButtonBoxClicked(QAbstractButton*)</slot>
+   <slot>loadFronSiteButtonPressed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>916</x>
-     <y>696</y>
+     <x>747</x>
+     <y>103</y>
     </hint>
     <hint type="destinationlabel">
-     <x>970</x>
-     <y>804</y>
+     <x>1222</x>
+     <y>91</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>open_map_visualization_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openMapVisualizationButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>51</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>54</x>
+     <y>-80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>enter_heights_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>enterHeightsButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>72</x>
+     <y>88</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>-32</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>enter_speed_vectors_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>enterSpeedVectorButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>463</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>463</x>
+     <y>-13</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_map_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveMapButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>457</x>
+     <y>-27</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>load_heights_from_file_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadHeightsFromFileButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>288</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>290</x>
+     <y>-12</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_heights_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveHeightsTableButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>221</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>-13</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_wind_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveSpeedsButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>266</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>279</x>
+     <y>-33</y>
     </hint>
    </hints>
   </connection>
@@ -1731,5 +1399,12 @@
   <slot>loadFronSiteButtonPressed()</slot>
   <slot>editImageButtonPressed()</slot>
   <slot>saveButtonBoxClicked(QAbstractButton*)</slot>
+  <slot>openMapVisualizationButtonPressed()</slot>
+  <slot>enterHeightsButtonPressed()</slot>
+  <slot>enterSpeedVectorButtonPressed()</slot>
+  <slot>saveMapButtonPressed()</slot>
+  <slot>loadHeightsFromFileButtonPressed()</slot>
+  <slot>saveHeightsTableButtonPressed()</slot>
+  <slot>saveSpeedsButtonPressed()</slot>
  </slots>
 </ui>

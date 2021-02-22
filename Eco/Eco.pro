@@ -14,6 +14,7 @@ SOURCES += \
     helperentities.cpp \
     main.cpp \
     mainwindow.cpp \
+    paintingwidget.cpp \
     painttablescene.cpp \
     tablecontainer.cpp \
     visualization3dcontainer.cpp \
@@ -24,17 +25,20 @@ HEADERS += \
     excelworker.hpp \
     gridhandler.hpp \
     mainwindow.hpp \
+    paintingwidget.hpp \
     painttablescene.hpp \
     tablecontainer.hpp \
     visualization3dcontainer.hpp \
     visualization3dobject.hpp
 
 FORMS += \
-    mainwindow.ui
+    cell_scale_parameters.ui \
+    mainwindow.ui \
+    paintingwidget.ui
 
 QT += webenginewidgets
 QT += datavisualization
-include(../QtXlsxWriter/QtXlsxWriter/src/xlsx/qtxlsx.pri)
+include(../QtXlsxWriter/src/xlsx/qtxlsx.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

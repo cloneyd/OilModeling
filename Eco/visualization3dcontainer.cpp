@@ -13,7 +13,7 @@
 extern void showErrorMessageBox(const QString &message);
 
 // ctor and dtor
-Visualization3DContainter::Visualization3DContainter(QWidget *parent) :
+Visualization3DContainer::Visualization3DContainer(QWidget *parent) :
     QWidget(parent),
     m_container{}, // will be deleted automatically with widget
     m_3dobject{},
@@ -47,7 +47,7 @@ Visualization3DContainter::Visualization3DContainter(QWidget *parent) :
     m_3dobject = new Visualization3DObject(graph); // WARNING: may throw; should be replaced
 }
 
-Visualization3DContainter::~Visualization3DContainter() noexcept
+Visualization3DContainer::~Visualization3DContainer() noexcept
 {
     delete m_gr_label;
     delete m_3dobject;
@@ -55,14 +55,16 @@ Visualization3DContainter::~Visualization3DContainter() noexcept
 
 
 // public slots
-void Visualization3DContainter::setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid)
+void Visualization3DContainer::setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid)
 {
     m_3dobject->setGrid(grid);
     m_gr_label->setPixmap(m_3dobject->getGradientPixmap());
     m_3dobject->updateMap();
+
+    emit heightsChanged(m_3dobject->getHeights());
 }
 
-void Visualization3DContainter::setupHeights(QTableWidget &table)
+void Visualization3DContainer::setupHeights(QTableWidget &table)
 {
     auto grid{ m_3dobject->getGrid() };
     auto rows{ grid.size() };
@@ -87,20 +89,33 @@ void Visualization3DContainter::setupHeights(QTableWidget &table)
 
     interpolation_and_approximation(heights);
     m_3dobject->setHeights(std::move(heights));
+
+    m_gr_label->clear();
+    m_gr_label->setPixmap(m_3dobject->getGradientPixmap());
+
+
+    emit heightsChanged(m_3dobject->getHeights());
+}
+
+void Visualization3DContainer::setupHeights(QVector<QVector<QPair<bool, double>>> &heights)
+{
+    interpolation_and_approximation(heights);
+    m_3dobject->setHeights(std::move(heights));
+
     m_gr_label->clear();
     m_gr_label->setPixmap(m_3dobject->getGradientPixmap());
 
     emit heightsChanged(m_3dobject->getHeights());
 }
 
-void Visualization3DContainter::setupScale(double scale)
+void Visualization3DContainer::setupScale(double scale)
 {
     m_3dobject->setScale(screen()->physicalDotsPerInch() / 2.54 / scale);
 }
 
 
 // private helper methods
-void Visualization3DContainter::interpolation_and_approximation(QVector<QVector<QPair<bool, double>>> &heights)
+void Visualization3DContainer::interpolation_and_approximation(QVector<QVector<QPair<bool, double>>> &heights)
 {
     const auto &grid{ m_3dobject->getGrid() };
     auto rows{ heights.size() };
@@ -270,7 +285,7 @@ void Visualization3DContainter::interpolation_and_approximation(QVector<QVector<
 }
 
 template <int size_>
-void Visualization3DContainter::gauss(const double(&A)[size_][size_], const double(&B)[size_], double(&C)[size_]) const
+void Visualization3DContainer::gauss(const double(&A)[size_][size_], const double(&B)[size_], double(&C)[size_]) const
 {
     constexpr auto rows{ size_ };
     constexpr auto cols{ size_ + 1 };
@@ -330,7 +345,7 @@ void Visualization3DContainter::gauss(const double(&A)[size_][size_], const doub
 #define FOO4(x) (((x) * 2.) + (x))
 #define FOO5(x) (1. / (x))
 
-QVector<double> Visualization3DContainter::approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x)
+QVector<double> Visualization3DContainer::approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x)
 {
     auto size_{ x.size() };
     constexpr auto num_of_fns{ 5 };

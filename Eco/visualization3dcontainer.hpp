@@ -6,7 +6,7 @@
 
 #include "visualization3dobject.hpp"
 
-class Visualization3DContainter: public QWidget
+class Visualization3DContainer: public QWidget
 {
     Q_OBJECT
 
@@ -16,12 +16,13 @@ private:
     QLabel *m_gr_label;
 
 public:
-    explicit Visualization3DContainter(QWidget *parent = nullptr);
-    ~Visualization3DContainter() noexcept;
+    explicit Visualization3DContainer(QWidget *parent = nullptr);
+    ~Visualization3DContainer() noexcept;
 
 public slots:
     void setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridCreatorWidget (signal - gridChanged(same))
     void setupHeights(QTableWidget &table);
+    void setupHeights(QVector<QVector<QPair<bool, double>>> &heights);
     void setupScale(double scale); // connected with QDoubleSpinBox (which is contained in MainWindow) (signal - valueChanged(same))
 
 signals:

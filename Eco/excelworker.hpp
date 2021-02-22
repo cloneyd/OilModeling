@@ -15,7 +15,10 @@ class ExcelWorker : public QObject
 
 private:
     // excel file with heights
-    QXlsx::Document *m_heights_doc;
+    QXlsx::Document m_heights_doc;
+    QXlsx::Document m_speeds_doc;
+
+    QVector<QVector<bool>> m_grid;
 
 public:
     explicit ExcelWorker();
@@ -23,8 +26,17 @@ public:
 
 public slots:
     void acceptGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridCreator widget (signal - gridChanged(same))
+
     void updateHeights(const QVector<QVector<QPair<bool, double>>> &heights); // connected with SurfaceContainer (signal - heightsChanged(same))
     void saveHeightsFile(const QString &filepath); // connected with MainWidnow (signal - saveInExcelFileButtonPressed(same))
+    void loadHeightsFromFile(const QString &file_path);
+
+    void updateXSpeeds(const QVector<QVector<double>> &speeds);
+    void updateYSpeeds(const QVector<QVector<double>> &speeds);
+    void saveSpeedsAsExcel(const QString &filepath);
+
+signals:
+    void heightsLoaded(QVector<QVector<QPair<bool, double>>> &heights); // WARNING: heights will be changed
 };
 
 #endif // EXCELWORKER_HPP

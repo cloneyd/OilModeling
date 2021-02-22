@@ -12,9 +12,14 @@ class TableContainer : public QWidget
     Q_OBJECT
 private:
     QPushButton m_init_button;
+    QPushButton m_save_changes_button;
+
     QDoubleSpinBox m_spin_box;
+
     QTableWidget m_table;
+
     QVBoxLayout m_layout;
+    QHBoxLayout m_buttons_layout;
 
 public:
     explicit TableContainer(const QString &name = "", QWidget *parent = nullptr);
@@ -22,6 +27,11 @@ public:
 
 public slots:
     void fillSelectedCells() const; // connected with QPushButton(m_init_buttom) pressed()
+
+    void saveButtonPressed();
+
+signals:
+    void saveButtonPressed(QTableWidget &table);
 
 // setters
 public:

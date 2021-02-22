@@ -6,7 +6,8 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-      ui(new Ui::MainWindow),
+      ui(new Ui::MainWindow), // FIXME: can throw; must be replaced
+      m_painting_widget{},
       m_deeps_table_container{},
       m_xwind_table_container{},
       m_ywind_table_container{},
@@ -14,10 +15,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    connectPaintingSignalsWithMainWindow();
+
     ui->display_info_tool_box->setCurrentIndex(0);
     ui->main_panel_tab_widget->setCurrentIndex(0);
-
-    ui->map_editor_graphics_view->setScene(new PaintTableScene(ui->map_editor_graphics_view));
 
     //FIXME:
     ui->map_web_engine->load(QUrl("http://www.google.ru/maps/@59.9448043,30.3622528,9.83z"));
@@ -26,6 +27,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->relief_tab_page->addTab(&m_visualization_container, QString("3D Объект"));
     ui->relief_tab_page->addTab(&m_deeps_table_container, QString("Таблица глубин"));
+
+    ui->winds_direction_tab->addTab(&m_xwind_table_container, QString("Таблица направлений OX"));
+    ui->winds_direction_tab->addTab(&m_ywind_table_container, QString("Таблица направлений OY"));
+
+    connect(&m_deeps_table_container, SIGNAL(saveButtonPressed(QTableWidget &)),
+            this, SLOT(saveHeightsFromTableSender(QTableWidget &)));
+
+    connect(&m_xwind_table_container, SIGNAL(saveButtonPressed(QTableWidget &)),
+            this, SLOT(saveXSpeedsFromTableSender(QTableWidget &)));
+
+    connect(&m_ywind_table_container, SIGNAL(saveButtonPressed(QTableWidget &)),
+            this, SLOT(saveYSpeedsFromTableSender(QTableWidget &)));
 }
 
 MainWindow::~MainWindow()
@@ -42,17 +55,22 @@ void MainWindow::setupTables(const QVector<QVector<QPair<bool, QPointF>>> &grid)
 
     auto& deep_table{ m_deeps_table_container.getTableWidget() };
     auto& xwind_table{ m_xwind_table_container.getTableWidget() };
-    auto& ywind_table{ m_xwind_table_container.getTableWidget() };
+    auto& ywind_table{ m_ywind_table_container.getTableWidget() };
+
     deep_table.clearContents();
     xwind_table.clearContents();
     ywind_table.clearContents();
 
     deep_table.setRowCount(rows);
     deep_table.setColumnCount(cols);
+
     xwind_table.setRowCount(rows);
     xwind_table.setColumnCount(cols);
+    xwind_table.setEnabled(false);
+
     ywind_table.setRowCount(rows);
     ywind_table.setColumnCount(cols);
+    ywind_table.setEnabled(false);
 
     for(int i{}; i < rows; ++i) {
         for(int j{}; j < cols; ++j) {
@@ -85,7 +103,8 @@ void MainWindow::loadFronSiteButtonPressed()
     emit ui->cell_width_spin_box->valueChanged(ui->cell_width_spin_box->value()); // updating values in other classes
     emit ui->cell_height_spin_box->valueChanged(ui->cell_height_spin_box->value()); // updating values in other classes
 
-    ui->map_editor_graphics_view->scene()->addPixmap(getPixmapFromWebEngine());
+    m_painting_widget.setScenePixmap(getPixmapFromWebEngine());
+    ui->edit_image_button->setEnabled(true);
 }
 
 void MainWindow::loadFromPCButtonPressed()
@@ -94,86 +113,213 @@ void MainWindow::loadFromPCButtonPressed()
     emit ui->cell_width_spin_box->valueChanged(ui->cell_width_spin_box->value()); // updating values in other classes
     emit ui->cell_height_spin_box->valueChanged(ui->cell_height_spin_box->value()); // updating values in other classes
 
-    QString image_path = QFileDialog::getOpenFileName(this, tr("Open File"), "/home", tr("Images (*.png *.jpg)"));
+    auto image_path { QFileDialog::getOpenFileName(this, tr("Open File"), "/home", tr("Images (*.png *.jpg *.jpeg)")) };
     if(image_path.isEmpty()) return;
 
-    while(!m_map_image.load(image_path)) {
-        auto answer{ QMessageBox::question(this, QString("Повторить действие"), QString("Не удалось загрузить изображение. Повторить действие?")) };
-        if(answer == QMessageBox::Yes) {
-            QString image_path = QFileDialog::getOpenFileName(this, tr("Open File"), "/home", tr("Images (*.png *.jpg)"));
-            if(image_path.isEmpty()) return;
-        }
-    }
-
+    m_painting_widget.prepareGraphicsView(image_path);
 
     ui->edit_image_button->setEnabled(true);
-    auto scene{ ui->map_editor_graphics_view->scene() };
-    auto width{ ui->map_editor_graphics_view->size().width() };
-    auto height{ ui->map_editor_graphics_view->size().height() };
+}
 
-    scene->addPixmap(QPixmap::fromImage(m_map_image)/*.scaled(width - 4., height - 4.)*/);
-    //scene->setSceneRect(4., 4., width - 4., height - 4.); // implicit casts
-    ui->map_editor_graphics_view->setAlignment(Qt::AlignCenter);
+void MainWindow::loadHeightsFromFileButtonPressed()
+{
+    auto file_path{ QFileDialog::getOpenFileName(this, tr("Open File"), "/home", tr("Excel files (*.xlsx)")) };
+    if(file_path.isEmpty()) return;
 
-    ui->display_info_tool_box->setCurrentIndex(1);
+    ui->save_heights_button->setEnabled(true);
+    emit loadHeightsFromFileSender(file_path);
 }
 
 void MainWindow::editImageButtonPressed()
 {
-    ui->map_editor_graphics_view->setEnabled(true);
-    ui->display_info_tool_box->setCurrentIndex(1); // 1 - magic number which means a "painting page"
-
-    ui->discard_last_changes_button->setEnabled(true);
-    ui->return_last_changes_button->setEnabled(true);
-    ui->accept_changes_button->setEnabled(true);
-    ui->discard_all_changes_button->setEnabled(true);
-    ui->save_changes_button_box->setEnabled(true);
+    m_painting_widget.show();
+    m_painting_widget.activateWindow();
 }
 
-void MainWindow::saveButtonBoxClicked(QAbstractButton *btn)
+void MainWindow::setImageInMapLabel(const QImage &image)
 {
-    auto scene{ qobject_cast<PaintTableScene*>(ui->map_editor_graphics_view->scene()) };
-    if(ui->save_changes_button_box->standardButton(btn) == QDialogButtonBox::Ok) {
-        // FIXME: work with buffer is should be here
-        auto pm{ getPixmapFromScene() };
-        emit createGrid(pm, scene->getWaterObjectCoords(), scene->getIslandsCoords());
-        scene->clear();
-        scene->addPixmap(pm);
-        m_map_image = pm.toImage();
+    ui->grid_map_label->setScaledContents(true);
+    ui->grid_map_label->setPixmap(QPixmap::fromImage(image));
+    ui->display_info_tool_box->setCurrentIndex(1);
+}
+
+
+void MainWindow::createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area) const
+{
+    emit createGrid(pm, water_object_area, islands_area);
+
+    ui->open_map_visualization_button->setEnabled(true);
+
+    ui->enter_heights_button->setEnabled(true);
+
+    ui->save_map_button->setEnabled(true);
+    ui->map_save_format_combo_box->setEnabled(true);
+}
+
+void MainWindow::updateGridParameters(double cell_width, double cell_height, double scale) const
+{
+    ui->cell_width_spin_box->setValue(cell_width);
+    ui->cell_height_spin_box->setValue(cell_height);
+    ui->scale_spin_box->setValue(scale);
+}
+
+void MainWindow::saveHeightsFromTableSender(QTableWidget &table)
+{
+    emit saveHeightsFromTable(table);
+    ui->enter_speed_vectors_button->setEnabled(true);
+    m_xwind_table_container.getTableWidget().setEnabled(true);
+    m_ywind_table_container.getTableWidget().setEnabled(true);
+    ui->save_heights_button->setEnabled(true);
+}
+
+void MainWindow::saveXSpeedsFromTableSender(QTableWidget &table)
+{
+    emit saveXSpeedsFromTable(table);
+    ui->wind_save_format_combo_box->setEnabled(true);
+    ui->save_wind_button->setEnabled(true);
+}
+
+void MainWindow::saveYSpeedsFromTableSender(QTableWidget &table)
+{
+    emit saveYSpeedsFromTable(table);
+    ui->wind_save_format_combo_box->setEnabled(true);
+    ui->save_wind_button->setEnabled(true);
+}
+
+void MainWindow::openMapVisualizationButtonPressed()
+{
+    ui->display_info_tool_box->setCurrentIndex(2);
+    ui->relief_tab_page->setCurrentIndex(0);
+}
+
+void MainWindow::enterHeightsButtonPressed()
+{
+    ui->display_info_tool_box->setCurrentIndex(2);
+    ui->relief_tab_page->setCurrentIndex(1);
+}
+
+void MainWindow::updateDepthTableValues(const QVector<QVector<QPair<bool, double>>> &heights)
+{
+    auto nrows{ heights.size() };
+    auto ncols{ nrows > 0 ? heights[0].size() : 0 };
+
+    auto& table{ m_deeps_table_container.getTableWidget() };
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(heights[i][j].first) {
+                table.item(i, j)->setText(QString("%1").arg(heights[i][j].second));
+            }
+        }
     }
-    else {
-        scene->clear();
-        scene->addPixmap(QPixmap::fromImage(m_map_image));
+}
+
+void MainWindow::saveHeightsTableButtonPressed()
+{
+    auto file_path { QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                  "/home/map.xlsx",
+                                                  tr("Excel files(*.xlsx")) };
+    if(file_path.isEmpty()) return;
+
+    emit saveMapAsExcel(file_path);
+}
+
+void MainWindow::enterSpeedVectorButtonPressed()
+{
+    ui->display_info_tool_box->setCurrentIndex(3);
+    ui->winds_direction_tab->setCurrentIndex(1);
+}
+
+void MainWindow::saveSpeedsButtonPressed()
+{
+    QString formats("Formats (");
+
+    auto nfile_formats{ ui->wind_save_format_combo_box->count() };
+    for(int i{}; i < nfile_formats; ++i) {
+        formats += '*' + ui->wind_save_format_combo_box->itemText(i) + ' ';
+    }
+    formats += ");;";
+
+    for(int i{}; i < nfile_formats; ++i) {
+        formats += '*' + ui->wind_save_format_combo_box->itemText(i) + ";;";
     }
 
-    ui->map_editor_graphics_view->setEnabled(false);
-    ui->discard_last_changes_button->setEnabled(false);
-    ui->return_last_changes_button->setEnabled(false);
-    ui->accept_changes_button->setEnabled(false);
-    ui->discard_all_changes_button->setEnabled(false);
-    ui->save_changes_button_box->setEnabled(false);
+    auto file_path { QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                  "/home/wind_image" + ui->wind_save_format_combo_box->currentText(),
+                                                  tr(formats.toStdString().c_str())) };
+    if(file_path.isEmpty()) return;
+
+    QString file_format;
+    for(int i{ file_path.size() - 1 }; file_path[i] != '.'; --i) {
+        file_format.push_front(file_path[i]);
+    }
+
+    if(file_format == QString("xlsx")) {
+        ui->load_heights_from_file_button->setEnabled(true);
+        emit saveSpeedsAsExcel(file_path);
+        return;
+    }
+
+    if(ui->map_with_winds_label->pixmap(Qt::ReturnByValue).save(file_path)) {
+        QMessageBox::warning(nullptr, QString("Ошибка сохранения"), QString("Возникла ошибка при сохранение\nизображения. Пожалуйста,\nпопробуйте еще раз"));
+    }
+}
+
+void MainWindow::saveMapButtonPressed()
+{
+    QString formats("Formats (");
+
+    auto nfile_formats{ ui->map_save_format_combo_box->count() };
+    for(int i{}; i < nfile_formats; ++i) {
+        formats += '*' + ui->map_save_format_combo_box->itemText(i) + ' ';
+    }
+    formats += ");;";
+
+    for(int i{}; i < nfile_formats; ++i) {
+        formats += '*' + ui->map_save_format_combo_box->itemText(i) + ";;";
+    }
+
+    auto file_path { QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                  "/home/map_image" + ui->map_save_format_combo_box->currentText(),
+                                                  tr(formats.toStdString().c_str())) };
+    if(file_path.isEmpty()) return;
+
+    QString file_format;
+    for(int i{ file_path.size() - 1 }; file_path[i] != '.'; --i) {
+        file_format.push_front(file_path[i]);
+    }
+
+    if(file_format == QString("xlsx")) {
+        ui->load_heights_from_file_button->setEnabled(true);
+        emit saveMapAsExcel(file_path);
+        return;
+    }
+
+    if(!m_painting_widget.getMapImage().save(file_path)) {
+        QMessageBox::warning(nullptr, QString("Ошибка сохранения"), QString("Возникла ошибка при сохранение\nизображения. Пожалуйста,\nпопробуйте еще раз"));
+    }
 }
 
 
 // private functions
-QPixmap MainWindow::getPixmapFromScene() const
-{
-    auto scene{ui->map_editor_graphics_view->scene()};
-    scene->clearSelection();   // Selections would also render to the file
-    scene->setSceneRect(scene->itemsBoundingRect()); // Reshrink the scene to it's bounding contents
-    QPixmap pixmap(scene->sceneRect().size().toSize()); // WARNING: may throw; Create the image with the exact size of the shrunk scene
-
-    QPainter painter(&pixmap);
-    scene->render(&painter);
-    return pixmap;
-}
-
 QPixmap MainWindow::getPixmapFromWebEngine() const
 {
     auto web_engine{ ui->map_web_engine };
-    QPixmap pixmap(web_engine->size()); // WARNING: may throw; Create the image with the exact size of the shrunk scene
+    QPixmap pixmap(web_engine->size());
 
     QPainter painter(&pixmap);
     web_engine->render(&painter);
     return pixmap;
+}
+
+void MainWindow::connectPaintingSignalsWithMainWindow()
+{
+    connect(&m_painting_widget, SIGNAL(imageChanged(const QImage &)),
+            this, SLOT(setImageInMapLabel(const QImage &)));
+
+    connect(&m_painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)),
+            this, SLOT(createGridSender(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)));
+
+    connect(&m_painting_widget, SIGNAL(cellScaleParametersChanged(double, double, double)),
+            this, SLOT(updateGridParameters(double, double, double)));
 }
