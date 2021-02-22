@@ -20,10 +20,10 @@ public:
     ~Visualization3DContainer() noexcept;
 
 public slots:
-    void setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridCreatorWidget (signal - gridChanged(same))
-    void setupHeights(QTableWidget &table);
-    void setupHeights(QVector<QVector<QPair<bool, double>>> &heights);
-    void setupScale(double scale); // connected with QDoubleSpinBox (which is contained in MainWindow) (signal - valueChanged(same))
+    void setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridHandler; signal - gridChanged(same)
+    void setupHeights(QTableWidget &table); // connected with MainWindow; signal - saveHeightsFromTable(same)
+    void setupHeights(QVector<QVector<QPair<bool, double>>> &heights); // connected with ExcelWorker; signal - heightsLoaded(same)
+    void setupScale(double scale); // connected with QDoubleSpinBox (from MainWindow); signal - valueChanged(same)
 
 signals:
     void heightsChanged(const QVector<QVector<QPair<bool, double>>> &heights); // emit function: setupHeights

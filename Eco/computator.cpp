@@ -112,110 +112,7 @@ void Computator::getXSpeedsFromTable(QTableWidget &table)
     }
 
     emit xSpeedChanged(m_xspeeds_vectors);
-
-//    QPair<int, int> first_water_obj_ind{};
-//    QPair<int, int> last_water_obj_ind{};
-
-//    // parsing first row of the water objects grid
-//    int cur_row = 1;
-
-//    first_water_obj_ind.first = cur_row;
-//    last_water_obj_ind.first = cur_row;
-
-//    int heights_row { cur_row - 1 };
-
-//    for(int j{ 1 }; j < ncols - 1; ++j) {
-//        int heights_col { j - 1 };
-
-//        if (m_heights[heights_row][heights_col].first) {
-//            first_water_obj_ind.second = j;
-//            break;
-//        }
-//    }
-
-//    for(int j{ ncols - 1 }; j > first_water_obj_ind.second; --j) {
-//        int heights_col { j - 1 };
-
-//        if (m_heights[heights_row][heights_col].first) {
-//            last_water_obj_ind.second = j;
-//            break;
-//        }
-//    }
-
-//    m_xspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second - 1] = m_xspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second];
-//    m_xspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second + 1] = m_xspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second];
-//    for (int j{ first_water_obj_ind.second }; j < last_water_obj_ind.second; ++j) {
-//        m_xspeeds_vectors[first_water_obj_ind.first + 1][j] = m_xspeeds_vectors[first_water_obj_ind.first][j];
-//    }
-//    // parsing mid part of water objects grid
-//    for (int i { 2 }; i < nrows - 2; ++i) {
-//        int heights_row { i - 1 };
-//        first_water_obj_ind.first = i;
-//        for (int j { 1 }; j < nrows - 1; ++j) {
-//            int heights_col { j - 1 };
-
-//            if (m_heights[heights_row][heights_col].first) {
-//                first_water_obj_ind.second = j;
-//                break;
-//            }
-//        }
-
-//        for(int j{ ncols - 1 }; j > first_water_obj_ind.second; --j) {
-//            int heights_col { j - 1 };
-
-//            if (m_heights[heights_row][heights_col].first) {
-//                last_water_obj_ind.second = j;
-//                break;
-//            }
-//        }
-
-//        m_xspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second - 1] = m_xspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second];
-//        m_xspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second + 1] = m_xspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second];
-
-//        for (int j { first_water_obj_ind.second }; j < last_water_obj_ind.second; ++j) {
-//            int heights_col { j - 1 };
-//            if(!m_heights[heights_row][heights_col].first) {
-//                m_xspeeds_vectors[i][j] = m_xspeeds_vectors[i][j - 1];
-//                break;
-//            }
-//        }
-
-//        for (int j { last_water_obj_ind.second }; j > first_water_obj_ind.second; --j) {
-//            int heights_col { j - 1 };
-//            if(!m_heights[heights_row][heights_col].first) {
-//                m_xspeeds_vectors[i][j] = m_xspeeds_vectors[i][j + 1];
-//                break;
-//            }
-//        }
-//    }
-//    // parsing last row of water objects grid
-//    cur_row = nrows - 1;
-
-//    first_water_obj_ind.first = cur_row;
-//    last_water_obj_ind.first = cur_row;
-
-//    heights_row = cur_row - 1;
-
-//    for(int j{ 1 }; j < ncols - 1; ++j) {
-//        if (m_heights[nrows - 1][j].first) {
-//            first_water_obj_ind.second = j;
-//            break;
-//        }
-//    }
-
-//    for(int j{ ncols - 1 }; j > first_water_obj_ind.second; --j) {
-//        if (m_heights[nrows - 1][j].first) {
-//             last_water_obj_ind.second = j;
-//             break;
-//        }
-//    }
-
-//    m_xspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second - 1] = m_xspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second];
-//    m_xspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second + 1] = m_xspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second];
-
-//    for (int j{ first_water_obj_ind.second }; j < last_water_obj_ind.second; ++j) {
-//         m_xspeeds_vectors[first_water_obj_ind.first + 1][j] = m_xspeeds_vectors[first_water_obj_ind.first][j];
-//    }
+    createShoreBorder(m_xspeeds_vectors);
 }
 
 void Computator::getYSpeedsFromTable(QTableWidget &table)
@@ -236,108 +133,56 @@ void Computator::getYSpeedsFromTable(QTableWidget &table)
     }
 
     emit ySpeedChanged(m_yspeeds_vectors);
+    createShoreBorder(m_yspeeds_vectors);
+}
 
-//    QPair<int, int> first_water_obj_ind{};
-//    QPair<int, int> last_water_obj_ind{};
+void Computator::createShoreBorder(QVector<QVector<double>> &area)
+{
+    if(area.size() == 0) return;
 
-//    // parsing first row of the water objects grid
-//    int cur_row = 1;
+    auto nrows{ area.size() + 2 };
+    auto ncols{ area[0].size() + 2 };
 
-//    first_water_obj_ind.first = cur_row;
-//    last_water_obj_ind.first = cur_row;
+    QVector<QVector<double>> bordered_area(nrows, QVector<double>(ncols));
+    for(int i{ 1 }; i < nrows - 1; ++i) {
+        for(int j{ 1 }; j < ncols - 1; ++j) {
+            bordered_area[i][j] = area[i - 1][j - 1];
+        }
+    }
 
-//    int heights_row { cur_row - 1 };
+    for(int i{ 1 }; i < ncols - 1; ++i) {
+        bordered_area[0][i] = area[0][i - 1];
+        bordered_area[nrows - 1][i] = area[nrows - 3][i - 1];
+    }
 
-//    for(int j{ 1 }; j < ncols - 1; ++j) {
-//        int heights_col { j - 1 };
 
-//        if (m_heights[heights_row][heights_col].first) {
-//            first_water_obj_ind.second = j;
-//            break;
+    for(int i{ 1 }; i < nrows - 1; ++i) {
+        for(int j{}; j < ncols - 2; ++j) {
+            if(area[i - 1][j] > 1e-5) {
+                 bordered_area[i][j] = area[i - 1][j];
+                break;
+            }
+        }
+
+        for(int j{ ncols - 3 }; j > 0; --j) {
+            if(area[i - 1][j] > 1e-5) {
+                 bordered_area[i][j + 2] = area[i - 1][j];
+                 break;
+            }
+        }
+    }
+
+    // TODO: islands handler
+//    auto table{ new QTableWidget };
+//    table->setRowCount(nrows);
+//    table->setColumnCount(ncols);
+//    for(int i{}; i < nrows; ++i) {
+//        for(int j{}; j < ncols; ++j) {
+//            auto item(new QTableWidgetItem);
+//            item->setBackground(Qt::cyan);
+//            item->setText(QString(("%1")).arg(bordered_area[i][j]));
+//            table->setItem(i, j, item);
 //        }
 //    }
-
-//    for(int j{ ncols - 1 }; j > first_water_obj_ind.second; --j) {
-//        int heights_col { j - 1 };
-
-//        if (m_heights[heights_row][heights_col].first) {
-//            last_water_obj_ind.second = j;
-//            break;
-//        }
-//    }
-
-//    m_yspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second - 1]= m_yspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second];
-//    m_yspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second + 1] = m_yspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second];
-//    for (int j{ first_water_obj_ind.second }; j < last_water_obj_ind.second; ++j) {
-//        m_yspeeds_vectors[first_water_obj_ind.first + 1][j] = m_yspeeds_vectors[first_water_obj_ind.first][j];
-//    }
-//    // parsing mid part of water objects grid
-//    for (int i { 2 }; i < nrows - 2; ++i) {
-//        int heights_row { i - 1 };
-//        first_water_obj_ind.first = i;
-//        for (int j { 1 }; j < nrows - 1; ++j) {
-//            int heights_col { j - 1 };
-
-//            if (m_heights[heights_row][heights_col].first) {
-//                first_water_obj_ind.second = j;
-//                break;
-//            }
-//        }
-
-//        for(int j{ ncols - 1 }; j > first_water_obj_ind.second; --j) {
-//            int heights_col { j - 1 };
-
-//            if (m_heights[heights_row][heights_col].first) {
-//                last_water_obj_ind.second = j;
-//                break;
-//            }
-//        }
-
-//        m_yspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second - 1] = m_yspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second];
-//        m_yspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second + 1] = m_yspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second];
-
-//        for (int j { first_water_obj_ind.second }; j < last_water_obj_ind.second; ++j) {
-//            int heights_col { j - 1 };
-//            if(!m_heights[heights_row][heights_col].first) {
-//                m_yspeeds_vectors[i][j] = m_yspeeds_vectors[i][j - 1];
-//                break;
-//            }
-//        }
-
-//        for (int j { last_water_obj_ind.second }; j > first_water_obj_ind.second; --j) {
-//            int heights_col { j - 1 };
-//            if(!m_heights[heights_row][heights_col].first) {
-//                m_yspeeds_vectors[i][j] = m_yspeeds_vectors[i][j + 1];
-//                break;
-//            }
-//        }
-//    }
-//    // parsing last row of water objects grid
-//    cur_row = nrows - 1;
-
-//    first_water_obj_ind.first = cur_row;
-//    last_water_obj_ind.first = cur_row;
-
-//    heights_row = cur_row - 1;
-
-//    for(int j{ 1 }; j < ncols - 1; ++j) {
-//        if (m_heights[nrows - 1][j].first) {
-//            first_water_obj_ind.second = j;
-//            break;
-//        }
-//    }
-
-//    for(int j{ ncols - 1 }; j > first_water_obj_ind.second; --j) {
-//        if (m_heights[nrows - 1][j].first) {
-//             last_water_obj_ind.second = j;
-//             break;
-//        }
-//    }
-
-//    m_yspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second - 1] = m_yspeeds_vectors[first_water_obj_ind.first][first_water_obj_ind.second];
-//    m_yspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second + 1] = m_yspeeds_vectors[last_water_obj_ind.first][last_water_obj_ind.second];
-
-//    for (int j{ first_water_obj_ind.second }; j < last_water_obj_ind.second; ++j) {
-//         m_yspeeds_vectors[first_water_obj_ind.first + 1][j] = m_yspeeds_vectors[first_water_obj_ind.first][j];
-//    }
+//    table->show();
 }

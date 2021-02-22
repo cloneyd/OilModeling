@@ -59,15 +59,19 @@ public:
 public slots:
     void setupHeights(const QVector<QVector<QPair<bool, double>>> &heights); // connected with GridCreatorWidget(signal - gridChanged(same))
 
-    void setARatio(double value) noexcept;
-    void setWOType(int wo_index) noexcept;
+    void setARatio(double value) noexcept; // connected with double spin box (from MainWindow); signal - valueChanged(double)
+    void setWOType(int wo_index) noexcept; // connected with combo box (from MainWindow); signal - valueChanged(double)
 
-    void getXSpeedsFromTable(QTableWidget &table);
-    void getYSpeedsFromTable(QTableWidget &table);
+    void getXSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveXSpeedsFromTable(QTableWidget &)
+    void getYSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveYSpeedsFromTable(QTableWidget &)
 
 signals:
     void xSpeedChanged(const QVector<QVector<double>> &xspeed);
     void ySpeedChanged(const QVector<QVector<double>> &yspeed);
+
+// helpers
+private:
+    void createShoreBorder(QVector<QVector<double>> &area); // creating shore values
 };
 
 #endif // COMPUTATIONS_HPP

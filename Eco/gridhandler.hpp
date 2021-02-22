@@ -23,11 +23,11 @@ public:
     GridHandler();
 
 public slots:
-    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area);
+    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area); // connected with MainWindow; siganl - createGrid(same)
 
-    void setScale(double scale) noexcept;
-    void setCellWidth(double cell_width) noexcept;
-    void setCellHeight(double cellHeight) noexcept;
+    void setScale(double scale) noexcept; // connected with DoubleSpinBox (from MainWindow); signal - valueChanged(same)
+    void setCellWidth(double cell_width) noexcept; // connected with DoubleSpinBox (from MainWindow); signal - valueChanged(same)
+    void setCellHeight(double cellHeight) noexcept; // connected with DoubleSpinBox (from MainWindow); signal - valueChanged(same
 
 signals:
     void gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &grid);

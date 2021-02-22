@@ -25,15 +25,15 @@ public:
     ~ExcelWorker() noexcept;
 
 public slots:
-    void acceptGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridCreator widget (signal - gridChanged(same))
+    void acceptGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridHandler; signal - gridChanged(same)
 
-    void updateHeights(const QVector<QVector<QPair<bool, double>>> &heights); // connected with SurfaceContainer (signal - heightsChanged(same))
-    void saveHeightsFile(const QString &filepath); // connected with MainWidnow (signal - saveInExcelFileButtonPressed(same))
-    void loadHeightsFromFile(const QString &file_path);
+    void updateHeights(const QVector<QVector<QPair<bool, double>>> &heights); // connected with Visualization3DContainer; signal - heightsChanged(same)
+    void saveHeightsFile(const QString &filepath); // connected with MainWidnow; signal - saveMapAsExcek(same)
+    void loadHeightsFromFile(const QString &file_path); // connected with MainWindow; signal - loadHeightsFromFileSender(same)
 
-    void updateXSpeeds(const QVector<QVector<double>> &speeds);
-    void updateYSpeeds(const QVector<QVector<double>> &speeds);
-    void saveSpeedsAsExcel(const QString &filepath);
+    void updateXSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - xSpeedChanged(same)
+    void updateYSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - ySpeedChanged(same)
+    void saveSpeedsAsExcel(const QString &filepath); // connected with MainWindow; signal - saveSpeedsAsExcel(same)
 
 signals:
     void heightsLoaded(QVector<QVector<QPair<bool, double>>> &heights); // WARNING: heights will be changed

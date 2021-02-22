@@ -26,9 +26,9 @@ public:
     ~TableContainer();
 
 public slots:
-    void fillSelectedCells() const; // connected with QPushButton(m_init_buttom) pressed()
+    void fillSelectedCells() const; // connected with m_init_button; signal - buttonPressed()
 
-    void saveButtonPressed();
+    void saveButtonPressed(); // connected with m_save_changes_button; signal - buttonPressed();
 
 signals:
     void saveButtonPressed(QTableWidget &table);

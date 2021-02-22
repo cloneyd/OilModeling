@@ -38,30 +38,30 @@ public:
     ~MainWindow();
 
 public slots:
-    void setupTables(const QVector<QVector<QPair<bool, QPointF>>> &grid);
+    void setupTables(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridHandler; signal - gridChanged(same)
 
-    void loadFronSiteButtonPressed();
-    void loadFromPCButtonPressed();
+    void loadFronSiteButtonPressed(); // connected with ui->load_from_site_button
+    void loadFromPCButtonPressed(); // connected with ui->load_from_pc_button
 
-    void loadHeightsFromFileButtonPressed();
+    void loadHeightsFromFileButtonPressed(); // connected with ui->load_heights_from_file_button
 
-    void editImageButtonPressed();
-    void setImageInMapLabel(const QImage &image);
+    void editImageButtonPressed(); // connected with ui->edit_image_button
+    void setImageInMapLabel(const QImage &image); // connected with PaintingWidget; signal - imageChanged(same)
 
-    void createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area) const;
-    void updateGridParameters(double cell_width, double cell_height, double scale) const;
+    void createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area) const; // connected with PaintingWidget; signal - createGrid(same)
+    void updateGridParameters(double cell_width, double cell_height, double scale) const; // connected with PaintingWidget; signal cellScaleParametersChanged(same)
 
-    void saveHeightsFromTableSender(QTableWidget &table);
-    void saveXSpeedsFromTableSender(QTableWidget &table);
-    void saveYSpeedsFromTableSender(QTableWidget &table);
+    void saveHeightsFromTableSender(QTableWidget &table); // connected with TableContainer; signal - saveButtonPressed(same)
+    void saveXSpeedsFromTableSender(QTableWidget &table); // connected with TableContainer; signal - saveButtonPressed(same)
+    void saveYSpeedsFromTableSender(QTableWidget &table); // connected with TableContainer; signal - saveButtonPressed(same)
 
-    void openMapVisualizationButtonPressed();
-    void enterHeightsButtonPressed();
-    void updateDepthTableValues(const QVector<QVector<QPair<bool, double>>> &heights);
-    void saveHeightsTableButtonPressed();
+    void openMapVisualizationButtonPressed(); // connected with ui->open_map_visualization_button
+    void enterHeightsButtonPressed(); // connected with ui->enter_heights_button
+    void updateDepthTableValues(const QVector<QVector<QPair<bool, double>>> &heights); // connected with Visualization3DContainer; signal - heightsChanged(same)
+    void saveHeightsTableButtonPressed(); // connected with ui->save_heights_table_button
 
-    void enterSpeedVectorButtonPressed();
-    void saveSpeedsButtonPressed();
+    void enterSpeedVectorButtonPressed(); // connected with ui->enter_speed_vectors_button
+    void saveSpeedsButtonPressed(); // connected with ui->save_speeds_button
 
     void saveMapButtonPressed();
 

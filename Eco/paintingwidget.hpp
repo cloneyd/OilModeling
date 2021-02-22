@@ -30,24 +30,24 @@ public:
     ~PaintingWidget();
 
 public slots:
-    void acceptChangesButtonPressed();
-    void discardAllChangesButtonPressed();
-    void updateMapButtonPressed();
-    void discardLastChandesButtonPressed();
-    void returnLastChangesButtonPressed();
-    void showChangesButtonPressed();
+    void acceptChangesButtonPressed(); // connected with painting_ui->accept_changes_button
+    void discardAllChangesButtonPressed(); // connected with painting_ui->discard_all_changes_button
+    void updateMapButtonPressed(); // connected with painting_ui->update_map_button
+    void discardLastChandesButtonPressed(); // connected with painting_ui->discard_last_changes_button
+    void returnLastChangesButtonPressed(); // connected with paiting_ui->return_last_changes_button
+    void showChangesButtonPressed(); // connected with painting_ui->show_changes_button
 
-    void brushType1ButtonPressed();
-    void brushType2ButtonPressed();
-    void brushType3ButtonPressed();
-    void brushType4ButtonPressed();
+    void brushType1ButtonPressed(); // connected with painting_ui->brush_type_1_button
+    void brushType2ButtonPressed(); // connected with painting_ui->brush_type_2_button
+    void brushType3ButtonPressed(); // connected with painting_ui->brush_type_3_button
+    void brushType4ButtonPressed(); // connected with painting_ui->brush_type_4_button
 
-    void updateGridButtonPressed();
+    void updateGridButtonPressed(); // connected with painting_ui->update_grid_button
 
-    void enableGridButtonPressed();
-    void shadowNonWOButtonPressed();
+    void enableGridButtonPressed(); // connected with painting_ui->enable_grid_button
+    void shadowNonWOButtonPressed(); // connected with painting_ui->shadow_non_wo_button
 
-    void saveChangesButtonClicked(QAbstractButton *btn);
+    void saveChangesButtonClicked(QAbstractButton *btn); // connected with cell_scale_width->save_changes_button
 
 signals:
     void imageChanged(const QImage &image);
