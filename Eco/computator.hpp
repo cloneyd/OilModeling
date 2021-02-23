@@ -22,8 +22,8 @@ private:
 
 private:
     QVector<QVector<QPair<bool, double>>> m_heights;
-    QVector<QVector<double>> m_xspeeds_vectors;
-    QVector<QVector<double>> m_yspeeds_vectors;
+    QVector<QVector<double>> m_xspeeds_vectors; // filled with 100001. by default
+    QVector<QVector<double>> m_yspeeds_vectors; // filled with 100001. by default
 
     QVector<QVector<QPair<double, double>>> m_xytan_pressure_vectors;
     QVector<QVector<double>> m_rot_t_vectors;
@@ -72,6 +72,8 @@ signals:
 // helpers
 private:
     void createShoreBorder(QVector<QVector<double>> &area); // creating shore values
+    template <class Cmp>
+    bool findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cmp, const QPair<int, int> value);
 };
 
 #endif // COMPUTATIONS_HPP

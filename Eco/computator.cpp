@@ -100,17 +100,16 @@ void Computator::getXSpeedsFromTable(QTableWidget &table)
     auto ncols{ nrows > 0 ? m_heights[0].size() : 0 };
 
     m_xspeeds_vectors.clear();
-    m_xspeeds_vectors.resize(nrows);
+    const auto fill_value{ 100001. };
+    m_xspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
 
     for(int i{}; i < nrows; ++i) {
-    m_xspeeds_vectors[i].resize(ncols);
         for(int j{}; j < ncols; ++j) {
             if(m_heights[i][j].first) {
                 m_xspeeds_vectors[i][j] = table.item(i, j)->text().toDouble();
             }
         }
     }
-
     emit xSpeedChanged(m_xspeeds_vectors);
     createShoreBorder(m_xspeeds_vectors);
 }
@@ -121,10 +120,10 @@ void Computator::getYSpeedsFromTable(QTableWidget &table)
     auto ncols{ nrows > 0 ? m_heights[0].size() : 0 };
 
     m_yspeeds_vectors.clear();
-    m_yspeeds_vectors.resize(nrows);
+    const auto fill_value{ 100001. };
+    m_yspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
 
     for(int i{}; i < nrows; ++i) {
-        m_yspeeds_vectors[i].resize(ncols);
         for(int j{}; j < ncols; ++j) {
             if(m_heights[i][j].first) {
                 m_yspeeds_vectors[i][j] = table.item(i, j)->text().toDouble();
@@ -143,46 +142,112 @@ void Computator::createShoreBorder(QVector<QVector<double>> &area)
     auto nrows{ area.size() + 2 };
     auto ncols{ area[0].size() + 2 };
 
-    QVector<QVector<double>> bordered_area(nrows, QVector<double>(ncols));
+    // copy the source table
+    QVector<QVector<double>> bordered_area(nrows, QVector<double>(ncols, 100001.));
     for(int i{ 1 }; i < nrows - 1; ++i) {
         for(int j{ 1 }; j < ncols - 1; ++j) {
             bordered_area[i][j] = area[i - 1][j - 1];
         }
     }
 
+    // copy first and last rows
+    QVector<QPair<int, int>> wo_shore_indexes;
     for(int i{ 1 }; i < ncols - 1; ++i) {
         bordered_area[0][i] = area[0][i - 1];
         bordered_area[nrows - 1][i] = area[nrows - 3][i - 1];
+        wo_shore_indexes.append(qMakePair(0, i));
+        wo_shore_indexes.append(qMakePair(nrows - 1, i));
     }
 
+    QVector<QPair<int, int>> islands_shore_indexes;
+    auto cmp = [](const QPair<int, int> &first, const QPair<int, int> &second)->bool { return first.first == second.first && first.second == second.second; };
+    // copy first and last nonzero cells
+    constexpr auto fill_value{ 100001. };
+    constexpr auto error{ -1. };
 
     for(int i{ 1 }; i < nrows - 1; ++i) {
+        int first_nonshore{};
         for(int j{}; j < ncols - 2; ++j) {
-            if(area[i - 1][j] > 1e-5) {
-                 bordered_area[i][j] = area[i - 1][j];
+            if(area[i - 1][j] - fill_value < error) {
+                first_nonshore = j;
+                bordered_area[i][j] = area[i - 1][j];
+                wo_shore_indexes.append(qMakePair(i, j));
                 break;
             }
         }
 
+        int last_nonshore{};
         for(int j{ ncols - 3 }; j > 0; --j) {
-            if(area[i - 1][j] > 1e-5) {
-                 bordered_area[i][j + 2] = area[i - 1][j];
-                 break;
+            if(area[i - 1][j] - fill_value < error) {
+                last_nonshore = j;
+                bordered_area[i][j + 2] = area[i - 1][j];
+                wo_shore_indexes.append(qMakePair(i, j + 2));
+                break;
+            }
+        }
+
+        ++last_nonshore;
+        for(int j{ first_nonshore }; j < last_nonshore; ++j) {
+            if(bordered_area[i][j] - fill_value > error) {
+                if(bordered_area[i][j - 1] - fill_value < error && !findInVector(islands_shore_indexes, cmp, qMakePair(i, j - 1))) {
+                    islands_shore_indexes.append(qMakePair(i, j));
+                    bordered_area[i][j] = bordered_area[i][j - 1]; // CHECKME
+                }
+                else if(bordered_area[i][j + 1] - fill_value < error && !findInVector(islands_shore_indexes, cmp, qMakePair(i, j + 1))) {
+                    islands_shore_indexes.append(qMakePair(i, j));
+                    bordered_area[i][j] = bordered_area[i][j + 1]; // CHECKME
+                }
+                else if(i > 0 && bordered_area[i - 1][j] - fill_value < error && !findInVector(islands_shore_indexes, cmp, qMakePair(i - 1, j))) {
+                    islands_shore_indexes.append(qMakePair(i, j));
+                    bordered_area[i][j] = bordered_area[i - 1][j]; // CHECKME
+                }
+                else if(i + 1 < nrows && bordered_area[i + 1][j] - fill_value < error && !findInVector(islands_shore_indexes, cmp, qMakePair(i + 1, j))) {
+                    islands_shore_indexes.append(qMakePair(i, j));
+                    bordered_area[i][j] = bordered_area[i + 1][j]; // CHECKME
+                }
+            }
+        }
+    }
+    islands_shore_indexes.clear();
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(bordered_area[i][j] - fill_value > error) {
+                if(i + 1 < nrows && bordered_area[i + 1][j] - fill_value < error && !findInVector(wo_shore_indexes, cmp, qMakePair(i + 1, j))) {
+                    bordered_area[i][j] = bordered_area[i + 1][j];
+                    wo_shore_indexes.append(qMakePair(i, j));
+                }
+                else if(i - 1 >= 0 && bordered_area[i - 1][j] - fill_value < error && !findInVector(wo_shore_indexes, cmp, qMakePair(i - 1, j))) {
+                    bordered_area[i][j] = bordered_area[i - 1][j];
+                    wo_shore_indexes.append(qMakePair(i, j));
+                }
             }
         }
     }
 
     // TODO: islands handler
-//    auto table{ new QTableWidget };
-//    table->setRowCount(nrows);
-//    table->setColumnCount(ncols);
-//    for(int i{}; i < nrows; ++i) {
-//        for(int j{}; j < ncols; ++j) {
-//            auto item(new QTableWidgetItem);
-//            item->setBackground(Qt::cyan);
-//            item->setText(QString(("%1")).arg(bordered_area[i][j]));
-//            table->setItem(i, j, item);
-//        }
-//    }
-//    table->show();
+    auto table{ new QTableWidget };
+    table->setRowCount(nrows);
+    table->setColumnCount(ncols);
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            auto item(new QTableWidgetItem);
+            item->setBackground(Qt::cyan);
+            item->setText(QString(("%1")).arg(bordered_area[i][j]));
+            table->setItem(i, j, item);
+        }
+    }
+    table->show();
+}
+
+template <class Cmp>
+bool Computator::findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cmp, const QPair<int, int> value)
+{
+    auto vec_size{ vec.size() };
+    for(int i{}; i < vec_size; ++i) {
+        if(cmp(value, vec[i])) {
+            return true;
+        }
+    }
+    return false;
 }
