@@ -50,6 +50,7 @@ public slots:
 
     void createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area) const; // connected with PaintingWidget; signal - createGrid(same)
     void updateGridParameters(double cell_width, double cell_height, double scale) const; // connected with PaintingWidget; signal cellScaleParametersChanged(same)
+    void deleteGridSender() const;
 
     void saveHeightsFromTableSender(QTableWidget &table); // connected with TableContainer; signal - saveButtonPressed(same)
     void saveXSpeedsFromTableSender(QTableWidget &table); // connected with TableContainer; signal - saveButtonPressed(same)
@@ -78,6 +79,8 @@ signals:
     void loadHeightsFromFileSender(const QString &file_path);
 
     void saveSpeedsAsExcel(const QString &filepath);
+
+    void deleteGrid() const;
 
 // Getters
 public:

@@ -9,6 +9,11 @@ class PaintTableScene: public QGraphicsScene
 {
     Q_OBJECT
 
+public:
+    static constexpr double line_width{ 3. };
+    static constexpr Qt::GlobalColor water_object_color{ Qt::cyan };
+    static constexpr Qt::GlobalColor islands_color{ Qt::red };
+
 private:
     // buffer for user drawn stuff
     QVector<QPointF> m_water_area;

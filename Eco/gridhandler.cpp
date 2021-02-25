@@ -61,6 +61,12 @@ void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_a
     emit gridChanged(m_grid);
 }
 
+void GridHandler::deleteGrid()
+{
+    m_grid.clear();
+    emit gridChanged(m_grid);
+}
+
 void GridHandler::setScale(double scale) noexcept
 {
     if(scale < 1e-3) {

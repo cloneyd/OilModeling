@@ -13,6 +13,7 @@ TableContainer::TableContainer(const QString &name, QWidget *parent) :
     m_init_button(QString("Инициализировать\nвыделенные значения"),this),
     m_save_changes_button(QString("Сохранить изменения"), this),
     m_spin_box(this),
+    m_validator{},
     m_table(this),
     m_layout(this),
     m_buttons_layout{}
@@ -23,10 +24,14 @@ TableContainer::TableContainer(const QString &name, QWidget *parent) :
     m_table.verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     m_spin_box.setAlignment(Qt::AlignCenter);
-    m_spin_box.setMinimum(0.);
+    m_spin_box.setMinimum(-10000.);
     m_spin_box.setMaximum(10000.);
     m_spin_box.setSingleStep(.5);
-    m_spin_box.setDecimals(3);
+    m_spin_box.setDecimals(4);
+
+    m_validator.setBottom(-10000.);
+    m_validator.setTop(10000.);
+    m_validator.setDecimals(4);
 
     m_init_button.setFixedSize(150, 40);
     m_save_changes_button.setFixedSize(150, 40);
@@ -43,6 +48,9 @@ TableContainer::TableContainer(const QString &name, QWidget *parent) :
 
     connect(&m_save_changes_button, SIGNAL(pressed()),
             this, SLOT(saveButtonPressed()));
+
+    connect(&m_table, SIGNAL(cellChanged(int, int)),
+            this, SLOT(validateCellValue(int, int)));
 }
 
 TableContainer::~TableContainer()
@@ -54,10 +62,6 @@ TableContainer::~TableContainer()
 void TableContainer::fillSelectedCells() const
 {
     auto value{ m_spin_box.value() };
-    if(value <= 1e-5) {
-        showErrorMessageBox(QString("Некорректное значение в поле.\nПожалуйста, введите число больше 0"));
-        return;
-    }
 
     auto selected_items{ m_table.selectedItems() };
     for(auto&& item : selected_items) {
@@ -68,6 +72,17 @@ void TableContainer::fillSelectedCells() const
 void TableContainer::saveButtonPressed()
 {
     emit saveButtonPressed(m_table);
+}
+
+
+// private slots
+void TableContainer::validateCellValue(int row, int col)
+{
+    int will_be_unused{};
+    if(auto&& text{ m_table.item(row, col)->text() }; !(m_validator.validate(text, will_be_unused) == QValidator::Acceptable)) {
+        text.remove(text.size() - 1, 1);
+        m_table.item(row, col)->setText(text);
+    }
 }
 
 

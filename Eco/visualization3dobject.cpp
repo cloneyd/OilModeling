@@ -108,11 +108,12 @@ void Visualization3DObject::updateMap()
 {
     // Note: the dimensions of m_heights is same as m_grid dimensions (I hope)
 
-    if(m_grid.empty())   return;
     if(auto series{ m_graph->seriesList() }; !(series.empty())) m_graph->removeSeries(series.at(0)); // if m_graph have old series, it must be deleted
+    if(m_grid.empty())   return; // if there is no new grid
 
     auto rows {m_grid.size() };
     auto cols{ rows > 0 ? m_grid[0].size() : 0 };
+
     QVector<QVector<QVector3D>> coords(rows);
     // Note: Q3DVisualization3DObject standart axis a bit confusing: Y axe is the height axe
     if(m_heights.empty()) {

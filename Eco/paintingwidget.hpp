@@ -17,6 +17,9 @@ class PaintingWidget : public QWidget
 {
     Q_OBJECT
 
+public:
+    static constexpr double image_scale_ratio { .75 };
+
 private:
     Ui::PaintingWidget *m_painting_ui;
     Ui::cell_scale_parametres *m_cell_scale_parameters_ui;
@@ -24,6 +27,8 @@ private:
     QImage m_map_image;
 
     QWidget m_cell_scale_parameters;
+
+    bool m_is_accept_changes_flag; // if show changes button pressed flag become false, if accept changes button pressed flag become true; true by default
 
 public:
     explicit PaintingWidget(QWidget *parent = nullptr);
@@ -55,6 +60,7 @@ signals:
     void cellScaleParametersChanged(double width, double height, double scale) const;
 
     void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area);
+    void deleteGrid() const;
 
 // setters
 public:

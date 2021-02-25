@@ -11,7 +11,8 @@ PaintingWidget::PaintingWidget(QWidget *parent) :
     m_painting_ui(new Ui::PaintingWidget),
     m_cell_scale_parameters_ui( new Ui::cell_scale_parametres),
     m_map_image{},
-    m_cell_scale_parameters{}
+    m_cell_scale_parameters{},
+    m_is_accept_changes_flag{ true }
 {
     m_painting_ui->setupUi(this);
     m_cell_scale_parameters_ui->setupUi(&m_cell_scale_parameters);
@@ -21,8 +22,8 @@ PaintingWidget::PaintingWidget(QWidget *parent) :
     setGeometry(10, 35, screen()->size().width() - 20, screen()->size().height() - 45);
 
     m_painting_ui->map_editor_graphics_view->setScene(new PaintTableScene(m_painting_ui->map_editor_graphics_view));
-    const auto width{ screen()->size().width() * 3 / 4 };
-    const auto height{ screen()->size().height() * 3 / 4 };
+    const auto width{ screen()->size().width() * image_scale_ratio };
+    const auto height{ screen()->size().height() * image_scale_ratio };
     m_painting_ui->map_editor_graphics_view->setFixedSize(width, height);
 
     // view setup
@@ -46,7 +47,13 @@ void PaintingWidget::acceptChangesButtonPressed()
 
     // FIXME: work with buffer is should be here
     auto pm{ getEdittedMapPixmap() };
-    emit createGrid(pm, scene->getWaterObjectCoords(), scene->getIslandsCoords());
+
+    if(m_is_accept_changes_flag) {
+        emit createGrid(pm, scene->getWaterObjectCoords(), scene->getIslandsCoords());
+    }
+    else {
+        m_is_accept_changes_flag = true;
+    }
 
     m_map_image = pm.toImage();
     emit imageChanged(m_map_image);
@@ -56,6 +63,7 @@ void PaintingWidget::acceptChangesButtonPressed()
 
 void PaintingWidget::discardAllChangesButtonPressed()
 {
+    emit deleteGrid(); // deleting grid in GridHandler
     close();
 }
 
@@ -97,6 +105,7 @@ void PaintingWidget::showChangesButtonPressed()
     auto pm{ drawAreasInMap() };
     emit createGrid(pm, scene->getWaterObjectCoords(), scene->getIslandsCoords());
     scene->addPixmap(pm);
+    m_is_accept_changes_flag = false;
 }
 
 // FIXME
@@ -215,16 +224,17 @@ QPixmap PaintingWidget::drawAreasInMap()
     auto&& islands{ scene->getIslandsCoords() };
     auto islands_size{ islands.size() };
 
+    auto line_width{ PaintTableScene::line_width };
     QPainter painter(&pm);
     painter.setPen(Qt::NoPen);
     painter.setBrush(Qt::cyan);
     for(int i{ }; i < wo_size; ++i) {
-        painter.drawEllipse(water_object[i].x(), water_object[i].y(), 3., 3.);
+        painter.drawEllipse(water_object[i].x(), water_object[i].y(), line_width, line_width);
     }
 
     painter.setBrush(Qt::red);
     for(int i{ }; i < islands_size; ++i){
-        painter.drawEllipse(islands[i].x(), islands[i].y(), 3., 3.);
+        painter.drawEllipse(islands[i].x(), islands[i].y(), line_width, line_width);
     }
 
     return pm;

@@ -24,6 +24,8 @@ int main(int argc, char *argv[])
                      &grid_handler, SLOT(setCellHeight(double)));
     QObject::connect(&window, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)),
                      &grid_handler, SLOT(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)));
+    QObject::connect(&window, SIGNAL(deleteGrid()),
+                     &grid_handler, SLOT(deleteGrid()));
 
 
     // connections between MainWindow and Visualization3DContainer

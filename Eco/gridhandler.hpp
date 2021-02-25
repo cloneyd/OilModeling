@@ -24,6 +24,7 @@ public:
 
 public slots:
     void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area); // connected with MainWindow; siganl - createGrid(same)
+    void deleteGrid(); // connected with MainWindow; signal - deleteGrid()
 
     void setScale(double scale) noexcept; // connected with DoubleSpinBox (from MainWindow); signal - valueChanged(same)
     void setCellWidth(double cell_width) noexcept; // connected with DoubleSpinBox (from MainWindow); signal - valueChanged(same)

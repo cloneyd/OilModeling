@@ -6,6 +6,7 @@
 #include <QTableWidget>
 #include <QVBoxLayout>
 #include <QRect>
+#include <QDoubleValidator>
 
 class TableContainer : public QWidget
 {
@@ -15,6 +16,8 @@ private:
     QPushButton m_save_changes_button;
 
     QDoubleSpinBox m_spin_box;
+
+    QDoubleValidator m_validator;
 
     QTableWidget m_table;
 
@@ -29,6 +32,9 @@ public slots:
     void fillSelectedCells() const; // connected with m_init_button; signal - buttonPressed()
 
     void saveButtonPressed(); // connected with m_save_changes_button; signal - buttonPressed();
+
+private slots:
+    void validateCellValue(int row, int col);
 
 signals:
     void saveButtonPressed(QTableWidget &table);

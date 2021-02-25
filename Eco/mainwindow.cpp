@@ -163,6 +163,11 @@ void MainWindow::updateGridParameters(double cell_width, double cell_height, dou
     ui->scale_spin_box->setValue(scale);
 }
 
+void MainWindow::deleteGridSender() const
+{
+    emit deleteGrid();
+}
+
 void MainWindow::saveHeightsFromTableSender(QTableWidget &table)
 {
     emit saveHeightsFromTable(table);
@@ -322,4 +327,7 @@ void MainWindow::connectPaintingSignalsWithMainWindow()
 
     connect(&m_painting_widget, SIGNAL(cellScaleParametersChanged(double, double, double)),
             this, SLOT(updateGridParameters(double, double, double)));
+
+    connect(&m_painting_widget, SIGNAL(deleteGrid()),
+            this, SLOT(deleteGridSender()));
 }
