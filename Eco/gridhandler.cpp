@@ -78,16 +78,21 @@ void GridHandler::setScale(double scale) noexcept
         m_realscale /= scale;
         m_scale = scale;
     }
+
+    emit xStepChanged(m_realscale * m_cell_width);
+    emit yStepChanged(m_realscale * m_cell_height);
 }
 
 void GridHandler::setCellWidth(double cell_width) noexcept
 {
     m_cell_width = cell_width;
+    emit xStepChanged(m_realscale * m_cell_width);
 }
 
 void GridHandler::setCellHeight(double cell_height) noexcept
 {
     m_cell_height = cell_height;
+    emit yStepChanged(m_realscale * m_cell_height);
 }
 
 

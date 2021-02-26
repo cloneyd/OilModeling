@@ -10,6 +10,8 @@ Computator::Computator() :
     m_heights{},
     m_xspeeds_vectors{},
     m_yspeeds_vectors{},
+    m_xstep{ -1. },
+    m_ystep{ -1. },
     m_xytan_pressure_vectors{},
     m_rot_t_vectors{},
     m_f0_vectors{},
@@ -238,4 +240,13 @@ bool Computator::findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cm
         }
     }
     return false;
+}
+
+void Computator::getXStep(const double step)
+{
+    m_xstep = step;
+}
+void Computator::getYStep(const double step)
+{
+    m_ystep = step;
 }

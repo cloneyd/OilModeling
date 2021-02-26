@@ -10,12 +10,12 @@ Visualization3DObject::Visualization3DObject(QtDataVisualization::Q3DSurface *gr
     QObject(nullptr),
     m_grid{},
     m_heights{},
-    m_graph{graph},
+    m_graph{ graph },
     m_realscale{},
     m_gr(0, 0, 1, 480) // magic numbers
 {
     // gradient setup
-    m_gr.setColorAt(1.f, Qt::darkBlue);
+    m_gr.setColorAt(1.f, Qt::white);
     m_gr.setColorAt(.9f, Qt::blue);
     m_gr.setColorAt(.8f, Qt::gray);
     m_gr.setColorAt(.7f, Qt::darkGreen);
