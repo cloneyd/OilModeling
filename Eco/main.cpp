@@ -61,6 +61,12 @@ int main(int argc, char *argv[])
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
                      &graphics3D, SLOT(setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
+    // connections between GridHangler and Computator
+    QObject::connect(&grid_handler, SIGNAL(xStepChanged(const double)),
+                     &computator, SLOT(getXStep(const double)));
+    QObject::connect(&grid_handler, SIGNAL(yStepChanged(const double)),
+                     &computator, SLOT(getYStep(const double)));
+
     // connections between GridHandler and ExcelWorker
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
                      &excel_worker, SLOT(acceptGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));

@@ -25,6 +25,9 @@ private:
     QVector<QVector<double>> m_xspeeds_vectors; // filled with 100001. by default
     QVector<QVector<double>> m_yspeeds_vectors; // filled with 100001. by default
 
+    double m_xstep; // -1. by default
+    double m_ystep; // -1. by default
+
     QVector<QVector<QPair<double, double>>> m_xytan_pressure_vectors;
     QVector<QVector<double>> m_rot_t_vectors;
     QVector<QVector<double>> m_f0_vectors;
@@ -64,6 +67,9 @@ public slots:
 
     void getXSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveXSpeedsFromTable(QTableWidget &)
     void getYSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveYSpeedsFromTable(QTableWidget &)
+
+    void getXStep(const double step);
+    void getYStep(const double step);
 
 signals:
     void xSpeedChanged(const QVector<QVector<double>> &xspeed);

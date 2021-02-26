@@ -16,16 +16,16 @@ Visualization3DObject::Visualization3DObject(QtDataVisualization::Q3DSurface *gr
 {
     // gradient setup
     m_gr.setColorAt(1.f, Qt::white);
-    m_gr.setColorAt(.9f, Qt::blue);
-    m_gr.setColorAt(.8f, Qt::gray);
-    m_gr.setColorAt(.7f, Qt::darkGreen);
-    m_gr.setColorAt(.6f, Qt::green);
-    m_gr.setColorAt(.5f, Qt::darkYellow);
-    m_gr.setColorAt(.4f, Qt::yellow);
-    m_gr.setColorAt(.3f, Qt::red);
-    m_gr.setColorAt(.2f, Qt::darkRed);
-    m_gr.setColorAt(.1f, Qt::darkMagenta);
-    m_gr.setColorAt(.0f, Qt::magenta);
+    m_gr.setColorAt(.9f, Qt::darkBlue);
+    m_gr.setColorAt(.8f, Qt::blue);
+    m_gr.setColorAt(.7f, Qt::gray);
+    m_gr.setColorAt(.6f, Qt::darkGreen);
+    m_gr.setColorAt(.5f, Qt::green);
+    m_gr.setColorAt(.4f, Qt::darkYellow);
+    m_gr.setColorAt(.3f, Qt::yellow);
+    m_gr.setColorAt(.2f, Qt::red);
+    m_gr.setColorAt(.1f, Qt::darkRed);
+    m_gr.setColorAt(.0f, Qt::darkMagenta);
 }
 
 Visualization3DObject::~Visualization3DObject() noexcept
@@ -66,7 +66,7 @@ void Visualization3DObject::setScale(double scale) noexcept
     const auto width{ 100 };
     const auto height{ 500 };
     const auto border{ 20 };
-    const auto ncolors{ 10 };
+    const auto ncolors{ 9 };
 
     QPixmap pm(width, height); // gradiend map
     pm.fill(Qt::transparent);
@@ -106,8 +106,6 @@ void Visualization3DObject::setScale(double scale) noexcept
 // Public methods
 void Visualization3DObject::updateMap()
 {
-    // Note: the dimensions of m_heights is same as m_grid dimensions (I hope)
-
     if(auto series{ m_graph->seriesList() }; !(series.empty())) m_graph->removeSeries(series.at(0)); // if m_graph have old series, it must be deleted
     if(m_grid.empty())   return; // if there is no new grid
 
@@ -121,7 +119,7 @@ void Visualization3DObject::updateMap()
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
                 if(m_grid[i][j].first) {
-                    tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), 0.f, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
+                    tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), -1.f, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
                 }
             }
             coords[i] = std::move(tmp);
@@ -139,18 +137,18 @@ void Visualization3DObject::updateMap()
         }
     }
 
-    for(int i{}; i < rows; ++i) {
-        for(int j{}; j < cols; ++j) {
-            if(coords[i][j].x() < 0) {
-                for(int k{}; k < cols; ++k) {
-                    if(coords[i][k].x() > 0) {
-                        coords[i][j] = coords[i][k]; // FIXME
-                        break;
-                    }
-                }
-            }
-        }
-    }
+//    for(int i{}; i < rows; ++i) {
+//        for(int j{}; j < cols; ++j) {
+//            if(coords[i][j].x() < 0) {
+//                for(int k{}; k < cols; ++k) {
+//                    if(coords[i][k].x() > 0) {
+//                        coords[i][j] = coords[i][k]; // FIXME
+//                        break;
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     float xmax{};
     float ymax{};

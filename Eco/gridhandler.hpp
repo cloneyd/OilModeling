@@ -33,6 +33,9 @@ public slots:
 signals:
     void gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &grid);
 
+    void xStepChanged(const double step);
+    void yStepChanged(const double step);
+
 // helper funtions
 private:
     void includeWaterObjectArea(QVector<QPointF> water_object_area, QVector<QPointF> islands_area);
