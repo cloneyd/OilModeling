@@ -225,19 +225,7 @@ void Computator::createShoreBorder(QVector<QVector<double>> &area)
         }
     }
 
-    // TODO: islands handler
-    auto table{ new QTableWidget };
-    table->setRowCount(nrows);
-    table->setColumnCount(ncols);
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            auto item(new QTableWidgetItem);
-            item->setBackground(Qt::cyan);
-            item->setText(QString(("%1")).arg(bordered_area[i][j]));
-            table->setItem(i, j, item);
-        }
-    }
-    table->show();
+    area = std::move(bordered_area);
 }
 
 template <class Cmp>
