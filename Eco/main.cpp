@@ -40,9 +40,9 @@ int main(int argc, char *argv[])
     QObject::connect(window.getWaterObjectComboBox(), SIGNAL(currentIndexChanged(int)),
                      &computator, SLOT(setWOType(int)));
     QObject::connect(&window, SIGNAL(saveXSpeedsFromTable(QTableWidget &)),
-                     &computator, SLOT(getXSpeedsFromTable(QTableWidget &)));
+                     &computator, SLOT(acceptXSpeedsFromTable(QTableWidget &)));
     QObject::connect(&window, SIGNAL(saveYSpeedsFromTable(QTableWidget &)),
-                     &computator, SLOT(getYSpeedsFromTable(QTableWidget &)));
+                     &computator, SLOT(vYSpeedsFromTable(QTableWidget &)));
 
     // connections between MainWindow and ExcelWorker
     QObject::connect(&window, SIGNAL(saveMapAsExcel(const QString &)),
@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
 
     // connections between GridHangler and Computator
     QObject::connect(&grid_handler, SIGNAL(xStepChanged(const double)),
-                     &computator, SLOT(getXStep(const double)));
+                     &computator, SLOT(acceptXStep(const double)));
     QObject::connect(&grid_handler, SIGNAL(yStepChanged(const double)),
-                     &computator, SLOT(getYStep(const double)));
+                     &computator, SLOT(acceptYStep(const double)));
 
     // connections between GridHandler and ExcelWorker
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),

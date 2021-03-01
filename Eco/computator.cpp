@@ -10,15 +10,17 @@ Computator::Computator() :
     m_heights{},
     m_xspeeds_vectors{},
     m_yspeeds_vectors{},
-    m_xstep{ -1. },
-    m_ystep{ -1. },
-    m_xytan_pressure_vectors{},
+    m_xtan_pressure_vectors{},
+    m_ytan_pressure_vectors{},
     m_rot_t_vectors{},
     m_f0_vectors{},
     m_ksi0_vectors{},
     m_ksi_vectors{},
     m_u_vectors{},
     m_v_vectors{},
+    m_u0_vectors{},
+    m_v0_vectors{},
+    m_horizon{},
     m_wo_type{ WaterObjectType::river },
     m_az_ratio{ 0.001 }
 {
@@ -32,24 +34,83 @@ Computator::~Computator()
 
 
 // setters
-void Computator::setXTanPressure(){
-    auto rows{ m_xspeeds_vectors.size() }; // m_xspeeds_vectors and m_yspeeds_vectors have same size
-    auto cols{ rows > 0 ? m_xspeeds_vectors[0].size() : 0 };
+void Computator::setXTanPressure()
+{
+    auto rows{ m_heights.size() };
+    auto cols{ rows > 0 ? m_heights[0].size() : 0 };
 
-    if(m_xytan_pressure_vectors.size() == 0) {
-        m_xytan_pressure_vectors.resize(rows);
-        for(int i{}; i < rows; ++i) {
-           m_xytan_pressure_vectors[i].resize(cols);
+    if(m_xtan_pressure_vectors.size() == 0){
+        m_xtan_pressure_vectors.fill(QVector<double>(cols, 100001.), rows);
+    }
+
+    for(int i{}; i < rows; ++i){
+        for(int j{}; j < cols; ++j){
+            if (m_heights[i][j].first)
+                m_xtan_pressure_vectors[i][j] = m_gamma * m_xspeeds_vectors[i + 1][j + 1] * std::abs(m_xspeeds_vectors[i + 1][j + 1]);
         }
     }
 
-    for(int i{ 1 }; i < rows - 1; ++i) {
-        for(int j{ 1 }; j < cols - 1; ++j) {
-            m_xytan_pressure_vectors[i][j].first = m_gamma * m_xspeeds_vectors[i][j] * std::abs(m_xspeeds_vectors[i][j]);
+   m_xtan_pressure_vectors = createShoreBorder(m_xtan_pressure_vectors);
+}
+
+void Computator::setYTanPressure()
+{
+    auto rows{ m_heights.size() };
+    auto cols{ rows > 0 ? m_heights[0].size() : 0 };
+
+    if(m_ytan_pressure_vectors.size() == 0) {
+        m_ytan_pressure_vectors.fill(QVector<double>(cols, 100001.), rows);
+    }
+
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; j < cols; ++j) {
+            if (m_heights[i][j].first)
+                m_ytan_pressure_vectors[i][j] = m_gamma * m_yspeeds_vectors[i + 1][j + 1] * std::abs(m_yspeeds_vectors[i + 1][j + 1]);
+        }
+    }
+
+    m_ytan_pressure_vectors = createShoreBorder(m_ytan_pressure_vectors);
+}
+
+void Computator::setRotT()
+{
+    auto rows{ m_heights.size() };
+    auto cols{ rows > 0 ? m_heights[0].size() : 0 };
+
+    if(m_rot_t_vectors.size() == 0) {
+        m_rot_t_vectors.fill(QVector<double>(cols, 100001.), rows);
+    }
+
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; j < cols; ++j) {
+            if (m_heights[i][j].first) {
+                m_rot_t_vectors[i][j] = (1.0 / (2.0 * m_xstep)) * (m_ytan_pressure_vectors[i + 1][j + 2] - m_ytan_pressure_vectors[i + 1][j] + m_xtan_pressure_vectors[i][j + 1] + m_xtan_pressure_vectors[i + 2][j + 1]);
+            }
+        }
+    }
+
+    m_rot_t_vectors = createShoreBorder(m_rot_t_vectors);
+}
+
+void Computator::setF0() {
+    auto rows{ m_heights.size() };
+    auto cols{ rows > 0 ? m_heights[0].size() : 0 };
+
+    if(m_f0_vectors.size() == 0) {
+        m_f0_vectors.resize(rows);
+        for(int i{}; i < rows; ++i) {
+            m_f0_vectors[i].resize(cols);
+        }
+    }
+
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; j < cols; ++j) {
+            if(m_heights[i][j].first) {
+                m_f0_vectors[i][j] = m_rot_t_vectors[i + 1][j + 1] * 200.0 * m_xstep / m_gamma;
+            }
         }
     }
 }
-
 
 // public slots
 void Computator::setupHeights(const QVector<QVector<QPair<bool, double>>> &heights)
@@ -96,7 +157,7 @@ void Computator::setWOType(int index_type) noexcept
 
 }
 
-void Computator::getXSpeedsFromTable(QTableWidget &table)
+void Computator::acceptXSpeedsFromTable(QTableWidget &table)
 {
     auto nrows{ m_heights.size() };
     auto ncols{ nrows > 0 ? m_heights[0].size() : 0 };
@@ -113,10 +174,10 @@ void Computator::getXSpeedsFromTable(QTableWidget &table)
         }
     }
     emit xSpeedChanged(m_xspeeds_vectors);
-    createShoreBorder(m_xspeeds_vectors);
+    m_xspeeds_vectors = createShoreBorder(m_xspeeds_vectors);
 }
 
-void Computator::getYSpeedsFromTable(QTableWidget &table)
+void Computator::acceptYSpeedsFromTable(QTableWidget &table)
 {
     auto nrows{ m_heights.size() };
     auto ncols{ nrows > 0 ? m_heights[0].size() : 0 };
@@ -134,12 +195,23 @@ void Computator::getYSpeedsFromTable(QTableWidget &table)
     }
 
     emit ySpeedChanged(m_yspeeds_vectors);
-    createShoreBorder(m_yspeeds_vectors);
+    m_yspeeds_vectors = createShoreBorder(m_yspeeds_vectors);
+
+    setYTanPressure();
+    setRotT();
+    setF0();
 }
 
-void Computator::createShoreBorder(QVector<QVector<double>> &area)
+void Computator::computateSpeeds()
 {
-    if(area.size() == 0) return;
+    if(m_wo_type != WaterObjectType::lake) {
+        showErrorMessageBox("Внимание! Некорректный водный объект!\nРасчеты проводятся только для озер");
+    }
+}
+
+QVector<QVector<double>> Computator::createShoreBorder(QVector<QVector<double>> &area)
+{
+    if(area.size() == 0) return QVector<QVector<double>>{};
 
     auto nrows{ area.size() + 2 };
     auto ncols{ area[0].size() + 2 };
@@ -227,7 +299,7 @@ void Computator::createShoreBorder(QVector<QVector<double>> &area)
         }
     }
 
-    area = std::move(bordered_area);
+   return bordered_area;
 }
 
 template <class Cmp>
@@ -240,13 +312,4 @@ bool Computator::findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cm
         }
     }
     return false;
-}
-
-void Computator::getXStep(const double step)
-{
-    m_xstep = step;
-}
-void Computator::getYStep(const double step)
-{
-    m_ystep = step;
 }

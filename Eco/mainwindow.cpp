@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->display_info_tool_box->setCurrentIndex(0);
     ui->main_panel_tab_widget->setCurrentIndex(0);
 
+
     //FIXME:
     ui->map_web_engine->load(QUrl("http://www.google.ru/maps/@59.9448043,30.3622528,9.83z"));
     ui->map_web_engine->setFocus();

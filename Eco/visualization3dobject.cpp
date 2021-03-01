@@ -15,7 +15,7 @@ Visualization3DObject::Visualization3DObject(QtDataVisualization::Q3DSurface *gr
     m_gr(0, 0, 1, 480) // magic numbers
 {
     // gradient setup
-    m_gr.setColorAt(1.f, Qt::white);
+    m_gr.setColorAt(1.f, QColor(0x9F6342));
     m_gr.setColorAt(.9f, Qt::darkBlue);
     m_gr.setColorAt(.8f, Qt::blue);
     m_gr.setColorAt(.7f, Qt::gray);
@@ -66,7 +66,7 @@ void Visualization3DObject::setScale(double scale) noexcept
     const auto width{ 100 };
     const auto height{ 500 };
     const auto border{ 20 };
-    const auto ncolors{ 9 };
+    const auto ncolors{ 10 };
 
     QPixmap pm(width, height); // gradiend map
     pm.fill(Qt::transparent);
@@ -118,9 +118,7 @@ void Visualization3DObject::updateMap()
         for(int i{}; i < rows; ++i) {
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
-                if(m_grid[i][j].first) {
-                    tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), -1.f, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
-                }
+                tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), -1.f, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
             }
             coords[i] = std::move(tmp);
         }
@@ -129,26 +127,20 @@ void Visualization3DObject::updateMap()
         for(int i{}; i < rows; ++i) {
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
-                if(m_grid[i][j].first) {
-                    tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), m_heights[i][j].second, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
-                }
+                tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), m_heights[i][j].second, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
             }
             coords[i] = std::move(tmp);
         }
     }
 
-//    for(int i{}; i < rows; ++i) {
-//        for(int j{}; j < cols; ++j) {
-//            if(coords[i][j].x() < 0) {
-//                for(int k{}; k < cols; ++k) {
-//                    if(coords[i][k].x() > 0) {
-//                        coords[i][j] = coords[i][k]; // FIXME
-//                        break;
-//                    }
-//                }
-//            }
-//        }
-//    }
+
+    for(int i{}; i < rows; ++i) {
+        for(int j{}; j < cols; ++j) {
+            if(coords[i][j].y() < 0.f) {
+
+            }
+        }
+    }
 
     float xmax{};
     float ymax{};

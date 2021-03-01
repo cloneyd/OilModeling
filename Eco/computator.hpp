@@ -28,13 +28,18 @@ private:
     double m_xstep; // -1. by default
     double m_ystep; // -1. by default
 
-    QVector<QVector<QPair<double, double>>> m_xytan_pressure_vectors;
+    QVector<QVector<double>> m_xtan_pressure_vectors;
+    QVector<QVector<double>> m_ytan_pressure_vectors;
     QVector<QVector<double>> m_rot_t_vectors;
     QVector<QVector<double>> m_f0_vectors;
     QVector<QVector<double>> m_ksi0_vectors;
     QVector<QVector<double>> m_ksi_vectors;
     QVector<QVector<double>> m_u_vectors;
     QVector<QVector<double>> m_v_vectors;
+    QVector<QVector<double>> m_u0_vectors;
+    QVector<QVector<double>> m_v0_vectors;
+
+    double m_horizon;
 
     WaterObjectType m_wo_type;
 
@@ -65,11 +70,14 @@ public slots:
     void setARatio(double value) noexcept; // connected with double spin box (from MainWindow); signal - valueChanged(double)
     void setWOType(int wo_index) noexcept; // connected with combo box (from MainWindow); signal - valueChanged(double)
 
-    void getXSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveXSpeedsFromTable(QTableWidget &)
-    void getYSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveYSpeedsFromTable(QTableWidget &)
+    void acceptXSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveXSpeedsFromTable(QTableWidget &)
+    void acceptYSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveYSpeedsFromTable(QTableWidget &)
 
-    void getXStep(const double step);
-    void getYStep(const double step);
+    inline void acceptXStep(const double step) noexcept {  m_xstep = step; }
+    inline void acceptYStep(const double step) noexcept { m_ystep = step; }
+    inline void acceptHorizon(const double horizon) noexcept {  m_horizon = horizon; }
+
+    void computateSpeeds();
 
 signals:
     void xSpeedChanged(const QVector<QVector<double>> &xspeed);
@@ -77,7 +85,7 @@ signals:
 
 // helpers
 private:
-    void createShoreBorder(QVector<QVector<double>> &area); // creating shore values
+    QVector<QVector<double>> createShoreBorder(QVector<QVector<double>> &area); // creating shore values
     template <class Cmp>
     bool findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cmp, const QPair<int, int> value);
 };

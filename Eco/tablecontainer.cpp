@@ -79,7 +79,17 @@ void TableContainer::saveButtonPressed()
 void TableContainer::validateCellValue(int row, int col)
 {
     int will_be_unused{};
-    if(auto&& text{ m_table.item(row, col)->text() }; !(m_validator.validate(text, will_be_unused) == QValidator::Acceptable)) {
+    auto&& text{ m_table.item(row, col)->text() };
+    const auto text_size { text.size() };
+
+    for(int i{}; i < text_size; ++i) {
+        if(text[i] == '.') {
+            text[i] = ',';
+            break;
+        }
+    }
+
+    if(!(m_validator.validate(text, will_be_unused) == QValidator::Acceptable)) {
         text.remove(text.size() - 1, 1);
         m_table.item(row, col)->setText(text);
     }
