@@ -1,0 +1,870 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PaintingWidget</class>
+ <widget class="QWidget" name="PaintingWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1171</width>
+    <height>682</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QGraphicsView" name="map_editor_graphics_view">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>156</y>
+     <width>1564</width>
+     <height>533</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QTabWidget" name="main_panel_tab_widget">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1564</width>
+     <height>150</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>150</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>150</height>
+    </size>
+   </property>
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>56</red>
+         <green>37</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Base">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Window">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>150</red>
+         <green>187</green>
+         <blue>124</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Shadow">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>150</red>
+         <green>187</green>
+         <blue>124</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Highlight">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>18</red>
+         <green>59</green>
+         <blue>54</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>56</red>
+         <green>37</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Base">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>255</red>
+         <green>255</green>
+         <blue>255</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Window">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>150</red>
+         <green>187</green>
+         <blue>124</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Shadow">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>150</red>
+         <green>187</green>
+         <blue>124</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Highlight">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>18</red>
+         <green>59</green>
+         <blue>54</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>120</red>
+         <green>120</green>
+         <blue>120</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Base">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>150</red>
+         <green>187</green>
+         <blue>124</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Window">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>150</red>
+         <green>187</green>
+         <blue>124</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Shadow">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>150</red>
+         <green>187</green>
+         <blue>124</blue>
+        </color>
+       </brush>
+      </colorrole>
+      <colorrole role="Highlight">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>0</red>
+         <green>120</green>
+         <blue>215</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+   <property name="currentIndex">
+    <number>0</number>
+   </property>
+   <property name="documentMode">
+    <bool>false</bool>
+   </property>
+   <property name="tabsClosable">
+    <bool>false</bool>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <widget class="QWidget" name="drawing_tab">
+    <attribute name="title">
+     <string>Рисовать</string>
+    </attribute>
+    <widget class="Line" name="enter_data_delimeter_line">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>10</y>
+       <width>16</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="accept_changes_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>1010</x>
+       <y>20</y>
+       <width>80</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>23</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Сохранить</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../../../Downloads/save.png</normaloff>../../../../Downloads/save.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="discard_all_changes_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>1100</x>
+       <y>20</y>
+       <width>80</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>23</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Отменить</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../../../Downloads/cansel.png</normaloff>../../../../Downloads/cansel.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>60</width>
+       <height>60</height>
+      </size>
+     </property>
+    </widget>
+    <widget class="Line" name="save_changes_delimeter_line">
+     <property name="geometry">
+      <rect>
+       <x>990</x>
+       <y>10</y>
+       <width>16</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="discard_last_changes_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>20</y>
+       <width>31</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Отменить</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../../../Downloads/arrow_1.png</normaloff>../../../../Downloads/arrow_1.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="return_last_changes_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>20</y>
+       <width>31</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Повторить действие</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../../../Downloads/arrow_2.png</normaloff>../../../../Downloads/arrow_2.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="enable_grid_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>870</x>
+       <y>20</y>
+       <width>121</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Включить сетку</string>
+     </property>
+    </widget>
+    <widget class="Line" name="brush_setting_delimeter_line">
+     <property name="geometry">
+      <rect>
+       <x>190</x>
+       <y>10</y>
+       <width>16</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="brush_label">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>10</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Кисть:</string>
+     </property>
+    </widget>
+    <widget class="QSlider" name="thickness_horizontal_slider">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>70</y>
+       <width>201</width>
+       <height>18</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="thickness_label">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>40</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Толщина:</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="brush_type_1_button">
+     <property name="geometry">
+      <rect>
+       <x>258</x>
+       <y>10</y>
+       <width>31</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>1</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../../../Downloads/arrow_2.png</normaloff>../../../../Downloads/arrow_2.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="brush_type_2_button">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>10</y>
+       <width>31</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>2</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../../../Downloads/arrow_2.png</normaloff>../../../../Downloads/arrow_2.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="brush_type_3_button">
+     <property name="geometry">
+      <rect>
+       <x>342</x>
+       <y>10</y>
+       <width>31</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>3</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../../../Downloads/arrow_2.png</normaloff>../../../../Downloads/arrow_2.png</iconset>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="brush_type_4_button">
+     <property name="geometry">
+      <rect>
+       <x>384</x>
+       <y>10</y>
+       <width>31</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>4</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>../../../../Downloads/arrow_2.png</normaloff>../../../../Downloads/arrow_2.png</iconset>
+     </property>
+    </widget>
+    <widget class="Line" name="display_delimeter_line">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>10</y>
+       <width>16</width>
+       <height>81</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="border_label">
+     <property name="geometry">
+      <rect>
+       <x>440</x>
+       <y>10</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Граница:</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="shadow_nonWO_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>870</x>
+       <y>60</y>
+       <width>121</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Затемнить</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="grid_display_label">
+     <property name="geometry">
+      <rect>
+       <x>750</x>
+       <y>20</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Отображение:</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="update_map_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>20</y>
+       <width>100</width>
+       <height>60</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>100</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Перерисовать
+область на
+изображении</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="update_grid_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>590</x>
+       <y>30</y>
+       <width>100</width>
+       <height>60</height>
+      </rect>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>100</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Перестроить
+сетку</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="show_changes_button">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>1000</x>
+       <y>90</y>
+       <width>121</width>
+       <height>25</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Предосмотр изменений</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>accept_changes_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>acceptChangesButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1056</x>
+     <y>89</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1006</x>
+     <y>-24</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>discard_all_changes_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>discardAllChangesButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1126</x>
+     <y>74</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1128</x>
+     <y>-47</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>update_map_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>updateMapButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>63</x>
+     <y>73</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>55</x>
+     <y>-80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>discard_last_changes_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>discardLastChandesButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>63</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>136</x>
+     <y>-51</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>return_last_changes_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>returnLastChangesButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>167</x>
+     <y>54</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>175</x>
+     <y>-80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>brush_type_1_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>brushType1ButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>275</x>
+     <y>48</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>280</x>
+     <y>-36</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>brush_type_2_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>brushType2ButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>51</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>324</x>
+     <y>-20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>brush_type_3_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>brushType3ButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>367</x>
+     <y>46</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>364</x>
+     <y>-68</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>brush_type_4_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>brushType4ButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>402</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>400</x>
+     <y>-52</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>update_grid_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>updateGridButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>633</x>
+     <y>87</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>632</x>
+     <y>-23</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>enable_grid_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>enableGridButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>906</x>
+     <y>54</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>912</x>
+     <y>-80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>shadow_nonWO_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>shadowNonWOButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>966</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>956</x>
+     <y>-32</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>show_changes_button</sender>
+   <signal>pressed()</signal>
+   <receiver>PaintingWidget</receiver>
+   <slot>showChangesButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1065</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1199</x>
+     <y>179</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>acceptChangesButtonPressed()</slot>
+  <slot>discardAllChangesButtonPressed()</slot>
+  <slot>updateMapButtonPressed()</slot>
+  <slot>discardLastChandesButtonPressed()</slot>
+  <slot>returnLastChangesButtonPressed()</slot>
+  <slot>brushType1ButtonPressed()</slot>
+  <slot>brushType2ButtonPressed()</slot>
+  <slot>brushType3ButtonPressed()</slot>
+  <slot>brushType4ButtonPressed()</slot>
+  <slot>updateGridButtonPressed()</slot>
+  <slot>enableGridButtonPressed()</slot>
+  <slot>shadowNonWOButtonPressed()</slot>
+  <slot>showChangesButtonPressed()</slot>
+ </slots>
+</ui>
