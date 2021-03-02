@@ -6,8 +6,33 @@ Last updated: 25/02/2020, 15:42.
 Available at: https://github.com/GTRONICK/QSS/blob/master/ManjaroMix.qss
 */
 
+QComboBox QAbstractItemView::item{padding: 0px; background-color:transparent;outline:none; border-bottom:1px solid #c6c6c6;} 
+
+QAbstractItemView
+{
+  background-color: #16a085;
+  color: #e2e5e5;
+}
+
+QComboBox QAbstractItemView::selection
+{
+	background-color: #16a085;
+	color: #e2e5e5;
+}
+
+QAbstractItemView::item:selected
+{
+    background-color: #16a085;
+	color: #e2e5e5;
+}
+
+QTableView{
+	background-color: #027f7f;
+
+}
+
 QWidget{
-	background-color:#1a2224
+	background-color:#1a2224;
 }
 
 QMainWindow {
@@ -15,7 +40,7 @@ QMainWindow {
 }
 
 QMessageBox{
-	background-color: #050a0e;
+	background-color:#1a2224;
 }
 
 QCalendar {
