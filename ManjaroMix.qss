@@ -5,6 +5,11 @@ Company: GTRONICK
 Last updated: 25/02/2020, 15:42.
 Available at: https://github.com/GTRONICK/QSS/blob/master/ManjaroMix.qss
 */
+
+QWidget{
+	background-color: #151a1e;
+}
+
 QMainWindow {
 	background-color:#151a1e;
 }
@@ -386,16 +391,8 @@ QToolBox::tab::content{
 	background-color: #151a1e;
 }
 
-QToolBox::pane{
 
-		border-color: #050a0e;
-		background-color: #1e282c;
-		border-style: solid;
-		border-width: 1px;
-    	border-bottom-left-radius: 4px;
-		border-bottom-right-radius: 4px;
 
-}
 
 QScrollArea {
 	color: #FFFFFF;
