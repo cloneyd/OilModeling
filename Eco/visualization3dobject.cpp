@@ -137,7 +137,7 @@ void Visualization3DObject::updateMap()
     for(int i{}; i < rows; ++i) {
         for(int j{}; j < cols; ++j) {
             if(coords[i][j].y() < 0.f) {
-
+                coords[i][j].setY(0.); // island
             }
         }
     }

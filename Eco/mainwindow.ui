@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1528</width>
-    <height>940</height>
+    <width>1533</width>
+    <height>950</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -451,9 +451,21 @@
             <height>50</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загрузите собственное изображение карты из каталогов компьютера&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>Загрузить
- изображение</string>
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/imgs/images/fws.png</normaloff>:/imgs/images/fws.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
           </property>
           <property name="flat">
            <bool>false</bool>
@@ -520,8 +532,21 @@
             <height>50</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загрузите карту для рисования из выбраной области на сайте в редактор карты&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>Загрузить с сайта</string>
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/imgs/images/load_from_site_icon.png</normaloff>:/imgs/images/load_from_site_icon.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
           </property>
           <property name="flat">
            <bool>false</bool>
@@ -563,8 +588,21 @@
             <height>50</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отредактируйте выбранное изображение&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>Редактировать</string>
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/imgs/images/pncl.png</normaloff>:/imgs/images/pncl.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
           </property>
           <property name="flat">
            <bool>false</bool>
@@ -578,7 +616,7 @@
          <widget class="Line" name="save_wind_delimeter_line">
           <property name="geometry">
            <rect>
-            <x>100</x>
+            <x>120</x>
             <y>20</y>
             <width>16</width>
             <height>71</height>
@@ -591,7 +629,7 @@
          <widget class="Line" name="sav_map_delimeter_line">
           <property name="geometry">
            <rect>
-            <x>300</x>
+            <x>321</x>
             <y>20</y>
             <width>16</width>
             <height>71</height>
@@ -607,7 +645,7 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>320</x>
+            <x>341</x>
             <y>60</y>
             <width>75</width>
             <height>24</height>
@@ -637,7 +675,7 @@
          <widget class="QLabel" name="map_saver_format_label">
           <property name="geometry">
            <rect>
-            <x>320</x>
+            <x>341</x>
             <y>30</y>
             <width>171</width>
             <height>16</height>
@@ -653,7 +691,7 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>410</x>
+            <x>431</x>
             <y>60</y>
             <width>80</width>
             <height>25</height>
@@ -666,7 +704,7 @@
          <widget class="Line" name="save_in_zip_delimeter_line">
           <property name="geometry">
            <rect>
-            <x>500</x>
+            <x>521</x>
             <y>20</y>
             <width>16</width>
             <height>71</height>
@@ -682,7 +720,7 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>0</x>
+            <x>20</x>
             <y>30</y>
             <width>100</width>
             <height>60</height>
@@ -706,10 +744,16 @@
             <height>50</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <pointsize>28</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Открыть 3D визуализацию текущего обЪекта&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="text">
-           <string>Открыть 3D
- визуализацию
- текущего объекта</string>
+           <string>3D</string>
           </property>
          </widget>
          <widget class="QPushButton" name="save_in_zip_button">
@@ -718,7 +762,7 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>529</x>
+            <x>550</x>
             <y>20</y>
             <width>281</width>
             <height>71</height>
@@ -726,15 +770,15 @@
           </property>
           <property name="font">
            <font>
-            <pointsize>23</pointsize>
+            <pointsize>21</pointsize>
            </font>
           </property>
           <property name="text">
            <string>Создать ZIP</string>
           </property>
           <property name="icon">
-           <iconset>
-            <normaloff>../../../../Downloads/zip.png</normaloff>../../../../Downloads/zip.png</iconset>
+           <iconset resource="res.qrc">
+            <normaloff>:/imgs/images/zip.png</normaloff>:/imgs/images/zip.png</iconset>
           </property>
           <property name="iconSize">
            <size>
@@ -749,7 +793,7 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>120</x>
+            <x>141</x>
             <y>60</y>
             <width>75</width>
             <height>24</height>
@@ -777,7 +821,7 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>210</x>
+            <x>231</x>
             <y>60</y>
             <width>80</width>
             <height>25</height>
@@ -790,14 +834,14 @@
          <widget class="QLabel" name="wind_saver_format_label">
           <property name="geometry">
            <rect>
-            <x>120</x>
+            <x>141</x>
             <y>30</y>
             <width>171</width>
             <height>16</height>
            </rect>
           </property>
           <property name="text">
-           <string>Сохранить ветер в формате:</string>
+           <string>Сохранить ветра  в формате:</string>
           </property>
          </widget>
         </widget>
@@ -805,7 +849,7 @@
          <attribute name="title">
           <string>Ветер</string>
          </attribute>
-         <widget class="QPushButton" name="computate_pressures_button">
+         <widget class="QPushButton" name="computate_speeds_button">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -844,7 +888,7 @@
           <property name="text">
            <string>Рассчитать 
 значения
- давлений</string>
+ скоростей</string>
           </property>
           <property name="flat">
            <bool>false</bool>
@@ -899,7 +943,7 @@
           <property name="geometry">
            <rect>
             <x>20</x>
-            <y>40</y>
+            <y>50</y>
             <width>220</width>
             <height>41</height>
            </rect>
@@ -929,6 +973,54 @@
             </widget>
            </item>
           </layout>
+         </widget>
+         <widget class="QWidget" name="horizontalLayoutWidget_2">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>10</y>
+            <width>221</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QLabel" name="horizon_label">
+             <property name="text">
+              <string>Горизонт</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="horizon_spin_box">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>10000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.500000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="Line" name="computator_parameters_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>250</x>
+            <y>10</y>
+            <width>16</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
          </widget>
         </widget>
         <widget class="QWidget" name="relief_tab">
@@ -1014,7 +1106,7 @@
            <bool>true</bool>
           </property>
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -1027,78 +1119,96 @@
           </property>
           <property name="maximumSize">
            <size>
-            <width>1280</width>
-            <height>720</height>
+            <width>16777215</width>
+            <height>16777215</height>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="map_image_widget">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1280</width>
-             <height>612</height>
+             <width>1285</width>
+             <height>622</height>
             </rect>
            </property>
            <attribute name="label">
-            <string>Карта</string>
+            <string>Здесь будет изображение загруженной карты</string>
            </attribute>
-           <widget class="QWebEngineView" name="map_web_engine" native="true">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>971</width>
-              <height>451</height>
-             </rect>
-            </property>
-           </widget>
-           <widget class="QLabel" name="data_service_name_label">
-            <property name="geometry">
-             <rect>
-              <x>440</x>
-              <y>450</y>
-              <width>381</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="whatsThis">
-             <UInt>0</UInt>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string>Данные предоставленны сервисом:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-           <widget class="QLabel" name="current_service_name_label">
-            <property name="geometry">
-             <rect>
-              <x>830</x>
-              <y>450</y>
-              <width>131</width>
-              <height>21</height>
-             </rect>
-            </property>
-            <property name="text">
-             <string>Текущий сервис</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QWebEngineView" name="map_web_engine" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>1200</width>
+                <height>523</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QLabel" name="data_service_name_label">
+                <property name="minimumSize">
+                 <size>
+                  <width>380</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>380</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="whatsThis">
+                 <UInt>0</UInt>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="text">
+                 <string>Данные предоставленны сервисом:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="current_service_name_label">
+                <property name="minimumSize">
+                 <size>
+                  <width>130</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>130</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Текущий сервис</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="map_image_page">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1280</width>
-             <height>612</height>
+             <width>1285</width>
+             <height>622</height>
             </rect>
            </property>
            <attribute name="label">
@@ -1122,34 +1232,30 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1280</width>
-             <height>612</height>
+             <width>1285</width>
+             <height>622</height>
             </rect>
            </property>
            <attribute name="label">
             <string>Подводный рельеф</string>
            </attribute>
-           <widget class="QTabWidget" name="relief_tab_page">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>971</width>
-              <height>491</height>
-             </rect>
-            </property>
-            <property name="currentIndex">
-             <number>-1</number>
-            </property>
-           </widget>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QTabWidget" name="relief_tab_page">
+              <property name="currentIndex">
+               <number>-1</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
           <widget class="QWidget" name="winds_direction_page">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1280</width>
-             <height>612</height>
+             <width>1285</width>
+             <height>622</height>
             </rect>
            </property>
            <attribute name="label">
@@ -1169,7 +1275,10 @@
                 <item row="0" column="0">
                  <widget class="QLabel" name="map_with_winds_label">
                   <property name="text">
-                   <string>TextLabel</string>
+                   <string>Здесь будет изображение карты ветров</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
                   </property>
                  </widget>
                 </item>
@@ -1216,7 +1325,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1528</width>
+     <width>1533</width>
      <height>20</height>
     </rect>
    </property>
@@ -1231,8 +1340,26 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections>
+  <connection>
+   <sender>save_map_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveMapButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>457</x>
+     <y>-27</y>
+    </hint>
+   </hints>
+  </connection>
   <connection>
    <sender>load_from_pc_button</sender>
    <signal>pressed()</signal>
@@ -1266,6 +1393,22 @@
    </hints>
   </connection>
   <connection>
+   <sender>enter_speed_vectors_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>enterSpeedVectorButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>463</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>463</x>
+     <y>-13</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>load_from_site_button</sender>
    <signal>pressed()</signal>
    <receiver>MainWindow</receiver>
@@ -1278,6 +1421,38 @@
     <hint type="destinationlabel">
      <x>1222</x>
      <y>91</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_wind_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveSpeedsButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>266</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>279</x>
+     <y>-33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>load_heights_from_file_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadHeightsFromFileButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>288</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>290</x>
+     <y>-12</y>
     </hint>
    </hints>
   </connection>
@@ -1314,54 +1489,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>enter_speed_vectors_button</sender>
-   <signal>pressed()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>enterSpeedVectorButtonPressed()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>463</x>
-     <y>107</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>463</x>
-     <y>-13</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>save_map_button</sender>
-   <signal>pressed()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>saveMapButtonPressed()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>464</x>
-     <y>126</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>457</x>
-     <y>-27</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>load_heights_from_file_button</sender>
-   <signal>pressed()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>loadHeightsFromFileButtonPressed()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>288</x>
-     <y>83</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>290</x>
-     <y>-12</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>save_heights_button</sender>
    <signal>pressed()</signal>
    <receiver>MainWindow</receiver>
@@ -1378,18 +1505,18 @@
    </hints>
   </connection>
   <connection>
-   <sender>save_wind_button</sender>
+   <sender>computate_speeds_button</sender>
    <signal>pressed()</signal>
    <receiver>MainWindow</receiver>
-   <slot>saveSpeedsButtonPressed()</slot>
+   <slot>computateSpeedsButtonPressed()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>266</x>
-     <y>126</y>
+     <x>327</x>
+     <y>105</y>
     </hint>
     <hint type="destinationlabel">
-     <x>279</x>
-     <y>-33</y>
+     <x>340</x>
+     <y>-4</y>
     </hint>
    </hints>
   </connection>
@@ -1406,5 +1533,9 @@
   <slot>loadHeightsFromFileButtonPressed()</slot>
   <slot>saveHeightsTableButtonPressed()</slot>
   <slot>saveSpeedsButtonPressed()</slot>
+  <slot>computateSpeedsButtonPressed()</slot>
+  <slot>savePressuresButtonPressed()</slot>
+  <slot>saveRotButtonPressed()</slot>
+  <slot>saveF0ButtonPressed()</slot>
  </slots>
 </ui>

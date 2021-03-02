@@ -28,7 +28,8 @@ private:
 
     QWidget m_cell_scale_parameters;
 
-    bool m_is_accept_changes_flag; // if show changes button pressed flag become false, if accept changes button pressed flag become true; true by default
+    bool m_is_accept_changes_flag; // checks if changes need to be accepted; if show changes button pressed flag become false, if accept changes button pressed flag become true; true by default
+    bool m_is_grid_drawn; // if grid was drawn becomes true; false by default
 
 public:
     explicit PaintingWidget(QWidget *parent = nullptr);
@@ -59,7 +60,7 @@ signals:
 
     void cellScaleParametersChanged(double width, double height, double scale) const;
 
-    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area);
+    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color);
     void deleteGrid() const;
 
 // setters
@@ -71,6 +72,10 @@ public:
     QPixmap getEdittedMapPixmap() const;
 
     [[nodiscard]] inline const QImage& getMapImage() const noexcept { return m_map_image; }
+
+// overridden functions
+protected:
+    void closeEvent(QCloseEvent *event) override;
 
 // redefined functions
 public:

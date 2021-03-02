@@ -48,7 +48,7 @@ public slots:
     void editImageButtonPressed(); // connected with ui->edit_image_button
     void setImageInMapLabel(const QImage &image); // connected with PaintingWidget; signal - imageChanged(same)
 
-    void createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area) const; // connected with PaintingWidget; signal - createGrid(same)
+    void createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color) const; // connected with PaintingWidget; signal - createGrid(same)
     void updateGridParameters(double cell_width, double cell_height, double scale) const; // connected with PaintingWidget; signal cellScaleParametersChanged(same)
     void deleteGridSender() const;
 
@@ -64,12 +64,14 @@ public slots:
     void enterSpeedVectorButtonPressed(); // connected with ui->enter_speed_vectors_button
     void saveSpeedsButtonPressed(); // connected with ui->save_speeds_button
 
-    void saveMapButtonPressed();
+    void saveMapButtonPressed(); // connected with ui->save_map_button; signal - pressed()
+
+    void computateSpeedsButtonPressed(); // connected with ui->computate_speeds_button
 
 signals:
     void setupTable(QTableWidget &table);
 
-    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area) const;
+    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color) const;
 
     void saveHeightsFromTable(QTableWidget &table);
     void saveXSpeedsFromTable(QTableWidget &table);
@@ -82,6 +84,12 @@ signals:
 
     void deleteGrid() const;
 
+    void computateSpeeds();
+
+    void savePressuresAsExcel(const QString &filepath); // FIXME: must be deleted
+    void saveRotAsExcel(const QString &filepath); // FIXME: must be deleted
+    void saveF0AsExcel(const QString &filepath); // FIXME: must be deleted
+
 // Getters
 public:
     [[nodiscard]] inline const QDoubleSpinBox* getScaleDoubleSpinBox() const noexcept { return ui->scale_spin_box; }
@@ -90,12 +98,15 @@ public:
     [[nodiscard]] inline const QDoubleSpinBox* getARatioDoubleSpinBox() const noexcept { return ui->ratio_double_spin_box; }
     [[nodiscard]] inline const QComboBox* getWaterObjectComboBox() const noexcept { return ui->water_object_type_combo_box; }
     [[nodiscard]] inline const Visualization3DContainer& getVisualizationContainer() const noexcept { return m_visualization_container; }
+    [[nodiscard]] inline const QDoubleSpinBox* getHorizonDoubleSpinBox() const noexcept { return ui->horizon_spin_box; }
 
 // Helpers
 private:
     QPixmap getPixmapFromScene() const;
     QPixmap getPixmapFromWebEngine() const;
+    QString getFormatsFromComboBox(const QComboBox *box) const;
 
     void connectPaintingSignalsWithMainWindow();
+
 };
 #endif // MAINWINDOW_H

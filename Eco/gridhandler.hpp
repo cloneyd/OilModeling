@@ -23,7 +23,7 @@ public:
     GridHandler();
 
 public slots:
-    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area); // connected with MainWindow; siganl - createGrid(same)
+    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color = Qt::cyan); // connected with MainWindow; siganl - createGrid(same)
     void deleteGrid(); // connected with MainWindow; signal - deleteGrid()
 
     void setScale(double scale) noexcept; // connected with DoubleSpinBox (from MainWindow); signal - valueChanged(same)
@@ -40,7 +40,7 @@ signals:
 private:
     void includeWaterObjectArea(QVector<QPointF> water_object_area, QVector<QPointF> islands_area);
 
-    void drawGridInPixmap(QPixmap &pm);
+    void drawGridInPixmap(QPixmap &pm, const QColor &color) const;
 };
 
 #endif // GRIDHANDLER_HPP

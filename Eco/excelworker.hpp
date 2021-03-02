@@ -6,6 +6,7 @@
 #include <QVector>
 #include <QPointF>
 
+#include "xlsxconditionalformatting.h"
 #include "xlsxdocument.h"
 //#define XLSX_NO_LIB // ??
 
@@ -34,6 +35,8 @@ public slots:
     void updateXSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - xSpeedChanged(same)
     void updateYSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - ySpeedChanged(same)
     void saveSpeedsAsExcel(const QString &filepath); // connected with MainWindow; signal - saveSpeedsAsExcel(same)
+    void saveValuesWithHighlight(const QString &filepath, const QVector<QVector<double>> &value, double discard_flag) const;
+    void saveValuesWithHighlight(const QString &filepath, const QVector<QVector<double>> &first, const QVector<QVector<double>> &second, double discard_flag) const;
 
 signals:
     void heightsLoaded(QVector<QVector<QPair<bool, double>>> &heights); // WARNING: heights will be changed

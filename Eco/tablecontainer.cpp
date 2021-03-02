@@ -2,10 +2,7 @@
 
 #include <QScreen>
 #include <QHeaderView>
-
-// third party functions
-extern void showErrorMessageBox(const QString &msg);
-
+#include <QMessageBox>
 
 // Ctor and dtor
 TableContainer::TableContainer(const QString &name, QWidget *parent) :
@@ -71,6 +68,7 @@ void TableContainer::fillSelectedCells() const
 
 void TableContainer::saveButtonPressed()
 {
+    QMessageBox::about(nullptr, "Инициализация", "Значения сохранены");
     emit saveButtonPressed(m_table);
 }
 

@@ -15,6 +15,11 @@ int main(int argc, char *argv[])
     ExcelWorker excel_worker;
     Computator computator;
 
+    QFile styleF(":/qss/qss/ManjaroMix.qss");
+    styleF.open(QFile::ReadOnly);
+    QString styleSheet = QLatin1String(styleF.readAll());
+    app.setStyleSheet(styleSheet);
+
     // connections between MainWindow and GridHandler
     QObject::connect(window.getScaleDoubleSpinBox(), SIGNAL(valueChanged(double)),
                      &grid_handler, SLOT(setScale(double)));
@@ -22,8 +27,8 @@ int main(int argc, char *argv[])
                      &grid_handler, SLOT(setCellWidth(double)));
     QObject::connect(window.getCellHeightDoubleSpinBox(), SIGNAL(valueChanged(double)),
                      &grid_handler, SLOT(setCellHeight(double)));
-    QObject::connect(&window, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)),
-                     &grid_handler, SLOT(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)));
+    QObject::connect(&window, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const QColor &)),
+                     &grid_handler, SLOT(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const QColor &)));
     QObject::connect(&window, SIGNAL(deleteGrid()),
                      &grid_handler, SLOT(deleteGrid()));
 
@@ -42,7 +47,11 @@ int main(int argc, char *argv[])
     QObject::connect(&window, SIGNAL(saveXSpeedsFromTable(QTableWidget &)),
                      &computator, SLOT(acceptXSpeedsFromTable(QTableWidget &)));
     QObject::connect(&window, SIGNAL(saveYSpeedsFromTable(QTableWidget &)),
-                     &computator, SLOT(vYSpeedsFromTable(QTableWidget &)));
+                     &computator, SLOT(acceptYSpeedsFromTable(QTableWidget &)));
+    QObject::connect(&window, SIGNAL(computateSpeeds()),
+                     &computator, SLOT(computateSpeeds()));
+    QObject::connect(window.getHorizonDoubleSpinBox(), SIGNAL(valueChanged(double)),
+                     &computator, SLOT(acceptHorizon(const double)));
 
     // connections between MainWindow and ExcelWorker
     QObject::connect(&window, SIGNAL(saveMapAsExcel(const QString &)),

@@ -19,7 +19,7 @@ GridHandler::GridHandler() :
 
 
 // public slots
-void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area)
+void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color)
 {
     m_grid.clear();
 
@@ -56,7 +56,7 @@ void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_a
     }
 
     includeWaterObjectArea(water_object_area, islands_area);
-    drawGridInPixmap(pm);
+    drawGridInPixmap(pm, color);
 
     emit gridChanged(m_grid);
 }
@@ -238,12 +238,12 @@ void GridHandler::includeWaterObjectArea(QVector<QPointF> water_object_area, QVe
     }
 }
 
-void GridHandler::drawGridInPixmap(QPixmap &pm)
+void GridHandler::drawGridInPixmap(QPixmap &pm, const QColor &color) const
 {
     QPainter painter;
 
     painter.begin(&pm);
-    painter.setPen(Qt::cyan);
+    painter.setPen(color);
     auto grid_size{m_grid.size()};
     auto cell_width{ m_realscale * m_cell_width };
     auto cell_height{ m_realscale * m_cell_height };

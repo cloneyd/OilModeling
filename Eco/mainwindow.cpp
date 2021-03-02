@@ -15,11 +15,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    setWindowTitle("Eco");
+
     connectPaintingSignalsWithMainWindow();
 
     ui->display_info_tool_box->setCurrentIndex(0);
     ui->main_panel_tab_widget->setCurrentIndex(0);
-
 
     //FIXME:
     ui->map_web_engine->load(QUrl("http://www.google.ru/maps/@59.9448043,30.3622528,9.83z"));
@@ -104,6 +105,7 @@ void MainWindow::loadFronSiteButtonPressed()
     emit ui->cell_width_spin_box->valueChanged(ui->cell_width_spin_box->value()); // updating values in other classes
     emit ui->cell_height_spin_box->valueChanged(ui->cell_height_spin_box->value()); // updating values in other classes
 
+    ui->display_info_tool_box->setCurrentIndex(0);
     m_painting_widget.setScenePixmap(getPixmapFromWebEngine());
     ui->edit_image_button->setEnabled(true);
 }
@@ -145,9 +147,9 @@ void MainWindow::setImageInMapLabel(const QImage &image)
 }
 
 
-void MainWindow::createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area) const
+void MainWindow::createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color) const
 {
-    emit createGrid(pm, water_object_area, islands_area);
+    emit createGrid(pm, water_object_area, islands_area, color);
 
     ui->open_map_visualization_button->setEnabled(true);
 
@@ -183,6 +185,7 @@ void MainWindow::saveXSpeedsFromTableSender(QTableWidget &table)
     emit saveXSpeedsFromTable(table);
     ui->wind_save_format_combo_box->setEnabled(true);
     ui->save_wind_button->setEnabled(true);
+    ui->computate_speeds_button->setEnabled(true);
 }
 
 void MainWindow::saveYSpeedsFromTableSender(QTableWidget &table)
@@ -190,6 +193,7 @@ void MainWindow::saveYSpeedsFromTableSender(QTableWidget &table)
     emit saveYSpeedsFromTable(table);
     ui->wind_save_format_combo_box->setEnabled(true);
     ui->save_wind_button->setEnabled(true);
+    ui->computate_speeds_button->setEnabled(true);
 }
 
 void MainWindow::openMapVisualizationButtonPressed()
@@ -238,17 +242,7 @@ void MainWindow::enterSpeedVectorButtonPressed()
 
 void MainWindow::saveSpeedsButtonPressed()
 {
-    QString formats("Formats (");
-
-    auto nfile_formats{ ui->wind_save_format_combo_box->count() };
-    for(int i{}; i < nfile_formats; ++i) {
-        formats += '*' + ui->wind_save_format_combo_box->itemText(i) + ' ';
-    }
-    formats += ");;";
-
-    for(int i{}; i < nfile_formats; ++i) {
-        formats += '*' + ui->wind_save_format_combo_box->itemText(i) + ";;";
-    }
+    auto formats{ getFormatsFromComboBox(ui->wind_save_format_combo_box) };
 
     auto file_path { QFileDialog::getSaveFileName(this, tr("Save File"),
                                                   "/home/wind_image" + ui->wind_save_format_combo_box->currentText(),
@@ -273,17 +267,7 @@ void MainWindow::saveSpeedsButtonPressed()
 
 void MainWindow::saveMapButtonPressed()
 {
-    QString formats("Formats (");
-
-    auto nfile_formats{ ui->map_save_format_combo_box->count() };
-    for(int i{}; i < nfile_formats; ++i) {
-        formats += '*' + ui->map_save_format_combo_box->itemText(i) + ' ';
-    }
-    formats += ");;";
-
-    for(int i{}; i < nfile_formats; ++i) {
-        formats += '*' + ui->map_save_format_combo_box->itemText(i) + ";;";
-    }
+    auto formats{ getFormatsFromComboBox(ui->map_save_format_combo_box) };
 
     auto file_path { QFileDialog::getSaveFileName(this, tr("Save File"),
                                                   "/home/map_image" + ui->map_save_format_combo_box->currentText(),
@@ -306,6 +290,12 @@ void MainWindow::saveMapButtonPressed()
     }
 }
 
+void MainWindow::computateSpeedsButtonPressed()
+{
+    // TODO
+    emit computateSpeeds();
+}
+
 
 // private functions
 QPixmap MainWindow::getPixmapFromWebEngine() const
@@ -318,13 +308,30 @@ QPixmap MainWindow::getPixmapFromWebEngine() const
     return pixmap;
 }
 
+QString MainWindow::getFormatsFromComboBox(const QComboBox *box) const
+{
+    QString formats("Formats (");
+
+    auto nfile_formats{ box->count() };
+    for(int i{}; i < nfile_formats; ++i) {
+        formats += '*' + box->itemText(i) + ' ';
+    }
+    formats += ");;";
+
+    for(int i{}; i < nfile_formats; ++i) {
+        formats += '*' + box->itemText(i) + ";;";
+    }
+
+    return formats;
+}
+
 void MainWindow::connectPaintingSignalsWithMainWindow()
 {
     connect(&m_painting_widget, SIGNAL(imageChanged(const QImage &)),
             this, SLOT(setImageInMapLabel(const QImage &)));
 
-    connect(&m_painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)),
-            this, SLOT(createGridSender(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &)));
+    connect(&m_painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const QColor &)),
+            this, SLOT(createGridSender(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const QColor &)));
 
     connect(&m_painting_widget, SIGNAL(cellScaleParametersChanged(double, double, double)),
             this, SLOT(updateGridParameters(double, double, double)));

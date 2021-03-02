@@ -1,7 +1,9 @@
 #include "computator.hpp"
 
+#include <QMessageBox>
+
 // third party functions
-void showErrorMessageBox(const QString &msg);
+void showErrorMessageBox(const QString &msg, const QString &title = "");
 
 
 // ctors and dtor
@@ -10,17 +12,13 @@ Computator::Computator() :
     m_heights{},
     m_xspeeds_vectors{},
     m_yspeeds_vectors{},
-    m_xtan_pressure_vectors{},
-    m_ytan_pressure_vectors{},
-    m_rot_t_vectors{},
-    m_f0_vectors{},
-    m_ksi0_vectors{},
-    m_ksi_vectors{},
+    m_is_xspeeds_entered_flag{},
+    m_is_yspeeds_entered_flag{},
     m_u_vectors{},
     m_v_vectors{},
     m_u0_vectors{},
     m_v0_vectors{},
-    m_horizon{},
+    m_horizon{ 1. },
     m_wo_type{ WaterObjectType::river },
     m_az_ratio{ 0.001 }
 {
@@ -32,85 +30,6 @@ Computator::~Computator()
 
 }
 
-
-// setters
-void Computator::setXTanPressure()
-{
-    auto rows{ m_heights.size() };
-    auto cols{ rows > 0 ? m_heights[0].size() : 0 };
-
-    if(m_xtan_pressure_vectors.size() == 0){
-        m_xtan_pressure_vectors.fill(QVector<double>(cols, 100001.), rows);
-    }
-
-    for(int i{}; i < rows; ++i){
-        for(int j{}; j < cols; ++j){
-            if (m_heights[i][j].first)
-                m_xtan_pressure_vectors[i][j] = m_gamma * m_xspeeds_vectors[i + 1][j + 1] * std::abs(m_xspeeds_vectors[i + 1][j + 1]);
-        }
-    }
-
-   m_xtan_pressure_vectors = createShoreBorder(m_xtan_pressure_vectors);
-}
-
-void Computator::setYTanPressure()
-{
-    auto rows{ m_heights.size() };
-    auto cols{ rows > 0 ? m_heights[0].size() : 0 };
-
-    if(m_ytan_pressure_vectors.size() == 0) {
-        m_ytan_pressure_vectors.fill(QVector<double>(cols, 100001.), rows);
-    }
-
-    for(int i{}; i < rows; ++i) {
-        for(int j{}; j < cols; ++j) {
-            if (m_heights[i][j].first)
-                m_ytan_pressure_vectors[i][j] = m_gamma * m_yspeeds_vectors[i + 1][j + 1] * std::abs(m_yspeeds_vectors[i + 1][j + 1]);
-        }
-    }
-
-    m_ytan_pressure_vectors = createShoreBorder(m_ytan_pressure_vectors);
-}
-
-void Computator::setRotT()
-{
-    auto rows{ m_heights.size() };
-    auto cols{ rows > 0 ? m_heights[0].size() : 0 };
-
-    if(m_rot_t_vectors.size() == 0) {
-        m_rot_t_vectors.fill(QVector<double>(cols, 100001.), rows);
-    }
-
-    for(int i{}; i < rows; ++i) {
-        for(int j{}; j < cols; ++j) {
-            if (m_heights[i][j].first) {
-                m_rot_t_vectors[i][j] = (1.0 / (2.0 * m_xstep)) * (m_ytan_pressure_vectors[i + 1][j + 2] - m_ytan_pressure_vectors[i + 1][j] + m_xtan_pressure_vectors[i][j + 1] + m_xtan_pressure_vectors[i + 2][j + 1]);
-            }
-        }
-    }
-
-    m_rot_t_vectors = createShoreBorder(m_rot_t_vectors);
-}
-
-void Computator::setF0() {
-    auto rows{ m_heights.size() };
-    auto cols{ rows > 0 ? m_heights[0].size() : 0 };
-
-    if(m_f0_vectors.size() == 0) {
-        m_f0_vectors.resize(rows);
-        for(int i{}; i < rows; ++i) {
-            m_f0_vectors[i].resize(cols);
-        }
-    }
-
-    for(int i{}; i < rows; ++i) {
-        for(int j{}; j < cols; ++j) {
-            if(m_heights[i][j].first) {
-                m_f0_vectors[i][j] = m_rot_t_vectors[i + 1][j + 1] * 200.0 * m_xstep / m_gamma;
-            }
-        }
-    }
-}
 
 // public slots
 void Computator::setupHeights(const QVector<QVector<QPair<bool, double>>> &heights)
@@ -133,11 +52,9 @@ void Computator::setupHeights(const QVector<QVector<QPair<bool, double>>> &heigh
             m_heights[i][j] = heights[i][j];
         }
     }
-}
 
-void Computator::setARatio(double ratio) noexcept
-{
-    m_az_ratio = ratio;
+    m_is_xspeeds_entered_flag = false;
+    m_is_yspeeds_entered_flag = false;
 }
 
 void Computator::setWOType(int index_type) noexcept
@@ -152,7 +69,7 @@ void Computator::setWOType(int index_type) noexcept
         break;
 
     default:
-        showErrorMessageBox("Тип водного объекта не опознан");
+        showErrorMessageBox("Тип водного объекта не опознан", "Ошибка");
     }
 
 }
@@ -163,18 +80,18 @@ void Computator::acceptXSpeedsFromTable(QTableWidget &table)
     auto ncols{ nrows > 0 ? m_heights[0].size() : 0 };
 
     m_xspeeds_vectors.clear();
-    const auto fill_value{ 100001. };
     m_xspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
 
     for(int i{}; i < nrows; ++i) {
         for(int j{}; j < ncols; ++j) {
             if(m_heights[i][j].first) {
-                m_xspeeds_vectors[i][j] = table.item(i, j)->text().toDouble();
+                m_xspeeds_vectors[i][j] = table.item(i, j)->text().toDouble();               
             }
         }
     }
+
+    m_is_xspeeds_entered_flag = true;
     emit xSpeedChanged(m_xspeeds_vectors);
-    m_xspeeds_vectors = createShoreBorder(m_xspeeds_vectors);
 }
 
 void Computator::acceptYSpeedsFromTable(QTableWidget &table)
@@ -183,33 +100,133 @@ void Computator::acceptYSpeedsFromTable(QTableWidget &table)
     auto ncols{ nrows > 0 ? m_heights[0].size() : 0 };
 
     m_yspeeds_vectors.clear();
-    const auto fill_value{ 100001. };
     m_yspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
 
     for(int i{}; i < nrows; ++i) {
         for(int j{}; j < ncols; ++j) {
             if(m_heights[i][j].first) {
-                m_yspeeds_vectors[i][j] = table.item(i, j)->text().toDouble();
+                m_yspeeds_vectors[i][j] = table.item(i, j)->text().toDouble();                
             }
         }
     }
 
+    m_is_yspeeds_entered_flag = true;
     emit ySpeedChanged(m_yspeeds_vectors);
-    m_yspeeds_vectors = createShoreBorder(m_yspeeds_vectors);
-
-    setYTanPressure();
-    setRotT();
-    setF0();
 }
 
-void Computator::computateSpeeds()
+void Computator::computateSpeeds() const
 {
     if(m_wo_type != WaterObjectType::lake) {
-        showErrorMessageBox("Внимание! Некорректный водный объект!\nРасчеты проводятся только для озер");
+        showErrorMessageBox("Внимание! Некорректный водный объект!\nРасчеты проводятся только для озер", "Ошибка водный объект");
+        return;
     }
+
+    if(!(m_is_xspeeds_entered_flag && m_is_yspeeds_entered_flag)) {
+        showErrorMessageBox("Внимание! Значение проекций\nскоростей должны быть проинициализированы!", "Ошибка значений");
+        return;
+    }
+
+    auto xtan_pressure_vectors{ computateXTanPressure() };
+    auto ytan_pressure_vectors{ computateYTanPressure() };
+
+    auto rot_t_vectors{ computateRotT(xtan_pressure_vectors, ytan_pressure_vectors) };
+    auto f0_vectors{ computateF0(rot_t_vectors) };
+
+    QMessageBox::about(nullptr, "Действие", "Значения рассчитаны");
 }
 
-QVector<QVector<double>> Computator::createShoreBorder(QVector<QVector<double>> &area)
+
+// private functions
+QVector<QVector<double>> Computator::computateXTanPressure() const
+{
+    auto nrows{ m_heights.size() };
+    if(nrows == 0) return QVector<QVector<double>>{};
+    auto ncols{ m_heights[0].size() };
+    if(ncols == 0) return QVector<QVector<double>>{};
+
+    QVector<QVector<double>> xtan_pressure_vectors(nrows, QVector<double>(ncols, fill_value));
+
+    auto xspeeds_vectors{ createShoreBorder(m_xspeeds_vectors) };
+
+    for(int i{}; i < nrows; ++i){
+        for(int j{}; j < ncols; ++j){
+            if (m_heights[i][j].first)
+                xtan_pressure_vectors[i][j] = m_gamma * xspeeds_vectors[i + 1][j + 1] * std::abs(xspeeds_vectors[i + 1][j + 1]);
+        }
+    }
+
+    return xtan_pressure_vectors;
+}
+
+QVector<QVector<double>> Computator::computateYTanPressure() const
+{
+    auto nrows{ m_heights.size() };
+    if(nrows == 0) return QVector<QVector<double>>{};
+    auto ncols{ m_heights[0].size() };
+    if(ncols == 0) return QVector<QVector<double>>{};
+
+    QVector<QVector<double>> ytan_pressure_vectors(nrows, QVector<double>(ncols, fill_value));
+
+    auto yspeeds_vectors{ createShoreBorder(m_yspeeds_vectors) };
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if (m_heights[i][j].first)
+                ytan_pressure_vectors[i][j] = m_gamma * yspeeds_vectors[i + 1][j + 1] * std::abs(yspeeds_vectors[i + 1][j + 1]);
+        }
+    }
+
+    return ytan_pressure_vectors;
+}
+
+QVector<QVector<double>> Computator::computateRotT(const QVector<QVector<double>> &xtan_pressures, const QVector<QVector<double>> &ytan_pressures) const
+{
+    auto nrows{ m_heights.size() };
+    if(nrows == 0)  return QVector<QVector<double>>{};
+    auto ncols{ m_heights[0].size() };
+    if(ncols == 0)  return QVector<QVector<double>>{};
+
+    QVector<QVector<double>> rot_vectors(nrows, QVector<double>(ncols, fill_value));
+    auto local_xtan_pressures{ createShoreBorder(xtan_pressures) };
+    auto local_ytan_pressures{ createShoreBorder(ytan_pressures) };
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if (m_heights[i][j].first) {
+                rot_vectors[i][j] = (1.0 / (2.0 * m_xstep)) * (local_ytan_pressures[i + 1][j + 2] -
+                        local_ytan_pressures[i + 1][j] -
+                        local_xtan_pressures[i][j + 1] +
+                        local_xtan_pressures[i + 2][j + 1]);
+            }
+        }
+    }
+
+    return rot_vectors;
+}
+
+QVector<QVector<double>> Computator::computateF0(const QVector<QVector<double>> &rot_vectors) const
+{
+    auto nrows{ m_heights.size() };
+    if(nrows == 0)      return QVector<QVector<double>>{};
+    auto ncols{m_heights[0].size() };
+    if(ncols == 0)      return QVector<QVector<double>>{};
+
+    auto local_rot_vectors{ createShoreBorder(rot_vectors) };
+
+    QVector<QVector<double>> f0_vectors(nrows, QVector<double>(ncols, fill_value));
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(m_heights[i][j].first) {
+                f0_vectors[i][j] = local_rot_vectors[i + 1][j + 1] * 200.0 * m_xstep / m_gamma;
+            }
+        }
+    }
+
+    return f0_vectors;
+}
+
+QVector<QVector<double>> Computator::createShoreBorder(const QVector<QVector<double>> &area) const
 {
     if(area.size() == 0) return QVector<QVector<double>>{};
 
@@ -217,7 +234,7 @@ QVector<QVector<double>> Computator::createShoreBorder(QVector<QVector<double>> 
     auto ncols{ area[0].size() + 2 };
 
     // copy the source table
-    QVector<QVector<double>> bordered_area(nrows, QVector<double>(ncols, 100001.));
+    QVector<QVector<double>> bordered_area(nrows, QVector<double>(ncols, fill_value));
     for(int i{ 1 }; i < nrows - 1; ++i) {
         for(int j{ 1 }; j < ncols - 1; ++j) {
             bordered_area[i][j] = area[i - 1][j - 1];
@@ -236,7 +253,6 @@ QVector<QVector<double>> Computator::createShoreBorder(QVector<QVector<double>> 
     QVector<QPair<int, int>> islands_shore_indexes;
     auto cmp = [](const QPair<int, int> &first, const QPair<int, int> &second)->bool { return first.first == second.first && first.second == second.second; };
     // copy first and last nonzero cells
-    constexpr auto fill_value{ 100001. };
     constexpr auto error{ -1. };
 
     for(int i{ 1 }; i < nrows - 1; ++i) {
@@ -303,7 +319,7 @@ QVector<QVector<double>> Computator::createShoreBorder(QVector<QVector<double>> 
 }
 
 template <class Cmp>
-bool Computator::findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cmp, const QPair<int, int> value)
+bool Computator::findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cmp, const QPair<int, int> value) const
 {
     auto vec_size{ vec.size() };
     for(int i{}; i < vec_size; ++i) {

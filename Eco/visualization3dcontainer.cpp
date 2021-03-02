@@ -10,7 +10,7 @@
 // STL
 #include <algorithm>
 
-extern void showErrorMessageBox(const QString &message);
+extern void showErrorMessageBox(const QString &message, const QString &title = "");
 
 // ctor and dtor
 Visualization3DContainer::Visualization3DContainer(QWidget *parent) :
@@ -21,7 +21,7 @@ Visualization3DContainer::Visualization3DContainer(QWidget *parent) :
 {
     auto graph{ new QtDataVisualization::Q3DSurface }; // WARNING: may throw; // FIXME!!!: deletion problem (leak now)
     if (!graph->hasContext()) {
-        showErrorMessageBox(QString("Couldn't initialize the OpenGL context."));
+        showErrorMessageBox(QString("Couldn't initialize the OpenGL context."), "OpenGL error");
         return;
     }
     m_container = QWidget::createWindowContainer(graph, this); // adopt the graph to container
@@ -140,6 +140,7 @@ void Visualization3DContainer::interpolation_and_approximation(QVector<QVector<Q
     }
 
     if(!is_interpolated_flag) {
+        // TODO: normalizing with approximated values; these values must be returned by this funtion
         create_approximation_row(grid, heights); // approximation + second interpolation
         interpolation(grid, heights); // third interpolation
     }
@@ -345,10 +346,14 @@ QVector<double> Visualization3DContainer::approximation(const QVector<double> &x
         return values;
     }
 
+    double min_aspect_ratio{ 1e+10 };
     double max_aspect_ratio{ -1. };
     for(int i{}; i < app_size; ++i) {
         auto cur_ratio{ std::abs(FOO(x[i]) / y[i]) };
 
+        if(cur_ratio < min_aspect_ratio) {
+            min_aspect_ratio = cur_ratio;
+        }
         if(cur_ratio > max_aspect_ratio) {
             max_aspect_ratio = cur_ratio;
         }
@@ -360,9 +365,13 @@ QVector<double> Visualization3DContainer::approximation(const QVector<double> &x
     }
     average_argument /= app_size;
 
+    double average_aspect_ratio{ (max_aspect_ratio + min_aspect_ratio) / 2. };
     for(int i{}; i < interpol_size; ++i) {
         if(interpol_x[i].second > average_argument) {
             values[i] = FOO(interpol_x[i].second) / max_aspect_ratio;
+        }
+        else {
+            values[i] = FOO(interpol_x[i].second) / average_aspect_ratio;
         }
     }
 
@@ -375,15 +384,24 @@ QVector<double> Visualization3DContainer::approximation(const QVector<double> &x
     }
 
     for(int i{}; i < reverse_index; ++i) {
-        values[i] = (average_function_value + (values[i] + y[binary_search(x, interpol_x[i].second)]) / 2. - average_ydelta) / 2.;
+        values[i] = (average_function_value + (values[i] + y[binary_search(x, interpol_x[i].second)]) / 2.) / 2.;
     }
 
-    for(int i{ reverse_index }, j{ interpol_size - reverse_index }; i < interpol_size; ++i, --j) {
+    for(int i{ reverse_index }; i < interpol_size; ++i) {
         values[i] = (average_function_value + (values[i] + y[app_size - 1]) / 2. - average_ydelta) / 2.;
     }
 
+    // reversing last values and normalizing them
     for(int i{ reverse_index }, j{ interpol_size - 1 }; i < j; ++i, --j) {
         std::swap(values[i], values[j]);
+    }
+
+    for(int i{ reverse_index + 1 }; i < interpol_size; ++i) {
+        while(values[i] > values[i - 1]) {
+            for(double diff_ratio{ 2. }, diff{ values[i] - values[i - 1]}; diff_ratio >= 0.; diff_ratio -= 0.1) {
+                values[i] -= diff_ratio * diff;
+            }
+        }
     }
 
     return values;
