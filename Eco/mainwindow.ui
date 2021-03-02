@@ -1,0 +1,1541 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1533</width>
+    <height>950</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QTabWidget" name="main_panel_tab_widget">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>56</red>
+              <green>37</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Shadow">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>18</red>
+              <green>59</green>
+              <blue>54</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>56</red>
+              <green>37</green>
+              <blue>0</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Shadow">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>18</red>
+              <green>59</green>
+              <blue>54</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="WindowText">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>120</red>
+              <green>120</green>
+              <blue>120</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Shadow">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>150</red>
+              <green>187</green>
+              <blue>124</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Highlight">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>0</red>
+              <green>120</green>
+              <blue>215</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="documentMode">
+         <bool>false</bool>
+        </property>
+        <property name="tabsClosable">
+         <bool>false</bool>
+        </property>
+        <property name="movable">
+         <bool>false</bool>
+        </property>
+        <widget class="QWidget" name="enter_data_tab">
+         <attribute name="title">
+          <string>Ввод</string>
+         </attribute>
+         <widget class="QLabel" name="x_coordinate_label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>16</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>X:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="y_coordinate_label">
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>60</y>
+            <width>16</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Y:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="scale_label">
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>20</y>
+            <width>61</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Масштаб:</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="water_object_type_label">
+          <property name="geometry">
+           <rect>
+            <x>490</x>
+            <y>10</y>
+            <width>131</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Тип водного объекта:</string>
+          </property>
+         </widget>
+         <widget class="Line" name="tab_widget_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>690</x>
+            <y>10</y>
+            <width>16</width>
+            <height>81</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="x_coordinate_double_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>12</y>
+            <width>91</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="decimals">
+           <number>7</number>
+          </property>
+          <property name="maximum">
+           <double>99.000000000000000</double>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="y_coordinate_double_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>50</x>
+            <y>60</y>
+            <width>91</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="decimals">
+           <number>7</number>
+          </property>
+         </widget>
+         <widget class="QLabel" name="cell_width_label">
+          <property name="geometry">
+           <rect>
+            <x>280</x>
+            <y>10</y>
+            <width>101</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Ширина ячейки</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="cell_height_label">
+          <property name="geometry">
+           <rect>
+            <x>280</x>
+            <y>60</y>
+            <width>101</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Высота ячейки</string>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="cell_width_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>380</x>
+            <y>20</y>
+            <width>91</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>500000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="cell_height_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>380</x>
+            <y>60</y>
+            <width>91</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>500000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
+          <property name="stepType">
+           <enum>QAbstractSpinBox::DefaultStepType</enum>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="water_object_type_combo_box">
+          <property name="geometry">
+           <rect>
+            <x>500</x>
+            <y>60</y>
+            <width>101</width>
+            <height>21</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>70</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="editable">
+           <bool>false</bool>
+          </property>
+          <property name="currentText">
+           <string>Река</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Река</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Озеро</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QPushButton" name="load_from_pc_button">
+          <property name="geometry">
+           <rect>
+            <x>830</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загрузите собственное изображение карты из каталогов компьютера&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/imgs/images/fws.png</normaloff>:/imgs/images/fws.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QDoubleSpinBox" name="scale_spin_box">
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>60</y>
+            <width>91</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+          <property name="showGroupSeparator" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>1000000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
+          <property name="value">
+           <double>10.000000000000000</double>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="load_from_site_button">
+          <property name="geometry">
+           <rect>
+            <x>720</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Загрузите карту для рисования из выбраной области на сайте в редактор карты&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/imgs/images/load_from_site_icon.png</normaloff>:/imgs/images/load_from_site_icon.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="edit_image_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>940</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Отредактируйте выбранное изображение&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/imgs/images/pncl.png</normaloff>:/imgs/images/pncl.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="output_data_tab">
+         <attribute name="title">
+          <string>Вывод</string>
+         </attribute>
+         <widget class="Line" name="save_wind_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>120</x>
+            <y>20</y>
+            <width>16</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="Line" name="sav_map_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>321</x>
+            <y>20</y>
+            <width>16</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="map_save_format_combo_box">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>341</x>
+            <y>60</y>
+            <width>75</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>.xlsx</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.jpg</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.png</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.jpeg</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QLabel" name="map_saver_format_label">
+          <property name="geometry">
+           <rect>
+            <x>341</x>
+            <y>30</y>
+            <width>171</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Сохранить карту в формате:</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="save_map_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>431</x>
+            <y>60</y>
+            <width>80</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>OK</string>
+          </property>
+         </widget>
+         <widget class="Line" name="save_in_zip_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>521</x>
+            <y>20</y>
+            <width>16</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="open_map_visualization_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>30</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>28</pointsize>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Открыть 3D визуализацию текущего обЪекта&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+          <property name="text">
+           <string>3D</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="save_in_zip_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>550</x>
+            <y>20</y>
+            <width>281</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>21</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Создать ZIP</string>
+          </property>
+          <property name="icon">
+           <iconset resource="res.qrc">
+            <normaloff>:/imgs/images/zip.png</normaloff>:/imgs/images/zip.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>40</height>
+           </size>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="wind_save_format_combo_box">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>141</x>
+            <y>60</y>
+            <width>75</width>
+            <height>24</height>
+           </rect>
+          </property>
+          <item>
+           <property name="text">
+            <string>.xlsx</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.png</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>.jpeg</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QPushButton" name="save_wind_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>231</x>
+            <y>60</y>
+            <width>80</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>OK</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="wind_saver_format_label">
+          <property name="geometry">
+           <rect>
+            <x>141</x>
+            <y>30</y>
+            <width>171</width>
+            <height>16</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Сохранить ветра  в формате:</string>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="wind_tab">
+         <attribute name="title">
+          <string>Ветер</string>
+         </attribute>
+         <widget class="QPushButton" name="computate_speeds_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>270</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Рассчитать 
+значения
+ скоростей</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="enter_speed_vectors_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>390</x>
+            <y>20</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Ввести значения
+векторов
+ скоростей</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
+         <widget class="QWidget" name="horizontalLayoutWidget">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>50</y>
+            <width>220</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QLabel" name="ratio_label">
+             <property name="text">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Коэффициент А&lt;span style=&quot; vertical-align:sub;&quot;&gt;z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="ratio_double_spin_box">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>9999.989999999999782</double>
+             </property>
+             <property name="singleStep">
+              <double>0.500000000000000</double>
+             </property>
+             <property name="value">
+              <double>0.001000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="horizontalLayoutWidget_2">
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>10</y>
+            <width>221</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QLabel" name="horizon_label">
+             <property name="text">
+              <string>Горизонт</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="horizon_spin_box">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>10000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.500000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="Line" name="computator_parameters_delimeter_line">
+          <property name="geometry">
+           <rect>
+            <x>250</x>
+            <y>10</y>
+            <width>16</width>
+            <height>71</height>
+           </rect>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </widget>
+        <widget class="QWidget" name="relief_tab">
+         <attribute name="title">
+          <string>Рельеф</string>
+         </attribute>
+         <widget class="QPushButton" name="enter_heights_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>10</x>
+            <y>10</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>600</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Ввод высот
+(при помощи 
+программы)</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="load_heights_from_file_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>20</y>
+            <width>171</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Загрузить таблицу глубин</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="save_heights_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>160</x>
+            <y>50</y>
+            <width>171</width>
+            <height>25</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Сохранить таблицу глубин</string>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QToolBox" name="display_info_tool_box">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>1280</width>
+            <height>720</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="currentIndex">
+           <number>3</number>
+          </property>
+          <widget class="QWidget" name="map_image_widget">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1285</width>
+             <height>622</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Здесь будет изображение загруженной карты</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QWebEngineView" name="map_web_engine" native="true">
+              <property name="minimumSize">
+               <size>
+                <width>1200</width>
+                <height>523</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QLabel" name="data_service_name_label">
+                <property name="minimumSize">
+                 <size>
+                  <width>380</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>380</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="whatsThis">
+                 <UInt>0</UInt>
+                </property>
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="text">
+                 <string>Данные предоставленны сервисом:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="current_service_name_label">
+                <property name="minimumSize">
+                 <size>
+                  <width>130</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>130</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Текущий сервис</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="map_image_page">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1285</width>
+             <height>622</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Изображение сеточной области</string>
+           </attribute>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="grid_map_label">
+              <property name="text">
+               <string>Карта</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="relief_page">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1285</width>
+             <height>622</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Подводный рельеф</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="QTabWidget" name="relief_tab_page">
+              <property name="currentIndex">
+               <number>-1</number>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="winds_direction_page">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1285</width>
+             <height>622</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Направление ветров</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_4">
+            <item row="0" column="0">
+             <widget class="QTabWidget" name="winds_direction_tab">
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <widget class="QWidget" name="winds_image_container_tab">
+               <attribute name="title">
+                <string>Карта</string>
+               </attribute>
+               <layout class="QGridLayout" name="gridLayout_2">
+                <item row="0" column="0">
+                 <widget class="QLabel" name="map_with_winds_label">
+                  <property name="text">
+                   <string>Здесь будет изображение карты ветров</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="saved_in_current_session_files_group_box">
+          <property name="minimumSize">
+           <size>
+            <width>220</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>220</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>Текущий проект</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="0">
+            <widget class="QListWidget" name="saved_files_list_box"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1533</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QWebEngineView</class>
+   <extends>QWidget</extends>
+   <header>qwebengineview.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>save_map_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveMapButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>457</x>
+     <y>-27</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>load_from_pc_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadFromPCButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>891</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1241</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>edit_image_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>editImageButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1002</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1239</x>
+     <y>54</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>enter_speed_vectors_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>enterSpeedVectorButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>463</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>463</x>
+     <y>-13</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>load_from_site_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadFronSiteButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>747</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1222</x>
+     <y>91</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_wind_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveSpeedsButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>266</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>279</x>
+     <y>-33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>load_heights_from_file_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadHeightsFromFileButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>288</x>
+     <y>83</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>290</x>
+     <y>-12</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>open_map_visualization_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openMapVisualizationButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>51</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>54</x>
+     <y>-80</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>enter_heights_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>enterHeightsButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>72</x>
+     <y>88</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>94</x>
+     <y>-32</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>save_heights_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveHeightsTableButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>221</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>257</x>
+     <y>-13</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>computate_speeds_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>computateSpeedsButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>327</x>
+     <y>105</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>340</x>
+     <y>-4</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>loadFromPCButtonPressed()</slot>
+  <slot>loadFronSiteButtonPressed()</slot>
+  <slot>editImageButtonPressed()</slot>
+  <slot>saveButtonBoxClicked(QAbstractButton*)</slot>
+  <slot>openMapVisualizationButtonPressed()</slot>
+  <slot>enterHeightsButtonPressed()</slot>
+  <slot>enterSpeedVectorButtonPressed()</slot>
+  <slot>saveMapButtonPressed()</slot>
+  <slot>loadHeightsFromFileButtonPressed()</slot>
+  <slot>saveHeightsTableButtonPressed()</slot>
+  <slot>saveSpeedsButtonPressed()</slot>
+  <slot>computateSpeedsButtonPressed()</slot>
+  <slot>savePressuresButtonPressed()</slot>
+  <slot>saveRotButtonPressed()</slot>
+  <slot>saveF0ButtonPressed()</slot>
+ </slots>
+</ui>
