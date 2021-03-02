@@ -7,7 +7,7 @@ Available at: https://github.com/GTRONICK/QSS/blob/master/ManjaroMix.qss
 */
 
 QWidget{
-	background-color: #151a1e;
+	background-color:#1a2224
 }
 
 QMainWindow {
@@ -370,6 +370,10 @@ QComboBox {
 
 QDial {
 	background: #16a085;
+}
+
+QToolBox::backdrop{
+	background-color: #15433a;
 }
 
 QToolBox {
