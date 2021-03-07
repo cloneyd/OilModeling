@@ -1,30 +1,52 @@
-QWidget{
-        background-color:#1a2224
+QComboBox QAbstractItemView::item{padding: 0px; background-color:transparent;outline:none; border-bottom:1px solid #c6c6c6;}
+
+QAbstractItemView
+{
+  background-color: #16a085;
+  color: #e2e5e5;
 }
 
-QWidget::title {
-        background-color:#1a2224
+QTableView QTableCornerButton::section {
+    background-color:#4fa08b
+}
+
+
+QHeaderView::section{
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                           stop:0 #616161, stop: 0.5 #505050,
+                                           stop: 0.6 #434343, stop:1 #656565);
+    color: white;
+    padding-left: 4px;
+    border: 1px solid #6c6c6c;
+}
+
+QComboBox QAbstractItemView::selection
+{
+        background-color: #16a085;
+        color: #e2e5e5;
+}
+
+QAbstractItemView::item:selected
+{
+    background-color: #16a085;
+        color: #e2e5e5;
+}
+
+QTableView{
+        background-color: #027f7f;
+
+}
+
+QWidget{
+        background-color:#1a2224;
 }
 
 QMainWindow {
         background-color:#151a1e;
 }
 
-QTableView QTableCornerButton::section {
-        background-color:#4fa08b
- }
-
-QHeaderView::section{
-         background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                                           stop:0 #616161, stop: 0.5 #505050,
-                                           stop: 0.6 #434343, stop:1 #656565);
-         color: white;
-         padding-left: 4px;
-         border: 1px solid #6c6c6c;
-}
-
 QMessageBox{
-        background-color: #050a0e;
+        background-color:#1a2224;
 }
 
 QCalendar {
@@ -360,7 +382,6 @@ QDateEdit {
         border-style: solid;
         border-color: #4fa08b;
 }
-
 QFontComboBox {
         color: #d3dae3;
         background-color: #222b2e;
@@ -368,14 +389,15 @@ QFontComboBox {
         border-style: solid;
         border-color: #4fa08b;
 }
-
 QComboBox {
         color: #d3dae3;
         background-color: #222b2e;
         border-width: 1px;
         border-style: solid;
         border-color: #4fa08b;
-}
+        }
+
+
 
 QDial {
         background: #16a085;

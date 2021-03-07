@@ -1,6 +1,7 @@
 #include "computator.hpp"
 
 #include <QMessageBox>
+#include <cmath>
 
 // third party functions
 void showErrorMessageBox(const QString &msg, const QString &title = "");
@@ -12,17 +13,16 @@ Computator::Computator() :
     m_heights{},
     m_xspeeds_vectors{},
     m_yspeeds_vectors{},
-    m_is_xspeeds_entered_flag{},
-    m_is_yspeeds_entered_flag{},
-    m_u_vectors{},
-    m_v_vectors{},
-    m_u0_vectors{},
-    m_v0_vectors{},
     m_horizon{ 1. },
-    m_wo_type{ WaterObjectType::river },
-    m_az_ratio{ 0.001 }
+    m_wo_type{ WaterObjectType::River },
+    m_az_ratio{ 0.001 },
+    m_ksi_atol{ 1. },
+    m_wind_direction{ WindDirection::North, false },
+    m_wind_azimuth{ 0., true },
+    m_absolute_speed{ 10. },
+    m_mark_index{ }
 {
-
+    // PASS
 }
 
 Computator::~Computator()
@@ -32,54 +32,56 @@ Computator::~Computator()
 
 
 // public slots
-void Computator::setupHeights(const QVector<QVector<QPair<bool, double>>> &heights)
+void Computator::setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid)
 {
-    auto rows{ heights.size() };
-    if(rows < 1) {
-        return;
-    }
+    m_mark_index.clear();
 
-    auto cols{ heights[0].size() };
-    if(cols < 1) {
-        return;
-    }
+    auto nrows{ grid.size() };
+    if(nrows == 0)  return;
+    auto ncols{ grid[0].size() };
+    if(ncols == 0)  return;
 
-    m_heights.resize(rows);
-    for(int i{}; i < rows; ++i) {
-        m_heights[i].resize(cols);
+    m_heights.fill(QVector<QPair<bool, double>>(ncols, qMakePair(false, fill_value)), nrows);
 
-        for(int j{}; j < cols; ++j) {
-            m_heights[i][j] = heights[i][j];
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            m_heights[i][j].first = grid[i][j].first;
         }
     }
 
-    m_is_xspeeds_entered_flag = false;
-    m_is_yspeeds_entered_flag = false;
+    decomposeAbsSpeed();
 }
 
-void Computator::setWOType(int index_type) noexcept
+void Computator::setupHeights(const QVector<QVector<QPair<bool, double>>> &heights)
 {
-    switch(index_type) {
-    case 0:
-        m_wo_type = WaterObjectType::river;
-        break;
+    auto nrows{ heights.size() };
+    if(nrows == 0)  return;
+    auto ncols{ heights[0].size() };
+    if(ncols == 0)  return;
 
-    case 1:
-        m_wo_type = WaterObjectType::lake;
-        break;
-
-    default:
-        showErrorMessageBox("Тип водного объекта не опознан", "Ошибка");
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            m_heights[i][j] = heights[i][j];
+        }
     }
+}
 
+void Computator::setWOType(int index) noexcept
+{
+    Q_ASSERT_X(index >= static_cast<int>(WaterObjectType::MIN) && index <= static_cast<int>(WaterObjectType::MAX),
+               "Class - Computator", "Function - setWOType, wrong water object index");
+    m_wo_type = static_cast<WaterObjectType>(index);
 }
 
 void Computator::acceptXSpeedsFromTable(QTableWidget &table)
 {
-    auto nrows{ m_heights.size() };
-    auto ncols{ nrows > 0 ? m_heights[0].size() : 0 };
-
     m_xspeeds_vectors.clear();
+
+    auto nrows{ m_heights.size() };
+    if(nrows == 0)  return;
+    auto ncols{ m_heights[0].size() };
+    if(ncols == 0)  return;
+
     m_xspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
 
     for(int i{}; i < nrows; ++i) {
@@ -89,17 +91,17 @@ void Computator::acceptXSpeedsFromTable(QTableWidget &table)
             }
         }
     }
-
-    m_is_xspeeds_entered_flag = true;
-    emit xSpeedChanged(m_xspeeds_vectors);
 }
 
 void Computator::acceptYSpeedsFromTable(QTableWidget &table)
 {
-    auto nrows{ m_heights.size() };
-    auto ncols{ nrows > 0 ? m_heights[0].size() : 0 };
-
     m_yspeeds_vectors.clear();
+
+    auto nrows{ m_heights.size() };
+    if(nrows == 0)  return;
+    auto ncols{ m_heights[0].size() };
+    if(ncols == 0)   return;
+
     m_yspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
 
     for(int i{}; i < nrows; ++i) {
@@ -109,20 +111,39 @@ void Computator::acceptYSpeedsFromTable(QTableWidget &table)
             }
         }
     }
+}
 
-    m_is_yspeeds_entered_flag = true;
-    emit ySpeedChanged(m_yspeeds_vectors);
+void Computator::acceptWindDirection(const QPair<int, bool> &pair)
+{
+    auto first{ pair.first };
+    auto second{ pair.second };
+
+    Q_ASSERT_X(first >= static_cast<int>(WindDirection::MIN) && first <= static_cast<int>(WindDirection::MAX),
+               "Class - Computator", "Function - acceptWindDirection, problem - wrong direction");
+
+    m_wind_direction.first = static_cast<WindDirection>(first);
+    m_wind_direction.second = second;
 }
 
 void Computator::computateSpeeds() const
 {
-    if(m_wo_type != WaterObjectType::lake) {
+    // HERE MUST BE SPEED CHECKING
+
+    if(m_wo_type != WaterObjectType::Lake) {
         showErrorMessageBox("Внимание! Некорректный водный объект!\nРасчеты проводятся только для озер", "Ошибка водный объект");
         return;
     }
 
-    if(!(m_is_xspeeds_entered_flag && m_is_yspeeds_entered_flag)) {
-        showErrorMessageBox("Внимание! Значение проекций\nскоростей должны быть проинициализированы!", "Ошибка значений");
+    // FIXME: error message?
+    auto nrows{ m_heights.size() };
+    if(nrows == 0) {
+        showErrorMessageBox("Высоты не заданы.\nЗаполните поля высот.");
+        return;
+    }
+
+    auto ncols{ m_heights[0].size() };
+    if(ncols == 0) {
+        showErrorMessageBox("Высоты не заданы.\nЗаполните поля высот.");
         return;
     }
 
@@ -132,17 +153,123 @@ void Computator::computateSpeeds() const
     auto rot_t_vectors{ computateRotT(xtan_pressure_vectors, ytan_pressure_vectors) };
     auto f0_vectors{ computateF0(rot_t_vectors) };
 
-    QMessageBox::about(nullptr, "Действие", "Значения рассчитаны");
+    // ksi computating
+    auto average_error = [](const QVector<QVector<double>> &first, const QVector<QVector<double>> &second) {
+        auto nrows{ first.size() };
+        auto ncols{ first[0].size() };
+        double average{};
+        for(int i{}; i < nrows; ++i) {
+            for(int j{}; j < ncols; ++j) {
+                average += std::fabs(std::fabs(second[i][j] - first[i][j]) / first[i][j]);
+            }
+        }
+        return average / (nrows * ncols);
+    };
+
+    auto ksi0{ f0_vectors };
+    auto ksi{ computateKsi(ksi0, f0_vectors) };
+    while(average_error(ksi, ksi0) * 100. > m_ksi_atol) { // * 100 - from relative to percents
+        ksi0 = std::move(ksi);
+        ksi = computateKsi(ksi0, f0_vectors);
+    }
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(m_heights[i][j].first) {
+                ksi[i][j] *= m_heights[i][j].second;
+            }
+        }
+    }
+
+    auto ux_speed{ computateU(ksi, xtan_pressure_vectors) };
+    emit uxSpeedChanged(ux_speed);
+
+    auto uy_speed{ computateV(ksi, ytan_pressure_vectors) };
+    emit uySpeedChanged(uy_speed);
+
+    emit u0xSpeedChanged(computateU0(ksi, xtan_pressure_vectors));
+    emit u0ySpeedChanged(computateV0(ksi, ytan_pressure_vectors));
+
+    QMessageBox::about(nullptr, "Действие завершено", "Значения рассчитаны");
+    emit speedsComputated();
 }
 
 
 // private functions
+void Computator::decomposeAbsSpeed()
+{
+    static constexpr double pi{ 3.141592653589793 };
+
+    m_xspeeds_vectors.clear();
+    m_yspeeds_vectors.clear();
+
+    auto nrows{ m_heights.size() };
+    if(nrows == 0)  return;
+    auto ncols{ m_heights[0].size() };
+    if(ncols == 0)  return;
+
+    m_xspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
+    m_yspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
+
+    auto fill = [&nrows, &ncols, this](double degrees) mutable {
+        for(int i{}; i < nrows; ++i) {
+            for(int j{}; j < ncols; ++j) {
+                if(m_heights[i][j].first) {
+                    m_xspeeds_vectors[i][j] = m_absolute_speed * std::cos(degrees * pi / 180.); // from radians to degrees
+                    m_yspeeds_vectors[i][j] = m_absolute_speed * std::sin(degrees * pi / 180.);
+                }
+            }
+        }
+    };
+
+    if(m_wind_azimuth.second) {
+        fill(90. -  m_wind_azimuth.first);
+    }
+    else if(m_wind_direction.second) {
+        switch(m_wind_direction.first) {
+        case WindDirection::North: // 0. OR 360.
+            fill(90.);
+            break;
+
+        case WindDirection::Northeast: // 45.
+            fill(45.);
+            break;
+
+        case WindDirection::East: // 90
+            fill(0.);
+            break;
+
+        case WindDirection::Southeast: // 135
+            fill(-45.);
+            break;
+
+        case WindDirection::South: // 180
+            fill(-90.);
+            break;
+
+        case WindDirection::Southwest: // 225
+            fill(-135.);
+            break;
+
+        case WindDirection::West: // 270
+            fill(-180.);
+            break;
+
+        case WindDirection::Northwest: // 325
+            fill(-225.);
+            break;
+        }
+    }
+
+    emit xWindProjectionChanged(m_xspeeds_vectors);
+    emit yWindProjectionChanged(m_yspeeds_vectors);
+}
+
 QVector<QVector<double>> Computator::computateXTanPressure() const
 {
+    // range check must be in caller function
     auto nrows{ m_heights.size() };
-    if(nrows == 0) return QVector<QVector<double>>{};
     auto ncols{ m_heights[0].size() };
-    if(ncols == 0) return QVector<QVector<double>>{};
 
     QVector<QVector<double>> xtan_pressure_vectors(nrows, QVector<double>(ncols, fill_value));
 
@@ -160,10 +287,9 @@ QVector<QVector<double>> Computator::computateXTanPressure() const
 
 QVector<QVector<double>> Computator::computateYTanPressure() const
 {
+    // range check must be in caller function
     auto nrows{ m_heights.size() };
-    if(nrows == 0) return QVector<QVector<double>>{};
     auto ncols{ m_heights[0].size() };
-    if(ncols == 0) return QVector<QVector<double>>{};
 
     QVector<QVector<double>> ytan_pressure_vectors(nrows, QVector<double>(ncols, fill_value));
 
@@ -181,10 +307,9 @@ QVector<QVector<double>> Computator::computateYTanPressure() const
 
 QVector<QVector<double>> Computator::computateRotT(const QVector<QVector<double>> &xtan_pressures, const QVector<QVector<double>> &ytan_pressures) const
 {
+    // range check must be in caller function
     auto nrows{ m_heights.size() };
-    if(nrows == 0)  return QVector<QVector<double>>{};
     auto ncols{ m_heights[0].size() };
-    if(ncols == 0)  return QVector<QVector<double>>{};
 
     QVector<QVector<double>> rot_vectors(nrows, QVector<double>(ncols, fill_value));
     auto local_xtan_pressures{ createShoreBorder(xtan_pressures) };
@@ -206,10 +331,9 @@ QVector<QVector<double>> Computator::computateRotT(const QVector<QVector<double>
 
 QVector<QVector<double>> Computator::computateF0(const QVector<QVector<double>> &rot_vectors) const
 {
+    // range check must be in caller function
     auto nrows{ m_heights.size() };
-    if(nrows == 0)      return QVector<QVector<double>>{};
     auto ncols{m_heights[0].size() };
-    if(ncols == 0)      return QVector<QVector<double>>{};
 
     auto local_rot_vectors{ createShoreBorder(rot_vectors) };
 
@@ -226,10 +350,192 @@ QVector<QVector<double>> Computator::computateF0(const QVector<QVector<double>> 
     return f0_vectors;
 }
 
+QVector<QVector<double>> Computator::computateKsi(const QVector<QVector<double>> &last_ksi, const QVector<QVector<double>> &f0) const
+{
+    // range check must be in caller function
+    const auto nrows{ last_ksi.size() };
+    const auto ncols{ last_ksi[0].size() };
+
+    QVector<QVector<double>> ksi(nrows, QVector<double>(ncols, fill_value));
+    for(int i{ 1 }; i < nrows - 1; ++i) {
+        for(int j{ 1 }; j < ncols - 1; ++j) {
+            if(m_heights[i][j].first) {
+                double left{};
+                double right{};
+                double up{};
+                double down{};
+
+                if(m_heights[i - 1][j].first)   up      = last_ksi[i - 1][j];
+                if(m_heights[i][j - 1].first)   left    = last_ksi[i][j - 1];
+                if(m_heights[i][j + 1].first)   right   = last_ksi[i][j + 1];
+                if(m_heights[i + 1][j].first)   down    = last_ksi[i + 1][j];
+
+                ksi[i][j] = (up + left + right + down) / 4. - f0[i][j];
+            }
+        }
+    }
+
+    if(m_heights[0][0].first) {
+        double up{};
+        double right{};
+        if(m_heights[1][0].first)   up      = last_ksi[1][0];
+        if(m_heights[0][1].first)   right   = last_ksi[0][1];
+        ksi[0][0] = (up + right) / 4. - f0[0][0];
+    }
+
+    if(m_heights[0][ncols - 1].first) {
+        double down{};
+        double left{};
+        if(m_heights[1][ncols - 1].first)   down = last_ksi[1][ncols - 1];
+        if(m_heights[0][ncols - 2].first)   left = last_ksi[0][ncols - 2];
+
+        ksi[0][ncols - 1] = (down + left) / 4. - f0[0][ncols - 1];
+    }
+
+    if(m_heights[nrows - 1][0].first) {
+        double right{};
+        double up{};
+        if(m_heights[nrows - 1][1].first)   right = last_ksi[nrows - 1][1];
+        if(m_heights[nrows - 2][0].first)   up    = last_ksi[nrows - 2][0];
+        ksi[nrows - 1][0] = (right + up) / 4. - f0[nrows - 1][0];
+    }
+
+    if(m_heights[nrows - 1][ncols - 1].first) {
+        double left{};
+        double up{};
+        if(m_heights[nrows - 1][ncols - 2].first)   left = last_ksi[nrows - 1][ncols - 2];
+        if(m_heights[nrows - 2][ncols - 1].first)   up   = last_ksi[nrows - 2][ncols - 1];
+        ksi[nrows - 1][ncols - 1] = (left + up) / 4. - f0[nrows - 1][ncols - 1];
+    }
+
+    for(int j{ 1 }; j < ncols - 1; ++j) {
+        if(m_heights[0][j].first) {
+            double left{};
+            double right{};
+            double down{};
+            if(m_heights[0][j - 1].first)   left  = last_ksi[0][j - 1];
+            if(m_heights[0][j + 1].first)   right = last_ksi[0][j + 1];
+            if(m_heights[1][j].first)       down  = last_ksi[1][j];
+            ksi[0][j] = (left + right + down) / 4. - f0[0][j];
+        }
+    }
+
+    for(int j{ 1 }; j < ncols - 1; ++j) {
+        if(m_heights[nrows - 1][j].first) {
+            double left{};
+            double right{};
+            double up{};
+            if(m_heights[nrows - 1][j - 1].first)   left  = last_ksi[nrows - 1][j - 1];
+            if(m_heights[nrows - 1][j + 1].first)   right = last_ksi[nrows - 1][j + 1];
+            if(m_heights[nrows - 2][j].first)       up    = last_ksi[nrows - 2][j];
+            ksi[nrows - 1][j] = (left + right + up) / 4. - f0[nrows - 1][j];
+        }
+    }
+
+    for(int i{ 1 }; i < nrows - 1; ++i) {
+        if(m_heights[i][0].first) {
+            double up{};
+            double down{};
+            double right{};
+            if(m_heights[i - 1][0].first)   up    = last_ksi[i - 1][0];
+            if(m_heights[i + 1][0].first)   down  = last_ksi[i + 1][0];
+            if(m_heights[i][1].first)       right = last_ksi[i][1];
+            ksi[i][0] = (up + down + right) / 4. - f0[i][0];
+        }
+    }
+
+    for(int i{ 1 }; i < nrows - 1; ++i) {
+        if(m_heights[i][ncols - 1].first) {
+            double up{};
+            double down{};
+            double left{};
+            if(m_heights[i - 1][ncols - 1].first)   up   = last_ksi[i - 1][ncols - 1];
+            if(m_heights[i + 1][ncols - 1].first)   down = last_ksi[i + 1][ncols - 1];
+            if(m_heights[i][ncols - 2].first)       left = last_ksi[i][ncols - 2];
+            ksi[i][ncols - 1] = (up + down + left) / 4. - f0[i][ncols - 1];
+        }
+    }
+    return ksi;
+}
+
+QVector<QVector<double>> Computator::computateU(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &xtan) const
+{
+    // range check must be in caller function
+    const auto nrows{ ksi.size() };
+    const auto ncols{ ksi[0].size() };
+
+    auto local_ksi{ createShoreBorder(ksi) };
+    QVector<QVector<double>> speeds(nrows, QVector<double>(ncols, fill_value));
+
+    for(int i{ 1 }; i <= nrows; ++i) {
+        for(int j{ 1 }; j <= ncols; ++j) {
+            if(m_heights[i - 1][j - 1].first) {
+                // all values for computating must be created by createShoreBorder
+                double height{ m_heights[i - 1][j - 1].second };
+                speeds[i - 1][j - 1] =(3. * (height * height - m_horizon * m_horizon) * (local_ksi[i][j + 1] - local_ksi[i][j - 1])) /
+                        (4. * height * height * height) + xtan[i - 1][j - 1] / (4. * m_az_ratio) * (height * height - 4 * height * m_horizon
+                                                                                                                 + 3 * m_horizon * m_horizon);
+            }
+        }
+    }
+
+    return speeds;
+}
+
+QVector<QVector<double>> Computator::computateV(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &ytan) const
+{
+    // range check must be in caller function
+    const auto nrows{ ksi.size() };
+    const auto ncols{ ksi[0].size() };
+
+    auto local_ksi{ createShoreBorder(ksi) };
+    QVector<QVector<double>> speeds(nrows, QVector<double>(ncols, fill_value));
+
+    for(int i{ 1 }; i <= nrows; ++i) {
+        for(int j{ 1 }; j <= ncols; ++j) {
+            if(m_heights[i - 1][j - 1].first) {
+                // all values for computating must be created by createShoreBorder
+                double height{ m_heights[i - 1][j - 1].second };
+                speeds[i - 1][j - 1] =(3. * (height * height - m_horizon * m_horizon) * (local_ksi[i - 1][j] - local_ksi[i + 1][j])) /
+                        (4. * height * height * height) + ytan[i - 1][j - 1] / (4. * m_az_ratio) * (height * height - 4 * height * m_horizon
+                                                                                                                 + 3 * m_horizon * m_horizon);
+            }
+        }
+    }
+
+    return speeds;
+}
+
+// FIXME
+QVector<QVector<double>> Computator::computateU0(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &/*xtan*/) const
+{
+    // range check must be in caller function
+    const auto nrows{ ksi.size() };
+    const auto ncols{ ksi[0].size() };
+
+    QVector<QVector<double>> speeds(nrows, QVector<double>(ncols, fill_value));
+
+    // TODO
+
+    return speeds;
+}
+
+// FIXME
+QVector<QVector<double>> Computator::computateV0(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &/*ytan*/) const
+{
+    // range check must be in caller function
+    const auto nrows{ ksi.size() };
+    const auto ncols{ ksi[0].size() };
+
+    QVector<QVector<double>> speeds(nrows, QVector<double>(ncols, fill_value));
+
+    // TODO
+
+    return speeds;
+}
+
 QVector<QVector<double>> Computator::createShoreBorder(const QVector<QVector<double>> &area) const
 {
-    if(area.size() == 0) return QVector<QVector<double>>{};
-
     auto nrows{ area.size() + 2 };
     auto ncols{ area[0].size() + 2 };
 

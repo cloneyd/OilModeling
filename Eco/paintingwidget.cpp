@@ -1,10 +1,10 @@
 #include "paintingwidget.hpp"
 #include "ui_paintingwidget.h"
-#include  "painttablescene.hpp"
 
 #include <QScreen>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QKeyEvent>
 
 PaintingWidget::PaintingWidget(QWidget *parent) :
     QWidget(parent),
@@ -12,8 +12,9 @@ PaintingWidget::PaintingWidget(QWidget *parent) :
     m_cell_scale_parameters_ui( new Ui::cell_scale_parametres),
     m_map_image{},
     m_cell_scale_parameters{},
-    m_is_accept_changes_flag{ true },
-    m_is_grid_drawn{}
+    m_is_grid_drawn{},
+    m_is_ctrl_held{},
+    m_is_change_made{}
 {
     m_painting_ui->setupUi(this);
     m_cell_scale_parameters_ui->setupUi(&m_cell_scale_parameters);
@@ -31,11 +32,20 @@ PaintingWidget::PaintingWidget(QWidget *parent) :
     m_painting_ui->map_editor_graphics_view->setFixedSize(width, height);
 
     // view setup
-    auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
+    auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
     scene->setSceneRect(0., 0., width, height); // implicit casts
     m_painting_ui->map_editor_graphics_view->setFixedSize(width, height);
     m_painting_ui->map_editor_graphics_view->setMaximumSize(width, height);
     m_painting_ui->map_editor_graphics_view->setAlignment(Qt::AlignCenter);
+
+    connect(scene, SIGNAL(changeLogChanged(int)),
+            this, SLOT(changeLogChanged(int)));
+
+    connect(scene, SIGNAL(stashedChangeLogChanged(int)),
+            this, SLOT(changeLogStashChanged(int)));
+
+    connect(scene, SIGNAL(markPositionChanged(const std::list<QPointF> &)),
+            this, SLOT(markPositionChanged()));
 }
 
 PaintingWidget::~PaintingWidget()
@@ -44,15 +54,20 @@ PaintingWidget::~PaintingWidget()
 }
 
 
-// public slots
+// private slots
 void PaintingWidget::acceptChangesButtonPressed()
 {
     auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
 
     auto pm{ getEdittedMapPixmap() };
 
-    if(m_is_accept_changes_flag) {
-        emit createGrid(pm, scene->getWaterObjectCoords(), scene->getIslandsCoords(), PaintTableScene::water_object_color);
+    if(!m_is_grid_drawn || m_is_change_made) {
+        emit createGrid(pm,
+                        scene->getWaterObjectCoords(),
+                        scene->getIslandsCoords(),
+                        scene->getMarkPosition(),
+                        PaintTableScene::water_object_color,
+                        PaintTableScene::line_width);
     }
 
     m_map_image = pm.toImage();
@@ -66,6 +81,40 @@ void PaintingWidget::discardAllChangesButtonPressed()
     emit deleteGrid(); // deleting grid in GridHandler
     close(); // set some flags;
 }
+
+void PaintingWidget::changeLogChanged(int nwrites)
+{
+    if(nwrites == 0) {
+        m_painting_ui->discard_last_changes_button->setEnabled(false);
+    }
+    else{
+        m_painting_ui->discard_last_changes_button->setEnabled(true);
+    }
+    m_is_change_made = true;
+}
+
+void PaintingWidget::changeLogStashChanged(int nwrites)
+{
+    if(nwrites == 0) {
+        m_painting_ui->return_last_changes_button->setEnabled(false);
+    }
+    else {
+        m_painting_ui->return_last_changes_button->setEnabled(true);
+    }
+}
+
+void PaintingWidget::markPositionChanged()
+{
+    auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
+    QPixmap pm { QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)) };
+    if(m_is_grid_drawn) {
+        drawGridInPixmap(pm, PaintTableScene::water_object_color, PaintTableScene::line_width);
+        scene->addPixmap(scene->paintContentOnMap(pm, PaintStyle::ellipse));
+        return;
+    }
+    scene->addPixmap(scene->paintContentOnMap(pm, PaintStyle::lines));
+}
+
 
 // setters
 void PaintingWidget::setScenePixmap(const QPixmap &pm)
@@ -83,7 +132,6 @@ void PaintingWidget::updateMapButtonPressed()
     auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
     scene->clear();
 
-    m_is_accept_changes_flag = true;
     m_is_grid_drawn = false;
 
     scene->addPixmap(QPixmap::fromImage(m_map_image));
@@ -94,17 +142,21 @@ void PaintingWidget::discardLastChandesButtonPressed()
     auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene() ) };
     if(scene->getNumberOfChanges() == 0)    return;
 
-    if(m_is_grid_drawn) {
+    QPixmap pm { QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)) };
+    if(m_is_grid_drawn && !m_is_change_made) {
         auto answer{ QMessageBox::question(this, QString("Подтвердите действие"), QString("Вы уверены, что хотите убрать изменения?\nЭто уничтожит сетку")) };
         if(answer == QMessageBox::No)   return;
 
         emit deleteGrid();
         m_is_grid_drawn = false;
     }
+    else {
+        scene->hideToStash(); // hiding last change to stash
+        emit drawGridInPixmap(pm, PaintTableScene::water_object_color, PaintTableScene::line_width);
+    }
 
-    scene->hideToStash(); // hiding last change to stash
     scene->QGraphicsScene::clear(); // clear graphics content
-    scene->addPixmap(drawAreasInMap());
+    scene->addPixmap(scene->paintContentOnMap(pm, PaintStyle::lines));
 }
 
 void PaintingWidget::returnLastChangesButtonPressed()
@@ -112,29 +164,40 @@ void PaintingWidget::returnLastChangesButtonPressed()
     auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene() ) };
     if(scene->getNumberOfStashedChanges() == 0)    return;
 
-    if(m_is_grid_drawn) {
+    QPixmap pm { QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)) };
+    if(m_is_grid_drawn && !m_is_change_made) {
         auto answer {QMessageBox::question(this, QString("Подтвердите действие"), QString("Вы уверены, что хотите вернуть изменения?\nЭто уничтожит сетку")) };
         if(answer == QMessageBox::No) return;
 
         emit deleteGrid();
         m_is_grid_drawn = false;
     }
+    else {
+        scene->getFromStash(); // get last change from stash
+        emit drawGridInPixmap(pm, PaintTableScene::water_object_color, PaintTableScene::line_width);
+    }
 
-    scene->getFromStash(); // get last change from stash
     scene->QGraphicsScene::clear(); // clear graphics content
-    scene->addPixmap(drawAreasInMap());
+    scene->addPixmap(scene->paintContentOnMap(pm, PaintStyle::lines));
 }
 
-void PaintingWidget::showChangesButtonPressed()
+void PaintingWidget::showChangesButtonPressed(PaintStyle style)
 {
     auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
 
-    // FIXME: work with buffer is should be here
-    auto pm{ drawAreasInMap() };
-    emit createGrid(pm, scene->getWaterObjectCoords(), scene->getIslandsCoords(), PaintTableScene::water_object_color);
+    if(m_is_grid_drawn && !m_is_change_made) return;
+
+    QPixmap pm(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+    emit createGrid(pm,
+                    scene->getWaterObjectCoords(),
+                    scene->getIslandsCoords(),
+                    scene->getMarkPosition(),
+                    PaintTableScene::water_object_color,
+                    PaintTableScene::line_width);
+    scene->resetStashes(); // clear stashed stuff
     m_is_grid_drawn = true;
-    scene->addPixmap(pm);
-    m_is_accept_changes_flag = false;
+    scene->addPixmap(scene->paintContentOnMap(pm, style));
+    m_is_change_made = false;
 }
 
 // FIXME
@@ -176,7 +239,7 @@ void PaintingWidget::enableGridButtonPressed()
 // FIXME
 void PaintingWidget::shadowNonWOButtonPressed()
 {
-    // TODO
+    // TODO    
 }
 
 void PaintingWidget::saveChangesButtonClicked(QAbstractButton *btn)
@@ -196,14 +259,7 @@ void PaintingWidget::saveChangesButtonClicked(QAbstractButton *btn)
 // Getters
 QPixmap PaintingWidget::getEdittedMapPixmap() const
 {
-    auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
-    scene->clearSelection();   // Selections would also render to the file
-    scene->setSceneRect(scene->itemsBoundingRect()); // Reshrink the scene to it's bounding contents
-    QPixmap pixmap(scene->sceneRect().size().toSize()); // WARNING: may throw; Create the image with the exact size of the shrunk scene
-
-    QPainter painter(&pixmap);
-    scene->render(&painter);
-    return pixmap;
+    return qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene())->getEditedPixmap();
 }
 
 
@@ -221,9 +277,48 @@ void PaintingWidget::close()
     auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
     qobject_cast<PaintTableScene*>(scene)->clear();
     scene->addPixmap(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-    m_is_accept_changes_flag = true;
+    m_is_change_made = false;
     m_is_grid_drawn = false;
     QWidget::close();
+}
+
+void PaintingWidget::keyPressEvent(QKeyEvent *event)
+{
+    if(!isActiveWindow()) return;
+
+    switch(event->key()) {
+    case Qt::Key_Control:
+        m_is_ctrl_held = true;
+        break;
+
+    case Qt::Key_Z:
+        if(m_is_ctrl_held)  discardLastChandesButtonPressed();
+        break;
+
+    case Qt::Key_Y:
+        if(m_is_ctrl_held)  returnLastChangesButtonPressed();
+        break;
+
+    case Qt::Key_Enter:
+    case Qt::Key_Return:
+        acceptChangesButtonPressed();
+        break;
+
+    case Qt::Key_Escape:
+        discardAllChangesButtonPressed();
+        break;
+    }
+
+    QWidget::keyPressEvent(event);
+}
+
+void PaintingWidget::keyReleaseEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Control) {
+        m_is_ctrl_held = false;
+    }
+
+    QWidget::keyReleaseEvent(event);
 }
 
 
@@ -250,31 +345,4 @@ void PaintingWidget::setupConnectionsWithCellScaleParametersWidget()
 
     connect(m_painting_ui->update_grid_button, SIGNAL(pressed()),
             this, SLOT(updateGridButtonPressed()));
-}
-
-QPixmap PaintingWidget::drawAreasInMap()
-{
-    auto* scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
-    QPixmap pm(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-
-    auto&& water_object{ scene->getWaterObjectCoords() };
-    auto wo_size{ water_object.size() };
-
-    auto&& islands{ scene->getIslandsCoords() };
-    auto islands_size{ islands.size() };
-
-    auto line_width{ PaintTableScene::line_width };
-    QPainter painter(&pm);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(PaintTableScene::water_object_color);
-    for(int i{ }; i < wo_size; ++i) {
-        painter.drawEllipse(water_object[i].x(), water_object[i].y(), line_width, line_width);
-    }
-
-    painter.setBrush(PaintTableScene::islands_color);
-    for(int i{ }; i < islands_size; ++i){
-        painter.drawEllipse(islands[i].x(), islands[i].y(), line_width, line_width);
-    }
-
-    return pm;
 }

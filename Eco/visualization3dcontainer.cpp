@@ -319,26 +319,47 @@ void Visualization3DContainer::create_approximation_row(const QVector<QVector<QP
     }
 }
 
-#define FOO(x) ((x) + 1. / (x))
-QVector<double> Visualization3DContainer::approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x)
+// average - shift for the parabola centre
+#define FOO(x, xshift, yshift) (yshift - ((x) + xshift) * ((x) + xshift))
+QVector<double> Visualization3DContainer::approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x) const
 {
     constexpr auto error{ 1e-4 };
     const auto app_size{ x.size() };
     const auto interpol_size{ interpol_x.size() };
-    QVector<double> values(interpol_size, -1.);
+    QVector<double> values(interpol_size, -1.); // return value
 
     if(app_size == 0) return values;
     if(interpol_size == 0) return values;
 
+    auto average = [](const QVector<double> &vec) -> double {
+        auto vec_size{ vec.size() };
+        double average_sum{};
+        for(int i{}; i < vec_size; ++i) {
+            average_sum += vec[i];
+        }
+        return average_sum / vec_size;
+    };
+
+    // computating average value of function argument (as approximation so interpolation)
+    double center{}; // must be average for all values (app and inter)
+    for(int i{} ; i < app_size; ++i) {
+        center += x[i];
+    }
+    for(int i{}; i < interpol_size; ++i) {
+        center += interpol_x[i].second;
+    }
+    center /= (app_size + interpol_size);
+
+    // computatin average delta with known function values and average known function arguments
     double average_ydelta{};
-    double average_function_value{ y[0] };
+    double ymax{ y[0] };
     for(int i{ 1 }; i < app_size; ++i) {
-        average_ydelta += std::abs(y[i] - y[i - 1]);
-        average_function_value += y[i];
+        average_ydelta += std::fabs(y[i] - y[i - 1]);
+        if(ymax < y[i]) ymax = y[i];
     }
     average_ydelta /= app_size - 1;
-    average_function_value /= app_size;
 
+    // if all function values equal
     if(average_ydelta < error) {
         for(int i{}; i < interpol_size; ++i) {
             values[i] = y[0];
@@ -346,68 +367,73 @@ QVector<double> Visualization3DContainer::approximation(const QVector<double> &x
         return values;
     }
 
-    double min_aspect_ratio{ 1e+10 };
-    double max_aspect_ratio{ -1. };
+    // computating function aspect ratio
+    double min_compression_ratio{ 1e+10 };
+    double max_compression_ratio{ -1. };
     for(int i{}; i < app_size; ++i) {
-        auto cur_ratio{ std::abs(FOO(x[i]) / y[i]) };
+        auto cur_ratio{ std::fabs(FOO(x[i], center, ymax) / y[i]) };
 
-        if(cur_ratio < min_aspect_ratio) {
-            min_aspect_ratio = cur_ratio;
+        if(cur_ratio < min_compression_ratio) {
+            min_compression_ratio = cur_ratio;
         }
-        if(cur_ratio > max_aspect_ratio) {
-            max_aspect_ratio = cur_ratio;
+        if(cur_ratio > max_compression_ratio) {
+            max_compression_ratio = cur_ratio;
         }
     }
 
-    double average_argument{};
-    for(int i{}; i < app_size; ++i) {
-        average_argument += x[i];
-    }
-    average_argument /= app_size;
+    double average_argument{ average(x)};
 
-    double average_aspect_ratio{ (max_aspect_ratio + min_aspect_ratio) / 2. };
+    // computating values in other points
+    double average_compression_ratio{ (max_compression_ratio + min_compression_ratio) / 2. };
     for(int i{}; i < interpol_size; ++i) {
         if(interpol_x[i].second > average_argument) {
-            values[i] = FOO(interpol_x[i].second) / max_aspect_ratio;
+            values[i] = std::fabs(FOO(interpol_x[i].second, center, ymax)) / max_compression_ratio;
         }
         else {
-            values[i] = FOO(interpol_x[i].second) / average_aspect_ratio;
+            values[i] = std::fabs(FOO(interpol_x[i].second, center, ymax)) / average_compression_ratio;
         }
     }
 
-    int reverse_index{ interpol_size };
-    for(int i{}; i < interpol_size; ++i) {
-        if(interpol_x[i].second > x[app_size - 1]) {
-            reverse_index = i;
+    int first_app_index{};
+    for(int i{}; i < interpol_size; ++i)  {
+        if(interpol_x[i].second < x[0]) {
+            first_app_index = i;
             break;
         }
     }
 
-    for(int i{}; i < reverse_index; ++i) {
-        values[i] = (average_function_value + (values[i] + y[binary_search(x, interpol_x[i].second)]) / 2.) / 2.;
+    int last_app_index{ interpol_size - 1};
+    for(int i{ interpol_size - 1}; i >= 0; --i) {
+        if(interpol_x[i].second < x[app_size - 1]) {
+            last_app_index = i;
+            break;
+        }
     }
 
-    for(int i{ reverse_index }; i < interpol_size; ++i) {
-        values[i] = (average_function_value + (values[i] + y[app_size - 1]) / 2. - average_ydelta) / 2.;
-    }
+    if(first_app_index <= last_app_index) {
+        for(int i{}; i < first_app_index; ++i) {
+            values[i] = (values[i] + y[0]) / 2.;
+        }
 
-    // reversing last values and normalizing them
-    for(int i{ reverse_index }, j{ interpol_size - 1 }; i < j; ++i, --j) {
-        std::swap(values[i], values[j]);
-    }
+        for(int i{ first_app_index }; i <= last_app_index; ++i) {
+            values[i] = (values[i] + y[binary_search(x, interpol_x[i].second)]) / 2.;
+        }
 
-    for(int i{ reverse_index + 1 }; i < interpol_size; ++i) {
-        while(values[i] > values[i - 1]) {
-            for(double diff_ratio{ 2. }, diff{ values[i] - values[i - 1]}; diff_ratio >= 0.; diff_ratio -= 0.1) {
-                values[i] -= diff_ratio * diff;
-            }
+        for(int i{ last_app_index + 1 }; i < interpol_size; ++i) {
+            values[i] = (values[i] + y[app_size - 1]) / 2. - average_ydelta;
+        }
+    }
+    else {
+        for(int i{ }; i < interpol_size; ++i) {
+            values[i] = (values[i] + y[binary_search(x, interpol_x[i].second)]) / 2. - average_ydelta;
         }
     }
 
     return values;
 }
+#undef FOO
 
-int Visualization3DContainer::binary_search(const QVector<double> &vec, double value, double atol)
+int Visualization3DContainer::binary_search(const QVector<double> &vec, double value, double atol) const
 {
     const auto size{ vec.size() };
     auto left_bound{ 0 };

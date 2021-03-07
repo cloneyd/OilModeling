@@ -300,7 +300,7 @@
       </widget>
       <widget class="QPushButton" name="discard_last_changes_button">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="geometry">
         <rect>
@@ -323,7 +323,7 @@
       </widget>
       <widget class="QPushButton" name="return_last_changes_button">
        <property name="enabled">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="geometry">
         <rect>

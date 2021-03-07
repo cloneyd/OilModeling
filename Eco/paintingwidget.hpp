@@ -6,6 +6,7 @@
 #include <QImage>
 #include <QString>
 
+#include  "painttablescene.hpp"
 #include "ui_cell_scale_parameters.h"
 // TODO: thickness bar have not slot
 
@@ -28,20 +29,21 @@ private:
 
     QWidget m_cell_scale_parameters;
 
-    bool m_is_accept_changes_flag; // checks if changes need to be accepted; if show changes button pressed flag become false, if accept changes button pressed flag become true; true by default
     bool m_is_grid_drawn; // if grid was drawn becomes true; false by default
+    bool m_is_ctrl_held; // if ctrl is helds become true
+    bool m_is_change_made; // true if some changes on scene was made
 
 public:
     explicit PaintingWidget(QWidget *parent = nullptr);
     ~PaintingWidget();
 
-public slots:
+private slots:
     void acceptChangesButtonPressed(); // connected with painting_ui->accept_changes_button
     void discardAllChangesButtonPressed(); // connected with painting_ui->discard_all_changes_button
     void updateMapButtonPressed(); // connected with painting_ui->update_map_button
     void discardLastChandesButtonPressed(); // connected with painting_ui->discard_last_changes_button
     void returnLastChangesButtonPressed(); // connected with paiting_ui->return_last_changes_button
-    void showChangesButtonPressed(); // connected with painting_ui->show_changes_button
+    void showChangesButtonPressed(PaintStyle style = PaintStyle::ellipse); // connected with painting_ui->show_changes_button
 
     void brushType1ButtonPressed(); // connected with painting_ui->brush_type_1_button
     void brushType2ButtonPressed(); // connected with painting_ui->brush_type_2_button
@@ -55,13 +57,19 @@ public slots:
 
     void saveChangesButtonClicked(QAbstractButton *btn); // connected with cell_scale_width->save_changes_button
 
+    void changeLogChanged(int nwrites);
+    void changeLogStashChanged(int nwrites);
+    void markPositionChanged();
+
 signals:
     void imageChanged(const QImage &image);
 
     void cellScaleParametersChanged(double width, double height, double scale) const;
 
-    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color);
+    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const std::list<QPointF> &mark_pos,
+                    const QColor &color, double line_width);
     void deleteGrid() const;
+    void drawGridInPixmap(QPixmap &map, const QColor &color, double line_width) const;
 
 // setters
 public:
@@ -76,6 +84,8 @@ public:
 // overridden functions
 protected:
     void closeEvent(QCloseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
 
 // redefined functions
 public:
@@ -88,8 +98,6 @@ public:
 // helpers
 private:
     void setupConnectionsWithCellScaleParametersWidget();
-
-    QPixmap drawAreasInMap();
 };
 
 #endif // PAINTINGWIDGET_HPP

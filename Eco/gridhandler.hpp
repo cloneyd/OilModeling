@@ -11,6 +11,12 @@
 class GridHandler : public QObject
 {
     Q_OBJECT
+
+// constants
+public:
+    static constexpr double max_parameters_diff{ 5. }; // max difference between (cell_width + cell_height) / 2 and scale
+    static constexpr double max_spin_error{ 1e-3 }; // max double spin box error
+
 private:
     double m_cell_width;
     double m_cell_height;
@@ -23,8 +29,9 @@ public:
     GridHandler();
 
 public slots:
-    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color = Qt::cyan); // connected with MainWindow; siganl - createGrid(same)
+    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const std::list<QPointF> &mark_pos, const QColor &color = Qt::cyan, double line_width = 3.); // connected with MainWindow; siganl - createGrid(same)
     void deleteGrid(); // connected with MainWindow; signal - deleteGrid()
+    void drawGridInPixmap(QPixmap &pm, const QColor &color, double line_width) const;
 
     void setScale(double scale) noexcept; // connected with DoubleSpinBox (from MainWindow); signal - valueChanged(same)
     void setCellWidth(double cell_width) noexcept; // connected with DoubleSpinBox (from MainWindow); signal - valueChanged(same)
@@ -36,11 +43,13 @@ signals:
     void xStepChanged(const double step);
     void yStepChanged(const double step);
 
+    void markSearched(QPair<int, int> mark_index) const;
+
 // helper funtions
 private:
     void includeWaterObjectArea(QVector<QPointF> water_object_area, QVector<QPointF> islands_area);
 
-    void drawGridInPixmap(QPixmap &pm, const QColor &color) const;
+    void searchMarkInGrid(const std::list<QPointF> &mark_pos) const;
 };
 
 #endif // GRIDHANDLER_HPP

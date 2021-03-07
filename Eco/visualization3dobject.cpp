@@ -16,8 +16,9 @@ Visualization3DObject::Visualization3DObject(QtDataVisualization::Q3DSurface *gr
 {
     // gradient setup
     m_gr.setColorAt(1.f, QColor(0x9F6342));
-    m_gr.setColorAt(.9f, Qt::darkBlue);
-    m_gr.setColorAt(.8f, Qt::blue);
+    m_gr.setColorAt(.99f, Qt::darkBlue);
+    m_gr.setColorAt(.9f, Qt::blue);
+    m_gr.setColorAt(.8f, Qt::cyan);
     m_gr.setColorAt(.7f, Qt::gray);
     m_gr.setColorAt(.6f, Qt::darkGreen);
     m_gr.setColorAt(.5f, Qt::green);
@@ -118,7 +119,9 @@ void Visualization3DObject::updateMap()
         for(int i{}; i < rows; ++i) {
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
-                tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), -1.f, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
+                tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(),
+                         0.,
+                         m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
             }
             coords[i] = std::move(tmp);
         }
@@ -127,18 +130,11 @@ void Visualization3DObject::updateMap()
         for(int i{}; i < rows; ++i) {
             QVector<QVector3D> tmp(cols, {-1, -1, -1});
             for(int j{}; j < cols; ++j) {
-                tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(), m_heights[i][j].second, m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
+                tmp[j] = QVector3D(m_grid[i][j].second.x() - m_grid[0][0].second.x(),
+                        m_heights[i][j].second > 0. ? m_heights[i][j].second : 0.,
+                        m_grid[i][j].second.y() - m_grid[0][0].second.y()); // WARNING: narrow from double to float
             }
             coords[i] = std::move(tmp);
-        }
-    }
-
-
-    for(int i{}; i < rows; ++i) {
-        for(int j{}; j < cols; ++j) {
-            if(coords[i][j].y() < 0.f) {
-                coords[i][j].setY(0.); // island
-            }
         }
     }
 

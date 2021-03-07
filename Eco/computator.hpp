@@ -5,12 +5,29 @@
 #include <QVector>
 #include <QTableWidget>
 
-enum class WaterObjectType : unsigned
+enum class WaterObjectType : unsigned char // AHTUNG!!! IF WATER OBJECT COMBO BOX(class - MainWindow) WILL BE CHANGED - UB!!!!!
 {
-    river,
-    lake
+    MIN,
+    River = MIN,
+    Lake,
+    MAX = Lake
 };
 
+enum class WindDirection : unsigned char // AHTUNG!!! IF SYSTEM COMBO BOX(class - MainWindow) WILL BE CHANGED - UB!!!
+{
+    MIN,
+    North = MIN, // first el
+    Northeast,
+    East,
+    Southeast,
+    South,
+    Southwest,
+    West,
+    Northwest, // last el
+    MAX = Northwest // must be equal to last el
+};
+
+// TODO: mark changed slot
 class Computator : public QObject
 {
     Q_OBJECT
@@ -25,27 +42,27 @@ private:
     QVector<QVector<QPair<bool, double>>> m_heights;
     QVector<QVector<double>> m_xspeeds_vectors; // filled with fill_value by default
     QVector<QVector<double>> m_yspeeds_vectors; // filled with fill_value by default
-    bool m_is_xspeeds_entered_flag; // if m_xspeeds_vectors is entered - true
-    bool m_is_yspeeds_entered_flag; // if m_yspeeds_vectors is entered - true
 
     double m_xstep; // -1. by default
     double m_ystep; // -1. by default
 
-    QVector<QVector<double>> m_u_vectors;
-    QVector<QVector<double>> m_v_vectors;
-    QVector<QVector<double>> m_u0_vectors;
-    QVector<QVector<double>> m_v0_vectors;
+    double m_horizon; // must be 1. by default value
+    WaterObjectType m_wo_type; // must be river by default
+    double m_az_ratio; // Az ratio value
+    double m_ksi_atol; // ksi accurancy tolerance (percent); 1 by default
 
-    double m_horizon; // must be 1. as default value
+    QPair<WindDirection, bool> m_wind_direction; // pair - direction is available now; north and false by default
+    QPair<double, bool> m_wind_azimuth; // pair - degrees and is available now; 0. and true by default;
+    double m_absolute_speed; // 10. by default
 
-    WaterObjectType m_wo_type;
+    std::list<QPair<int, int>> m_mark_index; // the polution mark position; empty by default
 
-    double m_az_ratio; // this is the Az ratio value
 public:
     Computator();
     ~Computator();
 
 public slots:
+    void setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid);
     void setupHeights(const QVector<QVector<QPair<bool, double>>> &heights); // connected with GridCreatorWidget(signal - gridChanged(same))
 
     inline void setARatio(double ratio) noexcept { m_az_ratio = ratio; } // connected with double spin box (from MainWindow); signal - valueChanged(double)
@@ -54,18 +71,30 @@ public slots:
     void acceptXSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveXSpeedsFromTable(QTableWidget &)
     void acceptYSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveYSpeedsFromTable(QTableWidget &)
 
-    inline void acceptXStep(const double step) noexcept {  m_xstep = step; }
-    inline void acceptYStep(const double step) noexcept { m_ystep = step; }
-    inline void acceptHorizon(const double horizon) noexcept {  m_horizon = horizon; }
+    inline void acceptXStep(const double step) noexcept {  m_xstep = step; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptYStep(const double step) noexcept { m_ystep = step; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptHorizon(const double horizon) noexcept {  m_horizon = horizon; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptMarkPosition(QPair<int, int> mark_pos) { m_mark_index.push_back(mark_pos); } // connected with GridHandler; signal - markSearched(same)
+    inline void acceptKsiAtol(double atol) noexcept { m_ksi_atol = atol; } // connected with DoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptAbsSpeed(double speed) noexcept { m_absolute_speed = speed; } // connected with DoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptAzimuth(const QPair<double, bool> &pair) { m_wind_azimuth = pair; } // connected with MainWindow; signal - sendAzimuthState(same)
+    void acceptWindDirection(const QPair<int, bool> &pair);// connected with MainWindow; signal - sendSystemState(same)
 
-    void computateSpeeds() const;
+    void decomposeAbsSpeed();
+
+    void computateSpeeds() const; // connected with MainWindow; signal - computateSpeeds();
 
 signals:
-    void xSpeedChanged(const QVector<QVector<double>> &xspeed); // FIXME: wrong value now
-    void ySpeedChanged(const QVector<QVector<double>> &yspeed); // FIXME: wrong value now
+    void xWindProjectionChanged(const QVector<QVector<double>> &speeds);
+    void yWindProjectionChanged(const QVector<QVector<double>> &speeds);
+    void uxSpeedChanged(const QVector<QVector<double>> &xspeed) const;
+    void uySpeedChanged(const QVector<QVector<double>> &yspeed) const;
+    void u0xSpeedChanged(const QVector<QVector<double>> &xspeed) const;
+    void u0ySpeedChanged(const QVector<QVector<double>> &yspeed) const;
+    void speedsComputated() const;
 
 // helpers
-private:    
+private:
     QVector<QVector<double>> computateXTanPressure() const;
     QVector<QVector<double>> computateYTanPressure() const;
 
@@ -73,13 +102,12 @@ private:
 
     QVector<QVector<double>> computateF0(const QVector<QVector<double>> &rot) const;
 
-    QVector<QVector<double>> computateKsi0() const;
-    QVector<QVector<double>> approximation() const;
-    QVector<QVector<double>> computateKsi() const;
+    QVector<QVector<double>> computateKsi(const QVector<QVector<double>> &function, const QVector<QVector<double>> &f0) const;
 
-    QVector<QVector<double>> computateU() const;
-    QVector<QVector<double>> computateV() const;
-
+    QVector<QVector<double>> computateU(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &xtan) const;
+    QVector<QVector<double>> computateV(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &ytan) const;
+    QVector<QVector<double>> computateU0(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &xtan) const;
+    QVector<QVector<double>> computateV0(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &ytan) const;
 
     QVector<QVector<double>> createShoreBorder(const QVector<QVector<double>> &area) const; // creating shore values
     template <class Cmp>

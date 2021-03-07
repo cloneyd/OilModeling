@@ -32,11 +32,11 @@ public slots:
     void saveHeightsFile(const QString &filepath); // connected with MainWidnow; signal - saveMapAsExcek(same)
     void loadHeightsFromFile(const QString &file_path); // connected with MainWindow; signal - loadHeightsFromFileSender(same)
 
-    void updateXSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - xSpeedChanged(same)
-    void updateYSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - ySpeedChanged(same)
+    void updateUXSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - uxSpeedChanged(same)
+    void updateUYSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - uySpeedChanged(same)
+    void updateU0XSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - u0xSpeedChanged(same)
+    void updateU0YSpeeds(const QVector<QVector<double>> &speeds); // connected with Computator; signal - u0ySpeedChanged(same)
     void saveSpeedsAsExcel(const QString &filepath); // connected with MainWindow; signal - saveSpeedsAsExcel(same)
-    void saveValuesWithHighlight(const QString &filepath, const QVector<QVector<double>> &value, double discard_flag) const;
-    void saveValuesWithHighlight(const QString &filepath, const QVector<QVector<double>> &first, const QVector<QVector<double>> &second, double discard_flag) const;
 
 signals:
     void heightsLoaded(QVector<QVector<QPair<bool, double>>> &heights); // WARNING: heights will be changed

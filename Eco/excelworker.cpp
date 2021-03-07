@@ -30,11 +30,15 @@ void ExcelWorker::acceptGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid)
 
     std::addressof(m_speeds_doc)->~Document();
     new (&m_speeds_doc) QXlsx::Document;
-    m_speeds_doc.addSheet("СкоростиOX");
-    m_speeds_doc.addSheet("СкоростиOY");
+    if(!(m_speeds_doc.addSheet("Скорости течений") && m_speeds_doc.addSheet("Скорости на поверхности"))) {
+        QMessageBox::warning(nullptr, "Ошибка", "Не удалось создать файл скоростей.");
+        return;
+    }
 
     const auto nrows{ grid.size() };
-    const auto ncols{ nrows > 0 ? grid[0].size() : 0 };
+    if(nrows == 0)  return;
+    const auto ncols{ grid[0].size() };
+    if(ncols == 0)  return;
 
     m_grid.resize(nrows);
     QVector<QVector<QPair<bool, double>>> heights(nrows, QVector<QPair<bool, double>>(ncols));
@@ -53,7 +57,10 @@ void ExcelWorker::acceptGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid)
 void ExcelWorker::updateHeights(const QVector<QVector<QPair<bool, double>>> &heights)
 {    
     const auto nrows{ heights.size() };
-    const auto ncols{ nrows > 0 ? heights[0].size() : 0 };
+    if(nrows == 0)  return;
+    const auto ncols{ heights[0].size() };
+    if(ncols == 0)  return;
+
     for(int i{}; i < nrows; ++i) {
         for(int j{}; j < ncols; ++j) {
             if(heights[i][j].first) {
@@ -76,7 +83,9 @@ void ExcelWorker::saveHeightsFile(const QString &filepath)
 void ExcelWorker::loadHeightsFromFile(const QString &file_path)
 {
     const auto nrows{ m_grid.size() };
-    const auto ncols{ nrows > 0 ? m_grid[0].size() : 0};
+    if(nrows == 0)  return;
+    const auto ncols{ m_grid[0].size() };
+    if(ncols == 0)  return;
 
     QXlsx::Document file(file_path);
 
@@ -108,48 +117,142 @@ void ExcelWorker::loadHeightsFromFile(const QString &file_path)
     emit heightsLoaded(heights); // WARMING: heights will be empty after function call
 }
 
-void ExcelWorker::updateXSpeeds(const QVector<QVector<double>> &speeds)
+void ExcelWorker::updateUXSpeeds(const QVector<QVector<double>> &speeds)
 {
     auto names{ m_speeds_doc.sheetNames() };
     if(names.size() != 2) {
         showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
+        return;
     }
 
     m_speeds_doc.selectSheet(names.front());
 
     const auto nrows{ speeds.size() };
-    const auto ncols{ nrows > 0 ? speeds[0].size() : 0 };
+    if(nrows == 0)  return;
+    const auto ncols{ speeds[0].size() };
+    if(ncols == 0)  return;
+
     for(int i{}; i < nrows; ++i) {
         for(int j{}; j < ncols; ++j) {
             if(m_grid[i][j]) {
                 if(!m_speeds_doc.write(i + 1, j + 1, speeds[i][j])) {
                     showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
+                    return;
                 }
             }
         }
     }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
+    cfm.addRange(1, 1, nrows, ncols);
+    m_speeds_doc.addConditionalFormatting(cfm);
 }
 
-void ExcelWorker::updateYSpeeds(const QVector<QVector<double>> &speeds)
+void ExcelWorker::updateUYSpeeds(const QVector<QVector<double>> &speeds)
 {
     auto names{ m_speeds_doc.sheetNames() };
     if(names.size() != 2) {
         showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
+        return;
+    }
+
+    m_speeds_doc.selectSheet(names.front());
+
+    const auto nrows{ speeds.size() };
+    if(nrows == 0) return;
+    const auto ncols{ speeds[0].size()  };
+    if(ncols == 0) return;
+
+    if(!m_speeds_doc.write(nrows + 3, 1, "Таблица скоростей Uy")) {
+        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
+        return;
+    }
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(m_grid[i][j]) {
+                if(!m_speeds_doc.write(nrows + 4 + i, j + 1, speeds[i][j])) {
+                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
+                    return;
+                }
+            }
+        }
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
+    cfm.addRange(nrows + 4, 1, nrows + 4 + nrows, ncols);
+    m_speeds_doc.addConditionalFormatting(cfm);
+}
+
+void ExcelWorker::updateU0XSpeeds(const QVector<QVector<double>> &speeds)
+{
+    auto names{ m_speeds_doc.sheetNames() };
+    if(names.size() != 2) {
+        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
+        return;
     }
 
     m_speeds_doc.selectSheet(names.back());
 
     const auto nrows{ speeds.size() };
-    const auto ncols{ nrows > 0 ? speeds[0].size() : 0 };
+    if(nrows == 0)  return;
+    const auto ncols{ speeds[0].size() };
+    if(ncols == 0)  return;
+
     for(int i{}; i < nrows; ++i) {
         for(int j{}; j < ncols; ++j) {
             if(m_grid[i][j]) {
                 if(!m_speeds_doc.write(i + 1, j + 1, speeds[i][j])) {
                     showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
+                    return;
                 }
             }
         }
     }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
+    cfm.addRange(1, 1, nrows, ncols);
+    m_speeds_doc.addConditionalFormatting(cfm);
+}
+
+void ExcelWorker::updateU0YSpeeds(const QVector<QVector<double>> &speeds)
+{
+    auto names{ m_speeds_doc.sheetNames() };
+    if(names.size() != 2) {
+        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
+        return;
+    }
+
+    m_speeds_doc.selectSheet(names.back());
+
+    const auto nrows{ speeds.size() };
+    if(nrows == 0) return;
+    const auto ncols{ speeds[0].size()  };
+    if(ncols == 0) return;
+
+    if(!m_speeds_doc.write(nrows + 3, 1, "Таблица скоростей Vy")) {
+        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
+        return;
+    }
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(m_grid[i][j]) {
+                if(!m_speeds_doc.write(nrows + 4 + i, j + 1, speeds[i][j])) {
+                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
+                    return;
+                }
+            }
+        }
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
+    cfm.addRange(nrows + 4, 1, nrows + 4 + nrows, ncols);
+    m_speeds_doc.addConditionalFormatting(cfm);
 }
 
 void ExcelWorker::saveSpeedsAsExcel(const QString &filepath)
@@ -157,94 +260,5 @@ void ExcelWorker::saveSpeedsAsExcel(const QString &filepath)
     if(!m_speeds_doc.saveAs(filepath)) {
         showErrorMessageBox(QString("Не удалось сохранить файл.\nПожалуйста, попробуйте еще раз"), "Ошибка сохранения");
         return;
-    }
-}
-
-void ExcelWorker::saveValuesWithHighlight(const QString &filepath, const QVector<QVector<double>> &value, double discard_flag) const
-{
-    constexpr auto atol{ 1e-4 };
-    QXlsx::Document doc;
-
-    QString value_sheet_name{ "Лист1" };
-    doc.addSheet(value_sheet_name);
-    doc.selectSheet(value_sheet_name);
-    const auto value_nrows{ value.size() };
-    auto max_value_cols{ -1 };
-    if(value_nrows == 0)    return;
-    for(int i{}; i < value_nrows; ++i) {
-        const auto ncols{ value[i].size() };
-        if(ncols == 0) continue;
-        if(max_value_cols < ncols)    max_value_cols = ncols;
-
-        for(int j{}; j < ncols; ++j) {
-            if(std::fabs(std::fabs(value[i][j]) - std::fabs(discard_flag)) > atol) {
-                if(!doc.write(i + 1, j + 1, value[i][j])) {
-                    showErrorMessageBox("Не удалось записать данные в файл.\nПожалуйста, попробуйте еще раз", "Ошибка записи");
-                }
-            }
-        }
-    }
-
-    if(!doc.saveAs(filepath)) {
-        QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл.\nПожалуйста, попробуйте еще раз", "Ошибка сохранения");
-    }
-}
-
-void ExcelWorker::saveValuesWithHighlight(const QString &filepath, const QVector<QVector<double>> &first, const QVector<QVector<double>> &second, double discard_flag) const
-{
-    constexpr auto atol{ 1e-4 };
-    QXlsx::Document doc;
-
-    QString first_sheet_name{ "Лист1" };
-    doc.addSheet(first_sheet_name);
-    doc.selectSheet(first_sheet_name);
-    const auto first_nrows{ first.size() };
-    auto max_first_cols{ -1 };
-    if(first_nrows == 0)    return;
-    for(int i{}; i < first_nrows; ++i) {
-        const auto ncols{ first[i].size() };
-        if(ncols == 0) continue;
-        if(max_first_cols < ncols)    max_first_cols = ncols;
-
-        for(int j{}; j < ncols; ++j) {
-            if(std::fabs(std::fabs(first[i][j]) - std::fabs(discard_flag)) > atol) {
-                if(!doc.write(i + 1, j + 1, first[i][j])) {
-                    showErrorMessageBox("Не удалось записать данные в файл.\nПожалуйста, попробуйте еще раз", "Ошибка записи");
-                }
-            }
-        }
-    }
-    QXlsx::ConditionalFormatting first_cfm;
-    first_cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
-    first_cfm.addRange(1, 1, first_nrows, max_first_cols);
-    doc.addConditionalFormatting(first_cfm);
-
-    QString second_sheet_name{ "Лист2" };
-    doc.addSheet(second_sheet_name);
-    doc.selectSheet(second_sheet_name);
-    const auto second_nrows{ second.size() };
-    auto max_second_cols{ -1 };
-    if(first_nrows == 0)    return;
-    for(int i{}; i < second_nrows; ++i) {
-        const auto ncols{ second[i].size() };
-        if(ncols == 0) continue;
-        if(max_second_cols < ncols) max_second_cols = ncols;
-
-        for(int j{}; j < ncols; ++j) {
-            if(std::fabs(std::fabs(second[i][j]) - std::fabs(discard_flag)) > atol) {
-                if(!doc.write(i + 1, j + 1, second[i][j])) {
-                    showErrorMessageBox("Не удалось записать данные в файл.\nПожалуйста, попробуйте еще раз", "Ошибка записи");
-                }
-            }
-        }
-    }
-
-    QXlsx::ConditionalFormatting second_cfm;
-    second_cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
-    second_cfm.addRange(1, 1, second_nrows, max_second_cols);
-    doc.addConditionalFormatting(second_cfm);
-
-    if(!doc.saveAs(filepath)) {
-        QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл.\nПожалуйста, попробуйте еще раз");
     }
 }

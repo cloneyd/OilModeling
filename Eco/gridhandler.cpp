@@ -12,14 +12,14 @@ GridHandler::GridHandler() :
     m_cell_width{},
     m_cell_height{},
     m_scale{},
-    m_realscale{ QWidget{}.screen()->physicalDotsPerInch() / 2.54 }
+    m_realscale{ QWidget{}.screen()->physicalDotsPerInch() / 2.54 } // 2.54 - inches to sm
 {
 
 }
 
 
 // public slots
-void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color)
+void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const std::list<QPointF> &mark_pos, const QColor &color, double line_width)
 {
     m_grid.clear();
 
@@ -31,7 +31,7 @@ void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_a
     auto ymin{ water_object_area[0].y() };
     auto ymax{ ymin };
 
-    for(int i{1}; i < water_object_area_size; ++i){
+    for(int i{ 1 }; i < water_object_area_size; ++i){
         auto x{ water_object_area[i].x() };
         auto y{ water_object_area[i].y() };
 
@@ -43,22 +43,27 @@ void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_a
 
     auto cell_width{ m_realscale * m_cell_width };
     auto cell_height{ m_realscale * m_cell_height };
+    m_grid.reserve(static_cast<int>(std::ceil((ymax - ymin) / cell_height)));
     for(auto y{ ymin }; ymax - y > 0; y += cell_height){
         QVector<QPair<bool, QPointF>> tmp;
+        tmp.reserve(static_cast<int>(std::ceil((xmax - xmin) / cell_width)));
         for(auto x{ xmin }; xmax - x > 0; x += cell_width){
             tmp.append(qMakePair(false, QPointF(x, y)));
         }
         m_grid.append(std::move(tmp));
     }
 
-    if((m_scale / m_cell_height + m_scale / m_cell_width) / 2. > 3.5) {
+    if((m_scale / ((m_cell_height + m_cell_width)) / 2.) > max_parameters_diff) {
         QMessageBox::warning(nullptr, QString("Погрешность разбиения"), QString("Внимание:\nтак как разница между размерами ячейки и\nмасштабом слишком большая,\n возможны неточности"));
     }
 
     includeWaterObjectArea(water_object_area, islands_area);
-    drawGridInPixmap(pm, color);
+    drawGridInPixmap(pm, color, line_width);
 
     emit gridChanged(m_grid);
+
+    if(mark_pos.size() == 0)   return; // default value
+    searchMarkInGrid(mark_pos);
 }
 
 void GridHandler::deleteGrid()
@@ -67,14 +72,41 @@ void GridHandler::deleteGrid()
     emit gridChanged(m_grid);
 }
 
+void GridHandler::drawGridInPixmap(QPixmap &pm, const QColor &color, double line_width) const
+{
+    QPainter painter;
+
+    painter.begin(&pm);
+    painter.setPen({ color, line_width });
+    auto grid_size{m_grid.size()};
+    auto cell_width{ m_realscale * m_cell_width };
+    auto cell_height{ m_realscale * m_cell_height };
+    for(int i{}; i < grid_size; ++i){
+        auto size {m_grid[i].size()};
+        for(int j{}; j < size; ++j) {
+            if(m_grid[i][j].first) {
+                auto x{ m_grid[i][j].second.x() };
+                auto y{ m_grid[i][j].second.y() };
+                painter.drawLines({ QLineF(m_grid[i][j].second, QPointF(x + cell_width, y)),
+                                    QLineF(QPointF(x + cell_width, y), QPointF(x + cell_width, y + cell_height)),
+                                    QLineF(QPointF(x + cell_width, y + cell_height), QPointF(x, y + cell_height)),
+                                    QLineF(QPointF(x, y + cell_height), m_grid[i][j].second)});
+            }
+        }
+    }
+    painter.end();
+}
+
+
+// setters
 void GridHandler::setScale(double scale) noexcept
 {
-    if(scale < 1e-3) {
-        m_realscale = 0.;
+    if(scale < max_spin_error) {
+        m_realscale = 1.;
         m_scale = 0.;
     }
     else {
-        m_realscale *= m_scale > 1e-3 ? m_scale : 1.;
+        m_realscale = QWidget{}.screen()->physicalDotsPerInch() / 2.54;
         m_realscale /= scale;
         m_scale = scale;
     }
@@ -238,27 +270,37 @@ void GridHandler::includeWaterObjectArea(QVector<QPointF> water_object_area, QVe
     }
 }
 
-void GridHandler::drawGridInPixmap(QPixmap &pm, const QColor &color) const
+void GridHandler::searchMarkInGrid(const std::list<QPointF> &mark_pos) const
 {
-    QPainter painter;
+    auto nrows { m_grid.size() };
+    if(nrows == 0)  return;
+    auto ncols{ m_grid[0].size() };
+    if(ncols == 0) return;
 
-    painter.begin(&pm);
-    painter.setPen(color);
-    auto grid_size{m_grid.size()};
     auto cell_width{ m_realscale * m_cell_width };
     auto cell_height{ m_realscale * m_cell_height };
-    for(int i{}; i < grid_size; ++i){
-        auto size {m_grid[i].size()};
-        for(int j{}; j < size; ++j) {
-            if(m_grid[i][j].first) {
-                auto x{ m_grid[i][j].second.x() };
-                auto y{ m_grid[i][j].second.y() };
-                painter.drawLines({ QLineF(m_grid[i][j].second, QPointF(x + cell_width, y)),
-                                    QLineF(QPointF(x + cell_width, y), QPointF(x + cell_width, y + cell_height)),
-                                    QLineF(QPointF(x + cell_width, y + cell_height), QPointF(x, y + cell_height)),
-                                    QLineF(QPointF(x, y + cell_height), m_grid[i][j].second)});
+
+    for(auto mark : mark_pos) {
+        if(mark.x() < m_grid[0][0].second.x() || mark.x() > m_grid[0][ncols - 1].second.x() ||
+           mark.y() < m_grid[0][0].second.y() || mark.y() > m_grid[nrows - 1][0].second.y()) {
+             QMessageBox::warning(nullptr, QString("Ошибка"), QString("Источник загрязнения вне водного объекта.\n"));
+             continue;
+        }
+
+        for(int i{}; i < nrows; ++i) {
+            if(mark.y() >= m_grid[i][0].second.y() && mark.y() <= m_grid[i][0].second.y() + cell_height) {
+                for(int j{}; j < ncols; ++j) {
+                    if(mark.x() >= m_grid[i][j].second.x() && mark.x() <= m_grid[i][j].second.x() + cell_width) {
+                        if(!m_grid[i][j].first) {
+                            QMessageBox::warning(nullptr, "Ошибка метки", "Источник загрязнения лежит на острове.\nПожалуйста, переставьте метку");
+                            emit markSearched({-1, -1});
+                        }
+                        else {
+                            emit markSearched({i, j});
+                        }
+                    }
+                }
             }
         }
     }
-    painter.end();
 }
