@@ -59,27 +59,26 @@ void PaintingWidget::acceptChangesButtonPressed()
 {
     auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
 
-    auto pm{ getEdittedMapPixmap() };
+    QPixmap pm{ showChangesButtonPressed(PaintStyle::lines) };
 
-    if(!m_is_grid_drawn || m_is_change_made) {
-        emit createGrid(pm,
-                        scene->getWaterObjectCoords(),
-                        scene->getIslandsCoords(),
-                        scene->getMarkPosition(),
-                        PaintTableScene::water_object_color,
-                        PaintTableScene::line_width);
-    }
-
-    m_map_image = pm.toImage();
-    emit imageChanged(m_map_image);
-
-    close(); // set some flags;
+    emit imageChanged(pm.toImage());
+    scene->QGraphicsScene::clear();
+    scene->addPixmap(pm);
+    close();
 }
 
 void PaintingWidget::discardAllChangesButtonPressed()
 {
     emit deleteGrid(); // deleting grid in GridHandler
-    close(); // set some flags;
+
+    auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
+    scene->clear();
+    m_is_grid_drawn = false;
+    m_is_change_made = false;
+
+    scene->addPixmap(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+
+    close();
 }
 
 void PaintingWidget::changeLogChanged(int nwrites)
@@ -181,11 +180,11 @@ void PaintingWidget::returnLastChangesButtonPressed()
     scene->addPixmap(scene->paintContentOnMap(pm, PaintStyle::lines));
 }
 
-void PaintingWidget::showChangesButtonPressed(PaintStyle style)
+QPixmap PaintingWidget::showChangesButtonPressed(PaintStyle style)
 {
     auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
 
-    if(m_is_grid_drawn && !m_is_change_made) return;
+    if(m_is_grid_drawn && !m_is_change_made) return scene->getEditedPixmap();
 
     QPixmap pm(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
     emit createGrid(pm,
@@ -196,8 +195,10 @@ void PaintingWidget::showChangesButtonPressed(PaintStyle style)
                     PaintTableScene::line_width);
     scene->resetStashes(); // clear stashed stuff
     m_is_grid_drawn = true;
-    scene->addPixmap(scene->paintContentOnMap(pm, style));
+    scene->addPixmap(pm = scene->paintContentOnMap(pm, style));
     m_is_change_made = false;
+
+    return pm;
 }
 
 // FIXME
@@ -263,25 +264,7 @@ QPixmap PaintingWidget::getEdittedMapPixmap() const
 }
 
 
-// overridden functions
-void PaintingWidget::closeEvent(QCloseEvent *event)
-{
-    close();
-    QWidget::closeEvent(event);
-}
-
-
-// redefined functions
-void PaintingWidget::close()
-{
-    auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
-    qobject_cast<PaintTableScene*>(scene)->clear();
-    scene->addPixmap(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-    m_is_change_made = false;
-    m_is_grid_drawn = false;
-    QWidget::close();
-}
-
+// overriden functions
 void PaintingWidget::keyPressEvent(QKeyEvent *event)
 {
     if(!isActiveWindow()) return;
@@ -325,6 +308,12 @@ void PaintingWidget::keyReleaseEvent(QKeyEvent *event)
 // Public modificators
 void PaintingWidget::prepareGraphicsView(const QString &image_path)
 {
+    auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
+    qobject_cast<PaintTableScene*>(scene)->clear();
+
+    m_is_change_made = false;
+    m_is_grid_drawn = false;
+
     while(!m_map_image.load(image_path)) {
         auto answer{ QMessageBox::question(this, QString("Повторить действие"), QString("Не удалось загрузить изображение. Попробовать снова?")) };
         if(answer == QMessageBox::Yes) {
@@ -332,7 +321,6 @@ void PaintingWidget::prepareGraphicsView(const QString &image_path)
             if(image_path.isEmpty()) return;
         }
     }
-    auto* scene{ m_painting_ui->map_editor_graphics_view->scene() };
     m_painting_ui->map_editor_graphics_view->scene()->addPixmap(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
 
     emit imageChanged(m_map_image);

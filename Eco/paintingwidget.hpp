@@ -43,7 +43,7 @@ private slots:
     void updateMapButtonPressed(); // connected with painting_ui->update_map_button
     void discardLastChandesButtonPressed(); // connected with painting_ui->discard_last_changes_button
     void returnLastChangesButtonPressed(); // connected with paiting_ui->return_last_changes_button
-    void showChangesButtonPressed(PaintStyle style = PaintStyle::ellipse); // connected with painting_ui->show_changes_button
+    QPixmap showChangesButtonPressed(PaintStyle style = PaintStyle::ellipse); // connected with painting_ui->show_changes_button
 
     void brushType1ButtonPressed(); // connected with painting_ui->brush_type_1_button
     void brushType2ButtonPressed(); // connected with painting_ui->brush_type_2_button
@@ -83,13 +83,8 @@ public:
 
 // overridden functions
 protected:
-    void closeEvent(QCloseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
-
-// redefined functions
-public:
-    void close();
 
 // modificators
 public:

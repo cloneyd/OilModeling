@@ -180,7 +180,7 @@
          </palette>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>4</number>
         </property>
         <property name="documentMode">
          <bool>false</bool>
@@ -1288,6 +1288,11 @@ p, li { white-space: pre-wrap; }
           </property>
          </widget>
         </widget>
+        <widget class="QWidget" name="polution_tab">
+         <attribute name="title">
+          <string>Загрязнение</string>
+         </attribute>
+        </widget>
        </widget>
       </item>
       <item>
@@ -1316,7 +1321,7 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="map_image_widget">
            <property name="geometry">
@@ -1324,7 +1329,7 @@ p, li { white-space: pre-wrap; }
              <x>0</x>
              <y>0</y>
              <width>1285</width>
-             <height>622</height>
+             <height>595</height>
             </rect>
            </property>
            <attribute name="label">
@@ -1400,7 +1405,7 @@ p, li { white-space: pre-wrap; }
              <x>0</x>
              <y>0</y>
              <width>1285</width>
-             <height>622</height>
+             <height>595</height>
             </rect>
            </property>
            <attribute name="label">
@@ -1425,7 +1430,7 @@ p, li { white-space: pre-wrap; }
              <x>0</x>
              <y>0</y>
              <width>1285</width>
-             <height>622</height>
+             <height>595</height>
             </rect>
            </property>
            <attribute name="label">
@@ -1447,7 +1452,7 @@ p, li { white-space: pre-wrap; }
              <x>0</x>
              <y>0</y>
              <width>1285</width>
-             <height>622</height>
+             <height>595</height>
             </rect>
            </property>
            <attribute name="label">
@@ -1479,6 +1484,11 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
            </layout>
+          </widget>
+          <widget class="QWidget" name="polution_page">
+           <attribute name="label">
+            <string>Таблица источников загрязнения</string>
+           </attribute>
           </widget>
          </widget>
         </item>
