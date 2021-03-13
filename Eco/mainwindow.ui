@@ -180,7 +180,7 @@
          </palette>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>0</number>
         </property>
         <property name="documentMode">
          <bool>false</bool>
@@ -269,6 +269,9 @@
             <height>31</height>
            </rect>
           </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="decimals">
            <number>7</number>
           </property>
@@ -284,6 +287,9 @@
             <width>91</width>
             <height>31</height>
            </rect>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
           </property>
           <property name="decimals">
            <number>7</number>
@@ -327,6 +333,12 @@
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="suffix">
+           <string> м</string>
+          </property>
           <property name="decimals">
            <number>3</number>
           </property>
@@ -351,6 +363,12 @@
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="suffix">
+           <string> м</string>
           </property>
           <property name="decimals">
            <number>3</number>
@@ -483,8 +501,14 @@
           <property name="alignment">
            <set>Qt::AlignCenter</set>
           </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="showGroupSeparator" stdset="0">
            <bool>false</bool>
+          </property>
+          <property name="suffix">
+           <string/>
           </property>
           <property name="decimals">
            <number>3</number>
@@ -971,6 +995,15 @@
            </item>
            <item row="0" column="1">
             <widget class="QDoubleSpinBox" name="horizon_spin_box">
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="suffix">
+              <string> м</string>
+             </property>
              <property name="decimals">
               <number>4</number>
              </property>
@@ -994,6 +1027,12 @@
            </item>
            <item row="1" column="1">
             <widget class="QDoubleSpinBox" name="ratio_double_spin_box">
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
              <property name="decimals">
               <number>4</number>
              </property>
@@ -1021,6 +1060,12 @@ p, li { white-space: pre-wrap; }
            </item>
            <item row="2" column="1">
             <widget class="QDoubleSpinBox" name="atol_percents_spin_box">
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
              <property name="decimals">
               <number>3</number>
              </property>
@@ -1030,13 +1075,25 @@ p, li { white-space: pre-wrap; }
              <property name="maximum">
               <double>100.000000000000000</double>
              </property>
-             <property name="value">
+             <property name="singleStep">
               <double>1.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>10.000000000000000</double>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
             <widget class="QDoubleSpinBox" name="abs_wind_speed_spin_box">
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="suffix">
+              <string> м/с</string>
+             </property>
              <property name="decimals">
               <number>4</number>
              </property>
@@ -1188,6 +1245,12 @@ p, li { white-space: pre-wrap; }
            </item>
            <item row="0" column="1">
             <widget class="QDoubleSpinBox" name="azimuth_double_spin_box">
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
              <property name="decimals">
               <number>2</number>
              </property>
@@ -1292,6 +1355,53 @@ p, li { white-space: pre-wrap; }
          <attribute name="title">
           <string>Загрязнение</string>
          </attribute>
+         <widget class="QWidget" name="formLayoutWidget_2">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>210</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <layout class="QFormLayout" name="formLayout_2">
+           <item row="0" column="0">
+            <widget class="QLabel" name="polution_computations_distance_label">
+             <property name="text">
+              <string>Расстояние от источника</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="max_computations_distance_double_spin_box">
+             <property name="maximumSize">
+              <size>
+               <width>16777210</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+             <property name="correctionMode">
+              <enum>QAbstractSpinBox::CorrectToPreviousValue</enum>
+             </property>
+             <property name="suffix">
+              <string> м</string>
+             </property>
+             <property name="maximum">
+              <double>10000.000000000000000</double>
+             </property>
+             <property name="value">
+              <double>500.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </widget>
       </item>
@@ -1469,7 +1579,41 @@ p, li { white-space: pre-wrap; }
                 <string>Карта</string>
                </attribute>
                <layout class="QGridLayout" name="gridLayout_2">
-                <item row="0" column="0">
+                <item row="0" column="1">
+                 <widget class="QGroupBox" name="legend_group_box">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>40</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                  <property name="title">
+                   <string>Легенда</string>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout_3">
+                   <item>
+                    <widget class="QLabel" name="label">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item row="0" column="0" rowspan="2">
                  <widget class="QLabel" name="map_with_winds_label">
                   <property name="text">
                    <string>Здесь будет изображение карты ветров</string>
@@ -1486,9 +1630,91 @@ p, li { white-space: pre-wrap; }
            </layout>
           </widget>
           <widget class="QWidget" name="polution_page">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>1285</width>
+             <height>595</height>
+            </rect>
+           </property>
            <attribute name="label">
             <string>Таблица источников загрязнения</string>
            </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QTableWidget" name="sources_table_widget">
+              <property name="editTriggers">
+               <set>QAbstractItemView::NoEditTriggers</set>
+              </property>
+              <property name="selectionMode">
+               <enum>QAbstractItemView::SingleSelection</enum>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,0,0,0">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="sizeConstraint">
+               <enum>QLayout::SetMinimumSize</enum>
+              </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="add_new_polution_source_button">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Добавить источник</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="current_source_matter_button">
+                <property name="text">
+                 <string>Просмотр веществ выбранного источника</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="delete_polution_source_button">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>Удалить источник</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>
@@ -1738,6 +1964,54 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>add_new_polution_source_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>addNewSourceButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>895</x>
+     <y>889</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1298</x>
+     <y>873</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>current_source_matter_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>displaySelectedSourceButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1017</x>
+     <y>895</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1298</x>
+     <y>788</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>delete_polution_source_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>deleteSelectedSouceButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>1235</x>
+     <y>900</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>1297</x>
+     <y>833</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>loadFromPCButtonPressed()</slot>
@@ -1753,5 +2027,8 @@ p, li { white-space: pre-wrap; }
   <slot>computateSpeedsButtonPressed()</slot>
   <slot>loadFromSiteButtonPressed()</slot>
   <slot>forceAbsSpeedDecomposeButtonPressed()</slot>
+  <slot>addNewSourceButtonPressed()</slot>
+  <slot>displaySelectedSourceButtonPressed()</slot>
+  <slot>deleteSelectedSouceButtonPressed()</slot>
  </slots>
 </ui>

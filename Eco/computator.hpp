@@ -5,6 +5,10 @@
 #include <QVector>
 #include <QTableWidget>
 
+#include <variant>
+
+#include "source_types.hpp"
+
 enum class WaterObjectType : unsigned char // AHTUNG!!! IF WATER OBJECT COMBO BOX(class - MainWindow) WILL BE CHANGED - UB!!!!!
 {
     MIN,
@@ -39,7 +43,8 @@ public:
     static constexpr auto fill_value{ 100001. };; // standart fill value for all vector
 
 private:
-    QVector<QVector<QPair<bool, double>>> m_heights;
+    const QVector<QVector<QPair<bool, QPointF>>> *m_grid_ptr; // nullptr by default;
+    const QVector<QVector<QPair<bool, double>>> *m_heights_ptr; // nullptr by default
     QVector<QVector<double>> m_xspeeds_vectors; // filled with fill_value by default
     QVector<QVector<double>> m_yspeeds_vectors; // filled with fill_value by default
 
@@ -50,12 +55,16 @@ private:
     WaterObjectType m_wo_type; // must be river by default
     double m_az_ratio; // Az ratio value
     double m_ksi_atol; // ksi accurancy tolerance (percent); 1 by default
+    double m_max_computation_distance; // max computation distance (metres); 500. by default
 
     QPair<WindDirection, bool> m_wind_direction; // pair - direction is available now; north and false by default
     QPair<double, bool> m_wind_azimuth; // pair - degrees and is available now; 0. and true by default;
     double m_absolute_speed; // 10. by default
 
     std::list<QPair<int, int>> m_mark_index; // the polution mark position; empty by default
+    QVector<QPair<std::variant<PointSource, DiffusionSource>, QVector<PolutionMatter>>> m_sources; /* first value - the source - will contain one of
+                                                                    two types: PointSource of DiffusionSource. Must be checked with index() before using;
+                                                                    second - vector of polution matters*/
 
 public:
     Computator();
@@ -79,19 +88,37 @@ public slots:
     inline void acceptAbsSpeed(double speed) noexcept { m_absolute_speed = speed; } // connected with DoubleSpinBox (MainWindow); signal - valueChanged(double)
     inline void acceptAzimuth(const QPair<double, bool> &pair) { m_wind_azimuth = pair; } // connected with MainWindow; signal - sendAzimuthState(same)
     void acceptWindDirection(const QPair<int, bool> &pair);// connected with MainWindow; signal - sendSystemState(same)
+    inline void acceptDistance(double distance) noexcept { m_max_computation_distance = distance; }
+
+    inline void giveSourceInfo(int index, std::variant<PointSource, DiffusionSource> &source, QVector<PolutionMatter> &matters) const;
+    void addNewSource(const std::variant<PointSource, DiffusionSource> &source, const QVector<PolutionMatter> &matters);
+    void updateSource(int index, const std::variant<PointSource, DiffusionSource> &source, const QVector<PolutionMatter> &matters);
+    inline void deleteSource(int index) { m_sources.remove(index); }
 
     void decomposeAbsSpeed();
-
     void computateSpeeds() const; // connected with MainWindow; signal - computateSpeeds();
 
 signals:
     void xWindProjectionChanged(const QVector<QVector<double>> &speeds);
     void yWindProjectionChanged(const QVector<QVector<double>> &speeds);
+
     void uxSpeedChanged(const QVector<QVector<double>> &xspeed) const;
     void uySpeedChanged(const QVector<QVector<double>> &yspeed) const;
-    void u0xSpeedChanged(const QVector<QVector<double>> &xspeed) const;
+    void u0xSpeedChanged(const QVector<QVector<double>> &xspeed) const;    
     void u0ySpeedChanged(const QVector<QVector<double>> &yspeed) const;
+    void uChanged(const QVector<QVector<double>> &speed) const;
+    void u0Changed(const QVector<QVector<double>> &speed) const;
+
     void speedsComputated() const;
+
+    void getCurrentMapImage(QPixmap &map) const;
+    void flowMapCreated(const QPixmap &map) const;
+
+    void sourcesChanged(const PointSource &source, const QVector<PolutionMatter> &matters) const;
+    void sourcesChanged(const DiffusionSource &source, const QVector<PolutionMatter> &matters) const;
+
+    void sourceUpdated(int index, const PointSource &source, const QVector<PolutionMatter> &matters) const;
+    void sourceUpdated(int index, const DiffusionSource &source, const QVector<PolutionMatter> &matters) const;
 
 // helpers
 private:
@@ -112,6 +139,15 @@ private:
     QVector<QVector<double>> createShoreBorder(const QVector<QVector<double>> &area) const; // creating shore values
     template <class Cmp>
     bool findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cmp, const QPair<int, int> value) const;
+
+    QPixmap createFlowMap(const QVector<QVector<double>> &ux, const QVector<QVector<double>> &uy,
+                          const QVector<QVector<double>> &u0x, const QVector<QVector<double>> &u0y) const;
 };
 
+// inline function realization
+inline void Computator::giveSourceInfo(int index, std::variant<PointSource, DiffusionSource> &source, QVector<PolutionMatter> &matters) const
+{
+    source = m_sources[index].first;
+    matters = m_sources[index].second;
+}
 #endif // COMPUTATIONS_HPP

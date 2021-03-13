@@ -5,6 +5,7 @@
 #include "gridhandler.hpp"
 #include "visualization3dcontainer.hpp"
 #include "excelworker.hpp"
+#include "polutionwidgetcontainer.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -14,6 +15,7 @@ int main(int argc, char *argv[])
     auto&& graphics3D { window.getVisualizationContainer() }; // ref to window's object
     ExcelWorker excel_worker;
     Computator computator;
+    PolutionWidgetContainer polution_widget_container;
 
     QFile styleF(":/qss/qss/ManjaroMix.qss");
     styleF.open(QFile::ReadOnly);
@@ -66,6 +68,10 @@ int main(int argc, char *argv[])
                      &computator, SLOT(decomposeAbsSpeed()));
     QObject::connect(window.getSpeedAbsDoubleSpinBox(), SIGNAL(valueChanged(double)),
                      &computator, SLOT(acceptAbsSpeed(double)));
+    QObject::connect(window.getMaxComputationDistanceDoubleSpinBox(), SIGNAL(valueChanged(double)),
+                     &computator, SLOT(acceptDistance(double)));
+    QObject::connect(&window, SIGNAL(deleteSelectedSource(int)),
+                     &computator, SLOT(deleteSource(int)));
 
     // connections between MainWindow and ExcelWorker
     QObject::connect(&window, SIGNAL(saveMapAsExcel(const QString &)),
@@ -74,6 +80,12 @@ int main(int argc, char *argv[])
                      &excel_worker, SLOT(loadHeightsFromFile(const QString &)));
     QObject::connect(&window, SIGNAL(saveSpeedsAsExcel(const QString &)),
                      &excel_worker, SLOT(saveSpeedsAsExcel(const QString &)));
+
+    // connections between MainWindow and PolutionWidgetContainer
+    QObject::connect(&window, SIGNAL(addNewSource()),
+                     &polution_widget_container, SLOT(createNewPolutionWidget()));
+    QObject::connect(&window, SIGNAL(displaySelectedSource(int)),
+                     &polution_widget_container, SLOT(displaySelectedSource(int)));
 
 
     // connections between GridHandler and MainWindow
@@ -120,6 +132,18 @@ int main(int argc, char *argv[])
                      &window, SLOT( updateXWindTable(const QVector<QVector<double>> &)));
     QObject::connect(&computator, SIGNAL(yWindProjectionChanged(const QVector<QVector<double>> &)),
                      &window, SLOT( updateYWindTable(const QVector<QVector<double>> &)));
+    QObject::connect(&computator, SIGNAL(getCurrentMapImage(QPixmap &)),
+                     &window, SLOT(setCurrentMapImageInPixmap(QPixmap &)));
+    QObject::connect(&computator, SIGNAL(flowMapCreated(const QPixmap &)),
+                     &window, SLOT(setFlowMap(const QPixmap &)));
+    QObject::connect(&computator, SIGNAL(sourcesChanged(const PointSource &, const QVector<PolutionMatter> &)),
+                     &window, SLOT(addSourceToTable(const PointSource &, const QVector<PolutionMatter> &)));
+    QObject::connect(&computator, SIGNAL(sourcesChanged(const DiffusionSource &, const QVector<PolutionMatter> &)),
+                     &window, SLOT(addSourceToTable(const DiffusionSource &, const QVector<PolutionMatter> &)));
+    QObject::connect(&computator, SIGNAL(sourceUpdated(int, const PointSource &, const QVector<PolutionMatter> &)),
+                     &window, SLOT(updateSourceInTable(int, const PointSource &, const QVector<PolutionMatter> &)));
+    QObject::connect(&computator, SIGNAL(sourceUpdated(int, const DiffusionSource &, const QVector<PolutionMatter> &)),
+                     &window, SLOT(updateSourceInTable(int, const DiffusionSource &, const QVector<PolutionMatter> &)));
 
     // connections between Computator and ExcelWorker
     QObject::connect(&computator, SIGNAL(uxSpeedChanged(const QVector<QVector<double>> &)),
@@ -130,11 +154,24 @@ int main(int argc, char *argv[])
                      &excel_worker, SLOT(updateU0XSpeeds(const QVector<QVector<double>> &)));
     QObject::connect(&computator, SIGNAL(u0ySpeedChanged(const QVector<QVector<double>> &)),
                      &excel_worker, SLOT(updateU0YSpeeds(const QVector<QVector<double>> &)));
+    QObject::connect(&computator, SIGNAL(uChanged(const QVector<QVector<double>> &)),
+                     &excel_worker, SLOT(updateU(const QVector<QVector<double>> &)));
+    QObject::connect(&computator, SIGNAL(u0Changed(const QVector<QVector<double>> &)),
+                     &excel_worker, SLOT(updateU0(const QVector<QVector<double>> &)));
 
 
     // connections  between ExcelWorker and Visualization3DContainer
     QObject::connect(&excel_worker, SIGNAL(heightsLoaded(QVector<QVector<QPair<bool, double>>> &)),
                      &graphics3D, SLOT(setupHeights(QVector<QVector<QPair<bool, double>>> &)));
+
+
+    // connections between PolutionWidgetContainer and Computator
+    QObject::connect(&polution_widget_container, SIGNAL(sourceCreated(const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)),
+                     &computator, SLOT(addNewSource(const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)));
+    QObject::connect(&polution_widget_container, SIGNAL(getSourceInfo(int, std::variant<PointSource, DiffusionSource> &, QVector<PolutionMatter> &)),
+                     &computator, SLOT(giveSourceInfo(int, std::variant<PointSource, DiffusionSource> &, QVector<PolutionMatter> &)));
+    QObject::connect(&polution_widget_container, SIGNAL(sourceUpdated(int, const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)),
+                     &computator, SLOT(updateSource(int, const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)));
 
     window.emitUiSignal(); // emit connected ui stuff signals
 

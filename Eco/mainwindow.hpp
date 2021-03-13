@@ -11,6 +11,7 @@
 #include "paintingwidget.hpp"
 #include "visualization3dcontainer.hpp"
 #include "tablecontainer.hpp"
+#include "source_types.hpp"
 
 #include "ui_mainwindow.h"
 
@@ -59,6 +60,16 @@ public slots:
 
     void enableSpeedsSaver(); // connected with Computator; signal - speedsComputated() // public
 
+    void setCurrentMapImageInPixmap(QPixmap &map);
+
+    void setFlowMap(const QPixmap &pm);
+
+    void addSourceToTable(const PointSource &source, const QVector<PolutionMatter> &matters); // connected with Computator; signal - sourcesChanged(same)
+    void addSourceToTable(const DiffusionSource &source, const QVector<PolutionMatter> &matters); // connected with Computator; signal - sourcesChanged(same)
+
+    void updateSourceInTable(int index, const PointSource &source, const QVector<PolutionMatter> &matters); // connected with Computator; signal - sourceUpdated(same)
+    void updateSourceInTable(int index, const DiffusionSource &source, const QVector<PolutionMatter> &matters); // connected with Computator; signal - sourceUpdated(same)
+
 private slots:
     void loadFromSiteButtonPressed(); // connected with ui->load_from_site_button;
     void loadFromPCButtonPressed(); // connected with ui->load_from_pc_button;
@@ -85,6 +96,10 @@ private slots:
     void azimuthValueChanged(double) const;
     void systemIndexChanged(int) const;
 
+    void addNewSourceButtonPressed() const;
+    void displaySelectedSourceButtonPressed();
+    void deleteSelectedSouceButtonPressed();
+
 signals:
     void setupTable(QTableWidget &table);
 
@@ -99,6 +114,7 @@ signals:
 
     void sendAzimuthState(const QPair<double, bool> &pair) const;
     void sendSystemState(const QPair<int, bool> &pair) const;
+    void sendComputationDistance(double) const;
 
     void saveMapAsExcel(const QString &file_path) const;
     void loadHeightsFromFileSender(const QString &file_path);
@@ -108,6 +124,10 @@ signals:
     void forceAbsSpeedDecompose() const;
 
     void computateSpeeds() const;
+
+    void addNewSource() const;
+    void displaySelectedSource(int index) const; // PolutionWidgetContainer
+    void deleteSelectedSource(int index); // Computator and ui table
 
 // Getters
 public:
@@ -120,6 +140,7 @@ public:
     [[nodiscard]] inline const QDoubleSpinBox* getHorizonDoubleSpinBox() const noexcept { return m_ui->horizon_spin_box; }
     [[nodiscard]] inline const QDoubleSpinBox* getKsiAtolSpinBox() const noexcept { return m_ui->atol_percents_spin_box; }
     [[nodiscard]] inline const QDoubleSpinBox* getSpeedAbsDoubleSpinBox() const noexcept { return m_ui->abs_wind_speed_spin_box; }
+    [[nodiscard]] inline const QDoubleSpinBox* getMaxComputationDistanceDoubleSpinBox() const noexcept { return m_ui->max_computations_distance_double_spin_box; }
 
 // methods
 public:
@@ -131,9 +152,12 @@ private:
     QPixmap getPixmapFromWebEngine() const;
     QString getFormatsFromComboBox(const QComboBox *box) const;
 
-    void enableInitButtonsSet();
+    void setupNewInstance();
+    void imageLoadedSettings();
 
     void setupIternalConnections();
     void connectPaintingSignalsWithMainWindow();
+
+    QTableWidgetItem* createTableWidgetItem(const QString &text) const;
 };
 #endif // MAINWINDOW_H
