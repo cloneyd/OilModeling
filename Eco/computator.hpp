@@ -41,6 +41,7 @@ public:
     static constexpr double m_owega{ 7.29e-5 };
     static constexpr double m_gamma{ 0.032 };
     static constexpr auto fill_value{ 100001. };; // standart fill value for all vector
+    static constexpr double pi{ 3.141592653589793 };
 
 private:
     const QVector<QVector<QPair<bool, QPointF>>> *m_grid_ptr; // nullptr by default;
@@ -141,7 +142,8 @@ private:
     bool findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cmp, const QPair<int, int> value) const;
 
     QPixmap createFlowMap(const QVector<QVector<double>> &ux, const QVector<QVector<double>> &uy,
-                          const QVector<QVector<double>> &u0x, const QVector<QVector<double>> &u0y) const;
+                          const QVector<QVector<double>> &u0x, const QVector<QVector<double>> &u0y,
+                          const QVector<QVector<double>> &u, const QVector<QVector<double>> &u0) const;
 };
 
 // inline function realization

@@ -120,224 +120,62 @@ void ExcelWorker::loadHeightsFromFile(const QString &file_path)
 
 void ExcelWorker::updateUXSpeeds(const QVector<QVector<double>> &speeds)
 {
-    auto names{ m_speeds_doc.sheetNames() };
-    if(names.size() != number_of_speed_list) {
-        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
-        return;
-    }
-
-    m_speeds_doc.selectSheet(names[list_of_u_projection]);
-
     const auto nrows{ speeds.size() };
     if(nrows == 0)  return;
     const auto ncols{ speeds[0].size() };
     if(ncols == 0)  return;
 
-    if(!m_speeds_doc.write(1, 1, "Таблица скоростей Ux")) {
-        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-        return;
-    }
-
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if((*m_grid_ptr)[i][j].first) {
-                if(!m_speeds_doc.write(i + 2, j + 1, speeds[i][j])) {
-                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-                    return;
-                }
-            }
-        }
-    }
-
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
-    cfm.addRange(2, 1, nrows + 1, ncols);
-    m_speeds_doc.addConditionalFormatting(cfm);
+    updateSpeed(1, 1, ListLocation::list_of_u_projection, "Таблица проекций скоростей на OX", speeds);
 }
 
 void ExcelWorker::updateUYSpeeds(const QVector<QVector<double>> &speeds)
 {
-    auto names{ m_speeds_doc.sheetNames() };
-    if(names.size() != number_of_speed_list) {
-        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
-        return;
-    }
-
-    m_speeds_doc.selectSheet(names[ListLocation::list_of_u_projection]);
-
     const auto nrows{ speeds.size() };
     if(nrows == 0) return;
     const auto ncols{ speeds[0].size()  };
     if(ncols == 0) return;
 
-    if(!m_speeds_doc.write(nrows + 4, 1, "Таблица скоростей Uy")) {
-        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-        return;
-    }
-
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if((*m_grid_ptr)[i][j].first) {
-                if(!m_speeds_doc.write(nrows + 5 + i, j + 1, speeds[i][j])) {
-                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-                    return;
-                }
-            }
-        }
-    }
-
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
-    cfm.addRange(nrows + 5, 1, nrows + 5 + nrows, ncols);
-    m_speeds_doc.addConditionalFormatting(cfm);
+    updateSpeed(nrows + 4, 1, ListLocation::list_of_u_projection, "Таблица проекций скоростей течений на OY", speeds);
 }
 
 void ExcelWorker::updateU0XSpeeds(const QVector<QVector<double>> &speeds)
 {
-    auto names{ m_speeds_doc.sheetNames() };
-    if(names.size() != number_of_speed_list) {
-        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
-        return;
-    }
-
-    m_speeds_doc.selectSheet(names[ListLocation::list_of_u0_projection]);
-
     const auto nrows{ speeds.size() };
     if(nrows == 0)  return;
     const auto ncols{ speeds[0].size() };
     if(ncols == 0)  return;
 
-    if(!m_speeds_doc.write(1, 1, "Таблица проекций скоростей U0x")) {
-        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-        return;
-    }
-
-    for(int i{ }; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if((*m_grid_ptr)[i][j].first) {
-                if(!m_speeds_doc.write(i + 2, j + 1, speeds[i][j])) {
-                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-                    return;
-                }
-            }
-        }
-    }
-
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
-    cfm.addRange(2, 1, nrows + 1, ncols);
-    m_speeds_doc.addConditionalFormatting(cfm);
+    updateSpeed(1, 1, ListLocation::list_of_u0_projection, "Таблица проекций скоростей течений на поверхности на OX", speeds);
 }
 
 void ExcelWorker::updateU0YSpeeds(const QVector<QVector<double>> &speeds)
 {    
-    auto names{ m_speeds_doc.sheetNames() };
-    if(names.size() != number_of_speed_list) {
-        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
-        return;
-    }
-
-    m_speeds_doc.selectSheet(names[ListLocation::list_of_u0_projection]);
-
     const auto nrows{ speeds.size() };
     if(nrows == 0) return;
     const auto ncols{ speeds[0].size()  };
     if(ncols == 0) return;
 
-    if(!m_speeds_doc.write(nrows + 4, 1, "Таблица проекций скоростей Vy")) {
-        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-        return;
-    }
-
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if((*m_grid_ptr)[i][j].first) {
-                if(!m_speeds_doc.write(nrows + 5 + i, j + 1, speeds[i][j])) {
-                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-                    return;
-                }
-            }
-        }
-    }
-
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
-    cfm.addRange(nrows + 5, 1, nrows + 5 + nrows, ncols);
-    m_speeds_doc.addConditionalFormatting(cfm);
+    updateSpeed(nrows + 4, 1, ListLocation::list_of_u0_projection, "Таблица проекций скоростей на поверхности на OY", speeds);
 }
 
 void ExcelWorker::updateU(const QVector<QVector<double>> &speeds)
 {
-    auto names{ m_speeds_doc.sheetNames() };
-    if(names.size() != number_of_speed_list) {
-        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
-        return;
-    }
-
-    m_speeds_doc.selectSheet(names[ListLocation::list_of_flows]);
-
     const auto nrows{ speeds.size() };
     if(nrows == 0) return;
     const auto ncols{ speeds[0].size()  };
     if(ncols == 0) return;
 
-    if(!m_speeds_doc.write(1, 1, "Таблица скоростей U")) {
-        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-        return;
-    }
-
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if((*m_grid_ptr)[i][j].first) {
-                if(!m_speeds_doc.write(i + 2, j + 1, speeds[i][j])) {
-                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-                    return;
-                }
-            }
-        }
-    }
-
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
-    cfm.addRange(2, 1, nrows + 1, ncols);
-    m_speeds_doc.addConditionalFormatting(cfm);
+    updateSpeed(1, 1, ListLocation::list_of_flows, "Таблица скоростей течений", speeds);
 }
 
 void ExcelWorker::updateU0(const QVector<QVector<double>> &speeds)
 {
-    auto names{ m_speeds_doc.sheetNames() };
-    if(names.size() != number_of_speed_list) {
-        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
-        return;
-    }
-
-    m_speeds_doc.selectSheet(names[ListLocation::list_of_flows]);
-
     const auto nrows{ speeds.size() };
     if(nrows == 0) return;
     const auto ncols{ speeds[0].size()  };
     if(ncols == 0) return;
 
-    if(!m_speeds_doc.write(nrows + 4, 1, "Таблица скоростей течений на поверхности")) {
-        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-        return;
-    }
-
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if((*m_grid_ptr)[i][j].first) {
-                if(!m_speeds_doc.write(nrows + 5 + i, j + 1, speeds[i][j])) {
-                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
-                    return;
-                }
-            }
-        }
-    }
-
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
-    cfm.addRange(nrows + 5, 1, nrows + 5 + nrows, ncols);
-    m_speeds_doc.addConditionalFormatting(cfm);
+    updateSpeed(nrows + 4, 1, ListLocation::list_of_flows, "Таблица скоростей течений на поверхности", speeds);
 }
 
 void ExcelWorker::saveSpeedsAsExcel(const QString &filepath)
@@ -346,4 +184,41 @@ void ExcelWorker::saveSpeedsAsExcel(const QString &filepath)
         showErrorMessageBox(QString("Не удалось сохранить файл.\nПожалуйста, попробуйте еще раз"), "Ошибка сохранения");
         return;
     }
+}
+
+
+// private functions
+void ExcelWorker::updateSpeed(int row_offset, int col_offset, ListLocation page, const QString &label, const QVector<QVector<double>> &speeds)
+{
+    auto names{ m_speeds_doc.sheetNames() };
+    if(names.size() != number_of_speed_list) {
+        showErrorMessageBox("Файл скоростей поврежден", "Ошибка файла");
+        return;
+    }
+
+    m_speeds_doc.selectSheet(names[page]);
+
+    const auto nrows{ speeds.size() };
+    const auto ncols{ speeds[0].size()  };
+
+    if(!m_speeds_doc.write(row_offset, 1, label)) {
+        showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
+        return;
+    }
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if((*m_grid_ptr)[i][j].first) {
+                if(!m_speeds_doc.write(row_offset + i + 1, col_offset + j, speeds[i][j])) {
+                    showErrorMessageBox(QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"), "Ошибка записи");
+                    return;
+                }
+            }
+        }
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(QColor(0x63BE7B), QColor(0xffEB84), QColor(0xf86968));
+    cfm.addRange(row_offset + 1,  col_offset, row_offset + 1 + nrows, col_offset + ncols);
+    m_speeds_doc.addConditionalFormatting(cfm);
 }

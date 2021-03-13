@@ -54,6 +54,10 @@ public slots:
 
 signals:
     void heightsLoaded(QVector<QVector<QPair<bool, double>>> &heights); // WARNING: heights will be changed
+
+// helpers
+private:
+    void updateSpeed(int row_offset, int col_offset, ListLocation page, const QString &label, const QVector<QVector<double>> &speeds);
 };
 
 #endif // EXCELWORKER_HPP

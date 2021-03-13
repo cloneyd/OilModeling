@@ -146,14 +146,12 @@ void Computator::updateSource(int index, const std::variant<PointSource, Diffusi
 
 void Computator::decomposeAbsSpeed()
 {
-    static constexpr double pi{ 3.141592653589793 };
-
     m_xspeeds_vectors.clear();
     m_yspeeds_vectors.clear();
 
-    if(!m_heights_ptr) return;
-    auto nrows{ (*m_heights_ptr).size() };
-    auto ncols{ (*m_heights_ptr)[0].size() };
+    if(!m_grid_ptr) return;
+    auto nrows{ (*m_grid_ptr).size() };
+    auto ncols{ (*m_grid_ptr)[0].size() };
 
     m_xspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
     m_yspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
@@ -161,7 +159,7 @@ void Computator::decomposeAbsSpeed()
     auto fill = [&nrows, &ncols, this](double degrees) mutable {
         for(int i{}; i < nrows; ++i) {
             for(int j{}; j < ncols; ++j) {
-                if((*m_heights_ptr)[i][j].first) {
+                if((*m_grid_ptr)[i][j].first) {
                     m_xspeeds_vectors[i][j] = m_absolute_speed * std::cos(degrees * pi / 180.); // from radians to degrees
                     m_yspeeds_vectors[i][j] = m_absolute_speed * std::sin(degrees * pi / 180.);
                 }
@@ -298,7 +296,7 @@ void Computator::computateSpeeds() const
     emit uChanged(u);
     emit u0Changed(u0);
 
-    auto pm{ createFlowMap(ux_speed, uy_speed, u0x_speed, u0y_speed) };
+    auto pm{ createFlowMap(ux_speed, uy_speed, u0x_speed, u0y_speed, u, u0) };
     emit flowMapCreated(pm);
 
     QMessageBox::about(nullptr, "Действие завершено", "Значения рассчитаны");
@@ -680,7 +678,8 @@ bool Computator::findInVector(const QVector<QPair<int, int>> &vec, const Cmp &cm
 
 // TODO: arrows and legend
 QPixmap Computator::createFlowMap(const QVector<QVector<double>> &ux, const QVector<QVector<double>> &uy,
-                                  const QVector<QVector<double>> &u0x, const QVector<QVector<double>> &u0y) const
+                                  const QVector<QVector<double>> &u0x, const QVector<QVector<double>> &u0y,
+                                  const QVector<QVector<double>> &u, const QVector<QVector<double>> &u0) const
 {
     QPixmap pm;
     emit getCurrentMapImage(pm);
@@ -688,56 +687,71 @@ QPixmap Computator::createFlowMap(const QVector<QVector<double>> &ux, const QVec
     auto nrows{ ux.size() };
     auto ncols{ ux[0].size() };
 
-    auto length = [](double first, double second) -> double {
-          return std::sqrt(std::pow(first, 2) + std::pow(second, 2));
-    };
-
-    auto pix_x_step{ (*m_grid_ptr)[0][1].second.x() -  (*m_grid_ptr)[0][0].second.x() };
-    auto pix_y_step{ (*m_grid_ptr)[1][0].second.y() - (*m_grid_ptr)[0][0].second.y() };
-    auto pix_vec{ std::sqrt(std::pow(pix_x_step / 2., 2) + std::pow(pix_y_step / 2., 2)) };
-
-    QPainter painter;
-    painter.begin(&pm);
-    painter.setPen(QPen(Qt::black, 1.));
-
+    double max_speed{ -1. };
     for(int i{}; i < nrows; ++i) {
         for(int j{}; j < ncols; ++j) {
             if((*m_heights_ptr)[i][j].first) {
-                if((*m_heights_ptr)[i][j].second > m_horizon) {
-                    auto result{ length(ux[i][j], uy[i][j]) };
-                    auto sin{ uy[i][j] / result };
-                    auto cos{ ux[i][j] / result };
+                if(max_speed < u[i][j]) {
+                    max_speed = u[i][j];
+                }
 
-                    if(result <= pix_vec) {
-                        painter.drawLine(QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2.,
-                                                 (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2.),
-                                         QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2 + result * cos,
-                                                 (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2. - result * sin));
+                if(max_speed < u0[i][j]) {
+                    max_speed = u0[i][j];
+                }
+            }
+        }
+    }
+
+    static constexpr double narrow_ratio{ 0.6 };
+    //static constexpr double arrow_degrees{ 15. };
+    auto pix_x_step{ (*m_grid_ptr)[0][1].second.x() -  (*m_grid_ptr)[0][0].second.x() };
+    auto pix_y_step{ (*m_grid_ptr)[1][0].second.y() - (*m_grid_ptr)[0][0].second.y() };
+    auto pix_vec{ std::sqrt(std::pow(pix_x_step / 2., 2) + std::pow(pix_y_step / 2., 2)) * narrow_ratio };
+    //double arrow_length{ pix_vec / narrow_ratio / 3. };
+
+    QPainter painter;
+    painter.begin(&pm);
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if((*m_heights_ptr)[i][j].first) {
+                double sin{};
+                double cos{};
+                if((*m_heights_ptr)[i][j].second > m_horizon) {
+                    if(u[i][j] <= max_speed / 3.) {
+                        painter.setPen(QPen(Qt::darkGreen, 1.));
+                    }
+                    else if(u[i][j] <= max_speed / 3. * 2.) {
+                        painter.setPen(QPen(Qt::yellow, 1.));
                     }
                     else {
-                        painter.drawLine(QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2., (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2.),
-                                         QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2. + pix_vec * cos,
-                                                 (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2. - pix_vec * sin));
+                        painter.setPen(QPen(Qt::red, 1.));
                     }
+
+                    sin = uy[i][j] / u[i][j];
+                    cos = ux[i][j] / u[i][j];
                 }
                 else {
-                    auto result{ length(u0x[i][j], u0y[i][j]) };
-                    auto sin{ u0y[i][j] / result };
-                    auto cos{ u0x[i][j] / result };
-
-                    if(result <= pix_vec) {
-                        painter.drawLine(QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2.,
-                                                 (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2.),
-                                         QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2. + result * cos,
-                                                 (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2. - result * sin));
+                    if(u0[i][j] <= max_speed / 3.) {
+                        painter.setPen(QPen(Qt::darkGreen, 1.));
+                    }
+                    else if(u0[i][j] <= max_speed / 3. * 2.) {
+                        painter.setPen(QPen(Qt::yellow, 1.));
                     }
                     else {
-                        painter.drawLine(QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2.,
-                                                 (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2.),
-                                         QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2. + pix_vec * cos,
-                                                 (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2. - pix_vec * sin));
+                        painter.setPen(QPen(Qt::red, 1.));
                     }
+
+                    sin = u0y[i][j] / u0[i][j];
+                    cos = u0x[i][j] / u0[i][j];
                 }
+
+                painter.drawLine(QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2., (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2.),
+                                 QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2. + pix_vec * cos,
+                                         (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2. - pix_vec * sin));
+
+                painter.drawLine(QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2., (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2.),
+                                 QPointF((*m_grid_ptr)[i][j].second.x() + pix_x_step / 2. - pix_vec * cos,
+                                         (*m_grid_ptr)[i][j].second.y() + pix_y_step / 2. + pix_vec * sin));
             }
         }
     }
