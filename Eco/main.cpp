@@ -5,6 +5,7 @@
 #include "gridhandler.hpp"
 #include "visualization3dcontainer.hpp"
 #include "excelworker.hpp"
+#include <paintingwidget.hpp>
 #include "polutionwidgetcontainer.hpp"
 
 int main(int argc, char *argv[])
@@ -15,6 +16,7 @@ int main(int argc, char *argv[])
     auto&& graphics3D { window.getVisualizationContainer() }; // ref to window's object
     ExcelWorker excel_worker;
     Computator computator;
+    PaintingWidget painting_widget;
     PolutionWidgetContainer polution_widget_container;
 
     QFile styleF(":/qss/qss/ManjaroMix.qss");
@@ -80,6 +82,18 @@ int main(int argc, char *argv[])
                      &excel_worker, SLOT(loadHeightsFromFile(const QString &)));
     QObject::connect(&window, SIGNAL(saveSpeedsAsExcel(const QString &)),
                      &excel_worker, SLOT(saveSpeedsAsExcel(const QString &)));
+
+    // connections between MainWindow and PaintingWidget
+    QObject::connect(&window, SIGNAL(getMapImage(QImage *)),
+                     &painting_widget, SLOT(getMapImage(QImage *)));
+    QObject::connect(&window, SIGNAL(getEdittedMapPixmap(QPixmap *)),
+                     &painting_widget, SLOT(getEdittedMapPixmap(QPixmap *)));
+    QObject::connect(&window, SIGNAL(loadImage(const QPixmap &)),
+                     &painting_widget, SLOT(setScenePixmap(const QPixmap &)));
+    QObject::connect(&window, SIGNAL(loadImage(const QString &)),
+                     &painting_widget, SLOT(prepareGraphicsView(const QString &)));
+    QObject::connect(&window, SIGNAL(showPaintingWidget()),
+                     &painting_widget, SLOT(show()));
 
     // connections between MainWindow and PolutionWidgetContainer
     QObject::connect(&window, SIGNAL(addNewSource()),
@@ -165,11 +179,24 @@ int main(int argc, char *argv[])
                      &graphics3D, SLOT(setupHeights(QVector<QVector<QPair<bool, double>>> &)));
 
 
+    // connections between PaintingWidget and MainWindow
+    QObject::connect(&painting_widget, SIGNAL(imageChanged(const QImage &)),
+                     &window, SLOT(setImageInMapLabel(const QImage &)));
+    QObject::connect(&painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const std::list<QPointF> &, const QColor &, double)),
+                     &window, SLOT(createGridSender(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const std::list<QPointF> &, const QColor &, double)));
+    QObject::connect(&painting_widget, SIGNAL(cellScaleParametersChanged(double, double, double)),
+                     &window, SLOT(updateGridParameters(double, double, double)));
+    QObject::connect(&painting_widget, SIGNAL(deleteGrid()),
+                     &window, SLOT(deleteGridSender()));
+    QObject::connect(&painting_widget, SIGNAL(drawGridInPixmap(QPixmap &, const QColor &, double)),
+                     &window, SLOT(drawGridInPixmapSender(QPixmap &, const QColor &, double)));
+
+
     // connections between PolutionWidgetContainer and Computator
     QObject::connect(&polution_widget_container, SIGNAL(sourceCreated(const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)),
-                     &computator, SLOT(addNewSource(const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)));
+                     &computator, SLOT(addNewSource(const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)));    
     QObject::connect(&polution_widget_container, SIGNAL(getSourceInfo(int, std::variant<PointSource, DiffusionSource> &, QVector<PolutionMatter> &)),
-                     &computator, SLOT(giveSourceInfo(int, std::variant<PointSource, DiffusionSource> &, QVector<PolutionMatter> &)));
+                     &computator, SLOT(giveSourceInfo(int, std::variant<PointSource, DiffusionSource> &, QVector<PolutionMatter> &)));    
     QObject::connect(&polution_widget_container, SIGNAL(sourceUpdated(int, const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)),
                      &computator, SLOT(updateSource(int, const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)));
 

@@ -8,7 +8,6 @@
 #include <QPointF>
 #include <QPair>
 
-#include "paintingwidget.hpp"
 #include "visualization3dcontainer.hpp"
 #include "tablecontainer.hpp"
 #include "source_types.hpp"
@@ -25,8 +24,6 @@ class MainWindow : public QMainWindow
 
 private:
     Ui::MainWindow *m_ui;
-
-    PaintingWidget m_painting_widget;
 
     TableContainer m_deeps_table_container;
     TableContainer m_xwind_table_container;
@@ -76,7 +73,7 @@ private slots:
 
     void loadHeightsFromFileButtonPressed(); // connected with ui->load_heights_from_file_button;
 
-    void editImageButtonPressed(); // connected with ui->edit_image_button;
+    void editImageButtonPressed() const; // connected with ui->edit_image_button;
     void setImageInMapLabel(const QImage &image); // connected with PaintingWidget; signal - imageChanged(same);
 
     void saveHeightsTableButtonPressed(); // connected with ui->save_heights_table_button
@@ -129,6 +126,12 @@ signals:
     void displaySelectedSource(int index) const; // PolutionWidgetContainer
     void deleteSelectedSource(int index); // Computator and ui table
 
+    void getMapImage(QImage *image) const;
+    void getEdittedMapPixmap(QPixmap *map) const;
+    void loadImage(const QPixmap &map) const;
+    void loadImage(const QString &filepath) const;
+    void showPaintingWidget() const;
+
 // Getters
 public:
     [[nodiscard]] inline const QDoubleSpinBox* getScaleDoubleSpinBox() const noexcept { return m_ui->scale_spin_box; }
@@ -156,7 +159,6 @@ private:
     void imageLoadedSettings();
 
     void setupIternalConnections();
-    void connectPaintingSignalsWithMainWindow();
 
     QTableWidgetItem* createTableWidgetItem(const QString &text) const;
 };

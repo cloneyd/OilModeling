@@ -10,7 +10,6 @@ extern void showErrorMessageBox(const QString &msg, const QString &title = "");
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       m_ui(new Ui::MainWindow), // FIXME: can throw; must be replaced
-      m_painting_widget{},
       m_deeps_table_container{},
       m_xwind_table_container{},
       m_ywind_table_container{},
@@ -248,7 +247,9 @@ void MainWindow::enableSpeedsSaver()
 
 void MainWindow::setCurrentMapImageInPixmap(QPixmap &map)
 {
-    map = QPixmap::fromImage(m_painting_widget.getMapImage());
+    QImage image;
+    emit getMapImage(&image);
+    map = QPixmap::fromImage(image);
 }
 
 void MainWindow::setFlowMap(const QPixmap &pm)
@@ -306,9 +307,9 @@ void MainWindow::updateSourceInTable(int index, const DiffusionSource &source, c
 void MainWindow::loadFromSiteButtonPressed()
 {
     m_ui->display_info_tool_box->setCurrentIndex(0);
-    m_painting_widget.setScenePixmap(getPixmapFromWebEngine());
-
     imageLoadedSettings();
+
+    emit loadImage(getPixmapFromWebEngine());
 }
 
 void MainWindow::loadFromPCButtonPressed()
@@ -316,7 +317,7 @@ void MainWindow::loadFromPCButtonPressed()
     auto image_path { QFileDialog::getOpenFileName(this, tr("Open File"), "/home", tr("Images (*.png *.jpg *.jpeg)")) };
     if(image_path.isEmpty()) return;
 
-    m_painting_widget.prepareGraphicsView(image_path);
+    emit loadImage(image_path);
     imageLoadedSettings();
 }
 
@@ -331,10 +332,9 @@ void MainWindow::loadHeightsFromFileButtonPressed()
     emit loadHeightsFromFileSender(file_path);
 }
 
-void MainWindow::editImageButtonPressed()
+void MainWindow::editImageButtonPressed() const
 {
-    m_painting_widget.show();
-    m_painting_widget.activateWindow();
+    emit showPaintingWidget();
 }
 
 void MainWindow::setImageInMapLabel(const QImage &image)
@@ -404,7 +404,9 @@ void MainWindow::saveMapButtonPressed()
         return;
     }
 
-    if(!m_painting_widget.getMapImage().save(file_path)) {
+    QImage map;
+    emit getMapImage(&map);
+    if(!map.save(file_path)) {
         QMessageBox::warning(nullptr, QString("Ошибка сохранения"), QString("Возникла ошибка при сохранение\nизображения. Пожалуйста,\nпопробуйте еще раз"));
     }
 }
@@ -578,8 +580,6 @@ void MainWindow::imageLoadedSettings()
 
 void MainWindow::setupIternalConnections()
 {
-    connectPaintingSignalsWithMainWindow();
-
     connect(&m_deeps_table_container, SIGNAL(saveButtonPressed(QTableWidget &)),
             this, SLOT(saveHeightsFromTableSender(QTableWidget &)));
 
@@ -600,24 +600,6 @@ void MainWindow::setupIternalConnections()
 
     connect(m_ui->system_combo_box, SIGNAL(currentIndexChanged(int)),
             this, SLOT( systemIndexChanged(int)));
-}
-
-void MainWindow::connectPaintingSignalsWithMainWindow()
-{
-    connect(&m_painting_widget, SIGNAL(imageChanged(const QImage &)),
-            this, SLOT(setImageInMapLabel(const QImage &)));
-
-    connect(&m_painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const std::list<QPointF> &, const QColor &, double)),
-            this, SLOT(createGridSender(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const std::list<QPointF> &, const QColor &, double)));
-
-    connect(&m_painting_widget, SIGNAL(cellScaleParametersChanged(double, double, double)),
-            this, SLOT(updateGridParameters(double, double, double)));
-
-    connect(&m_painting_widget, SIGNAL(deleteGrid()),
-            this, SLOT(deleteGridSender()));
-
-    connect(&m_painting_widget, SIGNAL(drawGridInPixmap(QPixmap &, const QColor &, double)),
-            this, SLOT(drawGridInPixmapSender(QPixmap &, const QColor &, double)));
 }
 
 QTableWidgetItem* MainWindow::createTableWidgetItem(const QString &text) const

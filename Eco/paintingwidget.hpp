@@ -37,6 +37,13 @@ public:
     explicit PaintingWidget(QWidget *parent = nullptr);
     ~PaintingWidget();
 
+public slots:
+    [[nodiscard]] QPixmap* getEdittedMapPixmap(QPixmap *pixmap = nullptr) const;
+    [[nodiscard]] QImage* getMapImage(QImage *image = nullptr) const;
+
+    void setScenePixmap(const QPixmap &pm);
+    void prepareGraphicsView(const QString &file_path);
+
 private slots:
     void acceptChangesButtonPressed(); // connected with painting_ui->accept_changes_button
     void discardAllChangesButtonPressed(); // connected with painting_ui->discard_all_changes_button
@@ -71,24 +78,12 @@ signals:
     void deleteGrid() const;
     void drawGridInPixmap(QPixmap &map, const QColor &color, double line_width) const;
 
-// setters
-public:
-    void setScenePixmap(const QPixmap &pm);
-
-// getters
-public:
-    QPixmap getEdittedMapPixmap() const;
-
-    [[nodiscard]] inline const QImage& getMapImage() const noexcept { return m_map_image; }
 
 // overridden functions
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
 
-// modificators
-public:
-    void prepareGraphicsView(const QString &file_path);
 
 // helpers
 private:

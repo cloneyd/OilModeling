@@ -54,6 +54,60 @@ PaintingWidget::~PaintingWidget()
 }
 
 
+// public sltos
+[[nodiscard]] QPixmap* PaintingWidget::getEdittedMapPixmap(QPixmap *pm) const
+{
+    if(!pm) {
+        auto map{ new QPixmap(qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene())->getEditedPixmap()) }; // WARNING: may throw; replace?
+        return map;
+    }
+
+    *pm = qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene())->getEditedPixmap();
+    return pm;
+}
+
+[[nodiscard]] QImage* PaintingWidget::getMapImage(QImage* image) const
+{
+    if(!image) {
+        auto map{ new QImage(m_map_image) }; // WARNING: may throw; replace
+        return map;
+    }
+
+    *image = m_map_image;
+    return image;
+}
+
+void PaintingWidget::setScenePixmap(const QPixmap &pm)
+{
+    auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
+    auto scaled_pm = pm.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    scene->addPixmap(scaled_pm);
+    m_map_image = scaled_pm.toImage();
+
+    emit imageChanged(m_map_image);
+}
+
+void PaintingWidget::prepareGraphicsView(const QString &image_path)
+{
+    auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
+    qobject_cast<PaintTableScene*>(scene)->clear();
+
+    m_is_change_made = false;
+    m_is_grid_drawn = false;
+
+    while(!m_map_image.load(image_path)) {
+        auto answer{ QMessageBox::question(this, QString("Повторить действие"), QString("Не удалось загрузить изображение. Попробовать снова?")) };
+        if(answer == QMessageBox::Yes) {
+            QString image_path = QFileDialog::getOpenFileName(this, tr("Open File"), "/home", tr("Images (*.png *.jpg)"));
+            if(image_path.isEmpty()) return;
+        }
+    }
+    m_painting_ui->map_editor_graphics_view->scene()->addPixmap(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+
+    emit imageChanged(m_map_image);
+}
+
+
 // private slots
 void PaintingWidget::acceptChangesButtonPressed()
 {
@@ -112,18 +166,6 @@ void PaintingWidget::markPositionChanged()
         return;
     }
     scene->addPixmap(scene->paintContentOnMap(pm, PaintStyle::lines));
-}
-
-
-// setters
-void PaintingWidget::setScenePixmap(const QPixmap &pm)
-{
-    auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
-    auto scaled_pm = pm.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    scene->addPixmap(scaled_pm);
-    m_map_image = scaled_pm.toImage();
-
-    emit imageChanged(m_map_image);
 }
 
 void PaintingWidget::updateMapButtonPressed()
@@ -257,13 +299,6 @@ void PaintingWidget::saveChangesButtonClicked(QAbstractButton *btn)
 }
 
 
-// Getters
-QPixmap PaintingWidget::getEdittedMapPixmap() const
-{
-    return qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene())->getEditedPixmap();
-}
-
-
 // overriden functions
 void PaintingWidget::keyPressEvent(QKeyEvent *event)
 {
@@ -305,27 +340,7 @@ void PaintingWidget::keyReleaseEvent(QKeyEvent *event)
 }
 
 
-// Public modificators
-void PaintingWidget::prepareGraphicsView(const QString &image_path)
-{
-    auto scene{ m_painting_ui->map_editor_graphics_view->scene() };
-    qobject_cast<PaintTableScene*>(scene)->clear();
-
-    m_is_change_made = false;
-    m_is_grid_drawn = false;
-
-    while(!m_map_image.load(image_path)) {
-        auto answer{ QMessageBox::question(this, QString("Повторить действие"), QString("Не удалось загрузить изображение. Попробовать снова?")) };
-        if(answer == QMessageBox::Yes) {
-            QString image_path = QFileDialog::getOpenFileName(this, tr("Open File"), "/home", tr("Images (*.png *.jpg)"));
-            if(image_path.isEmpty()) return;
-        }
-    }
-    m_painting_ui->map_editor_graphics_view->scene()->addPixmap(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-
-    emit imageChanged(m_map_image);
-}
-
+// private functions
 void PaintingWidget::setupConnectionsWithCellScaleParametersWidget()
 {
     connect(m_cell_scale_parameters_ui->save_changes_button_box, SIGNAL(clicked(QAbstractButton *)),
