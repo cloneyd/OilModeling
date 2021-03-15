@@ -180,7 +180,7 @@
          </palette>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>4</number>
         </property>
         <property name="documentMode">
          <bool>false</bool>
@@ -1402,6 +1402,57 @@ p, li { white-space: pre-wrap; }
            </item>
           </layout>
          </widget>
+         <widget class="QPushButton" name="computate_vat_push_button">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>20</x>
+            <y>40</y>
+            <width>100</width>
+            <height>60</height>
+           </rect>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>60</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>100</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Рассчитать 
+значения
+ загрязнения</string>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>
@@ -2012,6 +2063,22 @@ p, li { white-space: pre-wrap; }
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>computate_vat_push_button</sender>
+   <signal>pressed()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>computatePollutionButtonPressed()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>69</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>146</x>
+     <y>-3</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>loadFromPCButtonPressed()</slot>
@@ -2030,5 +2097,6 @@ p, li { white-space: pre-wrap; }
   <slot>addNewSourceButtonPressed()</slot>
   <slot>displaySelectedSourceButtonPressed()</slot>
   <slot>deleteSelectedSouceButtonPressed()</slot>
+  <slot>computatePollutionButtonPressed()</slot>
  </slots>
 </ui>

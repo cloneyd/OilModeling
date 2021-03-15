@@ -6,21 +6,8 @@
 
 #include <variant>
 
+#include "pollution_widget_utilities.hpp"
 #include "source_types.hpp"
-
-enum SourceType : unsigned char
-{
-    MIN,
-    Point = MIN,
-    Diffusion,
-    MAX = Diffusion
-};
-
-enum class WidgetMode : unsigned char
-{
-    Create,
-    Display
-};
 
 namespace Ui {
 class PolutionWidget;

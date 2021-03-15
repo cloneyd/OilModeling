@@ -7,6 +7,8 @@
 
 #include <list>
 
+#include "pollution_widget_utilities.hpp"
+
 enum class PaintStyle : unsigned char
 {
     MIN,
@@ -78,8 +80,11 @@ protected:
 public:
     void hideToStash();
     void getFromStash();
-    QPixmap paintContentOnMap(const QPixmap &where, PaintStyle style = PaintStyle::ellipse) const;
     void resetStashes();
+
+// public methods
+public:
+    QPixmap paintContentOnMap(const QPixmap &where, PaintStyle style = PaintStyle::ellipse) const;
 
 // helpers
 private:

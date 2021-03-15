@@ -90,7 +90,7 @@ void PolutionWidget::saveButtonAccepted()
                                        m_ui->x_double_spin_box->value(),
                                        m_ui->y_double_spin_box->value(),
                                        m_ui->spending_double_spin_box->value(),
-                                       -1., -1., -1. });
+                                       -1., -1., -1., -1.});
         break;
 
     case SourceType::Diffusion:
@@ -98,7 +98,7 @@ void PolutionWidget::saveButtonAccepted()
                                            m_ui->x_double_spin_box->value(),
                                            m_ui->y_double_spin_box->value(),
                                            m_ui->spending_double_spin_box->value(),
-                                           -1., -1., -1. }, // PointSource init
+                                           -1., -1., -1., -1. }, // PointSource init
                                            m_ui->length_double_spin_box->value(),
                                            m_ui->direction_double_spin_box->value(),
                                            m_ui->tubes_number_spin_box->value() });
@@ -137,12 +137,14 @@ void PolutionWidget::saveButtonAccepted()
             source_ref.m_initial_dilution_ratio = m_ui->init_dilution_double_spin_box->value();
             source_ref.m_main_dilution_ratio = m_ui->main_dilution_double_spin_box->value();
             source_ref.m_common_dilution_ratio = m_ui->common_dilution_double_spin_box->value();
+            source_ref.m_vat = m_ui->vat_double_spin_box->value();
         }
         else {
             auto &&source_ref{ std::get<DiffusionSource>(source) };
             source_ref.m_initial_dilution_ratio = m_ui->init_dilution_double_spin_box->value();
             source_ref.m_main_dilution_ratio = m_ui->main_dilution_double_spin_box->value();
             source_ref.m_common_dilution_ratio = m_ui->common_dilution_double_spin_box->value();
+            source_ref.m_vat = m_ui->vat_double_spin_box->value();
         }
 
         emit sourceUpdated(m_myindex, source, matters);
@@ -241,4 +243,5 @@ void PolutionWidget::getPointSourceItems(const PointSource &current_source)
     m_ui->init_dilution_double_spin_box->setValue(current_source.m_initial_dilution_ratio);
     m_ui->main_dilution_double_spin_box->setValue(current_source.m_main_dilution_ratio);
     m_ui->common_dilution_double_spin_box->setValue(current_source.m_common_dilution_ratio);
+    m_ui->vat_double_spin_box->setValue(current_source.m_vat);
 }

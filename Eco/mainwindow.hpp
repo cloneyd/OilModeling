@@ -84,6 +84,7 @@ private slots:
     void saveMapButtonPressed(); // connected with ui->save_map_button; signal - pressed()
 
     void computateSpeedsButtonPressed() const; // connected with ui->computate_speeds_button
+    inline void computatePollutionButtonPressed() const { emit computatePollution(); } // // connected with ui->computate_speeds_button
 
     void azimuthCheckBoxStateChanged(bool newstate); // connected with ui->azimuth_check_box
     void systemCheckBoxStateChanged(bool newstate); // connected with ui->system_check_box
@@ -121,6 +122,7 @@ signals:
     void forceAbsSpeedDecompose() const;
 
     void computateSpeeds() const;
+    void computatePollution() const;
 
     void addNewSource() const;
     void displaySelectedSource(int index) const; // PolutionWidgetContainer

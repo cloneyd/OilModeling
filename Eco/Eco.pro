@@ -24,11 +24,13 @@ SOURCES += \
 
 HEADERS += \
     computator.hpp \
+    computator_utilities.hpp \
     excelworker.hpp \
     gridhandler.hpp \
     mainwindow.hpp \
     paintingwidget.hpp \
     painttablescene.hpp \
+    pollution_widget_utilities.hpp \
     polutionwidget.hpp \
     polutionwidgetcontainer.hpp \
     source_types.hpp \

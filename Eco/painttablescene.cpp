@@ -269,6 +269,17 @@ void PaintTableScene::getFromStash()
     emit changeLogChanged(m_last_changes_log.size());
 }
 
+void PaintTableScene::resetStashes()
+{
+    m_wo_stash.clear();
+    m_islands_stash.clear();
+    m_mark_pos_stash.clear();
+    m_last_changes_log_stash.clear();
+    emit stashedChangeLogChanged(m_last_changes_log_stash.size());
+}
+
+
+// public methods
 QPixmap PaintTableScene::paintContentOnMap(const QPixmap &where, PaintStyle style) const
 {
     auto map{ where };
@@ -332,14 +343,6 @@ QPixmap PaintTableScene::paintContentOnMap(const QPixmap &where, PaintStyle styl
     return map;
 }
 
-void PaintTableScene::resetStashes()
-{
-    m_wo_stash.clear();
-    m_islands_stash.clear();
-    m_mark_pos_stash.clear();
-    m_last_changes_log_stash.clear();
-    emit stashedChangeLogChanged(m_last_changes_log_stash.size());
-}
 
 
 // private helpers

@@ -217,7 +217,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>1010</x>
+         <x>940</x>
          <y>20</y>
          <width>80</width>
          <height>71</height>
@@ -251,7 +251,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>1100</x>
+         <x>1030</x>
          <y>20</y>
          <width>80</width>
          <height>71</height>
@@ -282,7 +282,7 @@
       <widget class="Line" name="save_changes_delimeter_line">
        <property name="geometry">
         <rect>
-         <x>990</x>
+         <x>920</x>
          <y>10</y>
          <width>16</width>
          <height>81</height>
@@ -350,7 +350,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>870</x>
+         <x>800</x>
          <y>20</y>
          <width>121</width>
          <height>25</height>
@@ -489,7 +489,7 @@
       <widget class="Line" name="display_delimeter_line">
        <property name="geometry">
         <rect>
-         <x>560</x>
+         <x>490</x>
          <y>10</y>
          <width>16</width>
          <height>81</height>
@@ -524,7 +524,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>870</x>
+         <x>800</x>
          <y>60</y>
          <width>121</width>
          <height>25</height>
@@ -537,7 +537,7 @@
       <widget class="QLabel" name="grid_display_label">
        <property name="geometry">
         <rect>
-         <x>750</x>
+         <x>680</x>
          <y>20</y>
          <width>91</width>
          <height>21</height>
@@ -609,7 +609,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>590</x>
+         <x>520</x>
          <y>30</y>
          <width>100</width>
          <height>60</height>
@@ -644,7 +644,7 @@
        </property>
        <property name="geometry">
         <rect>
-         <x>710</x>
+         <x>640</x>
          <y>60</y>
          <width>141</width>
          <height>25</height>
@@ -653,6 +653,53 @@
        <property name="text">
         <string>Предосмотр изменений</string>
        </property>
+      </widget>
+      <widget class="Line" name="current_source_delimeter_line">
+       <property name="geometry">
+        <rect>
+         <x>1120</x>
+         <y>20</y>
+         <width>16</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>50</weight>
+         <bold>false</bold>
+        </font>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+      <widget class="QGroupBox" name="sources_group_box">
+       <property name="geometry">
+        <rect>
+         <x>1140</x>
+         <y>9</y>
+         <width>131</width>
+         <height>81</height>
+        </rect>
+       </property>
+       <property name="title">
+        <string>Источники</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QComboBox" name="source_name_combo_box"/>
+        </item>
+        <item>
+         <widget class="QLabel" name="source_type_label">
+          <property name="text">
+           <string>Тип источника</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </widget>

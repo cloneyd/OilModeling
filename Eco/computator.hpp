@@ -7,29 +7,9 @@
 
 #include <variant>
 
+#include <computator_utilities.hpp>
 #include "source_types.hpp"
-
-enum class WaterObjectType : unsigned char // AHTUNG!!! IF WATER OBJECT COMBO BOX(class - MainWindow) WILL BE CHANGED - UB!!!!!
-{
-    MIN,
-    River = MIN,
-    Lake,
-    MAX = Lake
-};
-
-enum class WindDirection : unsigned char // AHTUNG!!! IF SYSTEM COMBO BOX(class - MainWindow) WILL BE CHANGED - UB!!!
-{
-    MIN,
-    North = MIN, // first el
-    Northeast,
-    East,
-    Southeast,
-    South,
-    Southwest,
-    West,
-    Northwest, // last el
-    MAX = Northwest // must be equal to last el
-};
+#include "pollution_widget_utilities.hpp"
 
 // TODO: mark changed slot
 class Computator : public QObject
@@ -94,10 +74,11 @@ public slots:
     inline void giveSourceInfo(int index, std::variant<PointSource, DiffusionSource> &source, QVector<PolutionMatter> &matters) const;
     void addNewSource(const std::variant<PointSource, DiffusionSource> &source, const QVector<PolutionMatter> &matters);
     void updateSource(int index, const std::variant<PointSource, DiffusionSource> &source, const QVector<PolutionMatter> &matters);
-    inline void deleteSource(int index) { m_sources.remove(index); }
+    inline void deleteSource(int index);
 
     void decomposeAbsSpeed();
     void computateSpeeds() const; // connected with MainWindow; signal - computateSpeeds();
+    void computatePollution();
 
 signals:
     void xWindProjectionChanged(const QVector<QVector<double>> &speeds);
@@ -117,6 +98,7 @@ signals:
 
     void sourcesChanged(const PointSource &source, const QVector<PolutionMatter> &matters) const;
     void sourcesChanged(const DiffusionSource &source, const QVector<PolutionMatter> &matters) const;
+    void sourcesNumberChanged(int count, int index, SourceType type, const QString &name);
 
     void sourceUpdated(int index, const PointSource &source, const QVector<PolutionMatter> &matters) const;
     void sourceUpdated(int index, const DiffusionSource &source, const QVector<PolutionMatter> &matters) const;
@@ -152,4 +134,12 @@ inline void Computator::giveSourceInfo(int index, std::variant<PointSource, Diff
     source = m_sources[index].first;
     matters = m_sources[index].second;
 }
+
+inline void Computator::deleteSource(int index)
+{
+    SourceType type{ m_sources[index].first.index() == 0 ? SourceType::Point : SourceType::Diffusion };
+    m_sources.remove(index);
+    emit sourcesNumberChanged(m_sources.size(), index, type, "");
+}
+
 #endif // COMPUTATIONS_HPP

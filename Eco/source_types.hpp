@@ -10,10 +10,13 @@ struct PointSource
     double m_x;
     double m_y;
     double m_spending;
+
     // computated
     double m_initial_dilution_ratio;
     double m_main_dilution_ratio;
     double m_common_dilution_ratio;
+    double m_vat;
+
 };
 
 struct DiffusionSource : public PointSource

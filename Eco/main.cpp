@@ -74,6 +74,8 @@ int main(int argc, char *argv[])
                      &computator, SLOT(acceptDistance(double)));
     QObject::connect(&window, SIGNAL(deleteSelectedSource(int)),
                      &computator, SLOT(deleteSource(int)));
+    QObject::connect(&window, SIGNAL(computatePollution()),
+                     &computator, SLOT(computatePollution()));
 
     // connections between MainWindow and ExcelWorker
     QObject::connect(&window, SIGNAL(saveMapAsExcel(const QString &)),

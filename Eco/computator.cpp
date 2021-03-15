@@ -124,11 +124,14 @@ void Computator::addNewSource(const std::variant<PointSource, DiffusionSource> &
 {
     m_sources.append(qMakePair(source, matters));
 
+    auto new_size{ m_sources.size() };
     if(source.index() == 0) {
         emit sourcesChanged(std::get<PointSource>(source), matters);
+        emit sourcesNumberChanged(new_size, new_size - 1, SourceType::Point, std::get<PointSource>(m_sources[new_size - 1].first).m_name);
     }
     else {
         emit sourcesChanged(std::get<DiffusionSource>(source), matters);
+        emit sourcesNumberChanged(new_size, new_size - 1, SourceType::Diffusion, std::get<DiffusionSource>(m_sources[new_size - 1].first).m_name);
     }
 }
 
@@ -301,6 +304,11 @@ void Computator::computateSpeeds() const
 
     QMessageBox::about(nullptr, "Действие завершено", "Значения рассчитаны");
     emit speedsComputated();
+}
+
+void Computator::computatePollution()
+{
+
 }
 
 
