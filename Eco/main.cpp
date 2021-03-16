@@ -8,6 +8,8 @@
 #include <paintingwidget.hpp>
 #include "polutionwidgetcontainer.hpp"
 
+// TODO: sources update in paiting widget and computator
+
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
@@ -31,15 +33,6 @@ int main(int argc, char *argv[])
                      &grid_handler, SLOT(setCellWidth(double)));
     QObject::connect(window.getCellHeightDoubleSpinBox(), SIGNAL(valueChanged(double)),
                      &grid_handler, SLOT(setCellHeight(double)));
-    QObject::connect(&window, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &,
-                                                const std::list<QPointF> &, const QColor &, double)),
-                     &grid_handler, SLOT(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &,
-                                                    const std::list<QPointF> &, const QColor &, double)));
-    QObject::connect(&window, SIGNAL(deleteGrid()),
-                     &grid_handler, SLOT(deleteGrid()));
-    QObject::connect(&window, SIGNAL(drawGridInPixmap(QPixmap &, const QColor &, double)),
-                     &grid_handler, SLOT(drawGridInPixmap(QPixmap &, const QColor &, double)));
-
 
     // connections between MainWindow and Visualization3DContainer
     QObject::connect(window.getScaleDoubleSpinBox(), SIGNAL(valueChanged(double)),
@@ -106,19 +99,17 @@ int main(int argc, char *argv[])
 
     // connections between GridHandler and MainWindow
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
-                     &window, SLOT(setupTables(const QVector<QVector<QPair<bool, QPointF>>> &)));
+                     &window, SLOT(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
     // connections between GridHandler and Visualization3DContainer
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
                      &graphics3D, SLOT(setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
-    // connections between GridHangler and Computator
+    // connections between GridHandler and Computator
     QObject::connect(&grid_handler, SIGNAL(xStepChanged(const double)),
                      &computator, SLOT(acceptXStep(const double)));
     QObject::connect(&grid_handler, SIGNAL(yStepChanged(const double)),
                      &computator, SLOT(acceptYStep(const double)));
-    QObject::connect(&grid_handler, SIGNAL(markSearched(QPair<int, int>)),
-                     &computator, SLOT(acceptMarkPosition(QPair<int, int>)));
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
                      &computator, SLOT(setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
@@ -126,6 +117,9 @@ int main(int argc, char *argv[])
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &)),
                      &excel_worker, SLOT(acceptGrid(const QVector<QVector<QPair<bool, QPointF>>> &)));
 
+    // connections between GridHandler and PaintingWidget
+    QObject::connect(&grid_handler, SIGNAL(denyLastMark(int)),
+                     &painting_widget, SLOT(deleteLastMark(int)));
 
 
     // connections between Visualization3DContainer and MainWindow
@@ -175,6 +169,10 @@ int main(int argc, char *argv[])
     QObject::connect(&computator, SIGNAL(u0Changed(const QVector<QVector<double>> &)),
                      &excel_worker, SLOT(updateU0(const QVector<QVector<double>> &)));
 
+    // connections between Computator and PaintingWidget
+    QObject::connect(&computator, SIGNAL(sourcesChanged(int, int, SourceType, const QString &, const QPointF &)),
+                     &painting_widget, SLOT(updateSources(int, int, SourceType, const QString &, const QPointF &)));
+
 
     // connections  between ExcelWorker and Visualization3DContainer
     QObject::connect(&excel_worker, SIGNAL(heightsLoaded(QVector<QVector<QPair<bool, double>>> &)),
@@ -184,14 +182,24 @@ int main(int argc, char *argv[])
     // connections between PaintingWidget and MainWindow
     QObject::connect(&painting_widget, SIGNAL(imageChanged(const QImage &)),
                      &window, SLOT(setImageInMapLabel(const QImage &)));
-    QObject::connect(&painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const std::list<QPointF> &, const QColor &, double)),
-                     &window, SLOT(createGridSender(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const std::list<QPointF> &, const QColor &, double)));
-    QObject::connect(&painting_widget, SIGNAL(cellScaleParametersChanged(double, double, double)),
+     QObject::connect(&painting_widget, SIGNAL(cellScaleParametersChanged(double, double, double)),
                      &window, SLOT(updateGridParameters(double, double, double)));
+
+    // connection between PaintingWidget and GridHandler
+    QObject::connect(&painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &,
+                                                         const QColor &, double)),
+                     &grid_handler, SLOT(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &,
+                                                    const QColor &, double)));
     QObject::connect(&painting_widget, SIGNAL(deleteGrid()),
-                     &window, SLOT(deleteGridSender()));
+                     &grid_handler, SLOT(deleteGrid()));
     QObject::connect(&painting_widget, SIGNAL(drawGridInPixmap(QPixmap &, const QColor &, double)),
-                     &window, SLOT(drawGridInPixmapSender(QPixmap &, const QColor &, double)));
+                     &grid_handler, SLOT(drawGridInPixmap(QPixmap &, const QColor &, double)));
+    QObject::connect(&painting_widget, SIGNAL(findMark(int, const QPointF &, QPoint *)), // find source in grid
+                     &grid_handler, SLOT(searchMarkInGrid(int, const QPointF &, QPoint *)));
+
+    // connections between PaintingWidget and Computator
+    QObject::connect(&painting_widget, SIGNAL(updateCoordinates(const QVector<QVector<QPointF>> &, const QVector<QVector<QPoint>> &)),
+                     &computator, SLOT(updateCoordinates(const QVector<QVector<QPointF>> &, const QVector<QVector<QPoint>> &)));
 
 
     // connections between PolutionWidgetContainer and Computator

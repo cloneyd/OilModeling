@@ -39,7 +39,7 @@
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>20</height>
+            <height>30</height>
            </size>
           </property>
           <property name="text">
@@ -93,7 +93,7 @@
           <property name="maximumSize">
            <size>
             <width>80</width>
-            <height>20</height>
+            <height>30</height>
            </size>
           </property>
           <property name="text">
@@ -151,7 +151,7 @@
           <property name="maximumSize">
            <size>
             <width>40</width>
-            <height>20</height>
+            <height>30</height>
            </size>
           </property>
           <property name="text">
@@ -194,8 +194,14 @@
           <property name="decimals">
            <number>3</number>
           </property>
+          <property name="minimum">
+           <double>-1.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>100000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>-1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -214,7 +220,7 @@
           <property name="maximumSize">
            <size>
             <width>40</width>
-            <height>20</height>
+            <height>30</height>
            </size>
           </property>
           <property name="text">
@@ -257,8 +263,14 @@
           <property name="decimals">
            <number>3</number>
           </property>
+          <property name="minimum">
+           <double>-1.000000000000000</double>
+          </property>
           <property name="maximum">
            <double>100000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>-1.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -277,7 +289,7 @@
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>20</height>
+            <height>30</height>
            </size>
           </property>
           <property name="text">
@@ -340,7 +352,7 @@
           <property name="maximumSize">
            <size>
             <width>50</width>
-            <height>20</height>
+            <height>30</height>
            </size>
           </property>
           <property name="text">
@@ -653,6 +665,12 @@
        <layout class="QVBoxLayout" name="vat_layout">
         <item>
          <widget class="QLabel" name="vat_label">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
           <property name="text">
            <string>НДС</string>
           </property>

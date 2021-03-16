@@ -42,7 +42,7 @@ private:
     QPair<double, bool> m_wind_azimuth; // pair - degrees and is available now; 0. and true by default;
     double m_absolute_speed; // 10. by default
 
-    std::list<QPair<int, int>> m_mark_index; // the polution mark position; empty by default
+    QVector<QVector<QPoint>> m_marks_indexes; // the polution mark position; empty by default
     QVector<QPair<std::variant<PointSource, DiffusionSource>, QVector<PolutionMatter>>> m_sources; /* first value - the source - will contain one of
                                                                     two types: PointSource of DiffusionSource. Must be checked with index() before using;
                                                                     second - vector of polution matters*/
@@ -64,7 +64,7 @@ public slots:
     inline void acceptXStep(const double step) noexcept {  m_xstep = step; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
     inline void acceptYStep(const double step) noexcept { m_ystep = step; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
     inline void acceptHorizon(const double horizon) noexcept {  m_horizon = horizon; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
-    inline void acceptMarkPosition(QPair<int, int> mark_pos) { m_mark_index.push_back(mark_pos); } // connected with GridHandler; signal - markSearched(same)
+    void updateCoordinates(const QVector<QVector<QPointF>> &coordinates, const QVector<QVector<QPoint>> &sector);
     inline void acceptKsiAtol(double atol) noexcept { m_ksi_atol = atol; } // connected with DoubleSpinBox (MainWindow); signal - valueChanged(double)
     inline void acceptAbsSpeed(double speed) noexcept { m_absolute_speed = speed; } // connected with DoubleSpinBox (MainWindow); signal - valueChanged(double)
     inline void acceptAzimuth(const QPair<double, bool> &pair) { m_wind_azimuth = pair; } // connected with MainWindow; signal - sendAzimuthState(same)
@@ -98,7 +98,7 @@ signals:
 
     void sourcesChanged(const PointSource &source, const QVector<PolutionMatter> &matters) const;
     void sourcesChanged(const DiffusionSource &source, const QVector<PolutionMatter> &matters) const;
-    void sourcesNumberChanged(int count, int index, SourceType type, const QString &name);
+    void sourcesChanged(int count, int index, SourceType type, const QString &name, const QPointF &pos);
 
     void sourceUpdated(int index, const PointSource &source, const QVector<PolutionMatter> &matters) const;
     void sourceUpdated(int index, const DiffusionSource &source, const QVector<PolutionMatter> &matters) const;
@@ -139,7 +139,7 @@ inline void Computator::deleteSource(int index)
 {
     SourceType type{ m_sources[index].first.index() == 0 ? SourceType::Point : SourceType::Diffusion };
     m_sources.remove(index);
-    emit sourcesNumberChanged(m_sources.size(), index, type, "");
+    emit sourcesChanged(m_sources.size(), index, type, "", { -1., -1.} );
 }
 
 #endif // COMPUTATIONS_HPP

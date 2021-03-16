@@ -690,13 +690,20 @@
          <widget class="QComboBox" name="source_name_combo_box"/>
         </item>
         <item>
-         <widget class="QLabel" name="source_type_label">
-          <property name="text">
-           <string>Тип источника</string>
+         <widget class="QComboBox" name="source_type_combo_box">
+          <property name="editable">
+           <bool>false</bool>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
+          <item>
+           <property name="text">
+            <string>Точечный</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Диффузионный</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>

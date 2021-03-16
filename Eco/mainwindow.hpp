@@ -36,13 +36,9 @@ public:
     ~MainWindow();
 
 public slots:
-    void setupTables(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridHandler; signal - gridChanged(same)
+    void gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &grid); // connected with GridHandler; signal - gridChanged(same)
 
-    void createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const std::list<QPointF> &mark_pos,
-                          const QColor &color, double line_width); // connected with PaintingWidget; signal - createGrid(same);
     void updateGridParameters(double cell_width, double cell_height, double scale) const; // connected with PaintingWidget; signal cellScaleParametersChanged(same);
-    void deleteGridSender() const; // connected with PaintingWidget; signal - deleteGrid();
-    void drawGridInPixmapSender(QPixmap &map, const QColor &color, double line_width) const; // public
 
     void saveHeightsFromTableSender(QTableWidget &table); // connected with TableContainer; signal - saveButtonPressed(same) // public
     void saveXSpeedsFromTableSender(QTableWidget &table); // connected with TableContainer; signal - saveButtonPressed(same) // public
@@ -101,11 +97,6 @@ private slots:
 signals:
     void setupTable(QTableWidget &table);
 
-    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const std::list<QPointF> &mark_pos,
-                    const QColor &color, double line_width) const;
-    void drawGridInPixmap(QPixmap &map, const QColor &color, double line_width) const;
-    void deleteGrid() const;
-
     void saveHeightsFromTable(QTableWidget &table);
     void saveXSpeedsFromTable(QTableWidget &table);
     void saveYSpeedsFromTable(QTableWidget &table);
@@ -133,6 +124,7 @@ signals:
     void loadImage(const QPixmap &map) const;
     void loadImage(const QString &filepath) const;
     void showPaintingWidget() const;
+    void clearPaintingContent() const;
 
 // Getters
 public:
@@ -159,9 +151,11 @@ private:
 
     void setupNewInstance();
     void imageLoadedSettings();
+    void setupButtonsAfterGridChanges(const QVector<QVector<QPair<bool, QPointF>>> &grid);
+    void addSourceInformationRow();
 
     void setupIternalConnections();
 
-    QTableWidgetItem* createTableWidgetItem(const QString &text) const;
+    QTableWidgetItem* createTableWidgetItem(const QString &text, Qt::ItemFlags flags = Qt::NoItemFlags) const;
 };
 #endif // MAINWINDOW_H

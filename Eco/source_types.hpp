@@ -4,7 +4,7 @@
 
 struct PointSource
 {
-    static constexpr int number_of_properties{ 7 };
+    static constexpr int number_of_properties{ 8 };
     // known
     QString m_name;
     double m_x;
@@ -21,7 +21,7 @@ struct PointSource
 
 struct DiffusionSource : public PointSource
 {
-    static constexpr int number_of_properties{ 10 };
+    static constexpr int number_of_properties{ 11 };
     // known
     double m_length;
     double m_direction; // degrees

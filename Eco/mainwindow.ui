@@ -180,7 +180,7 @@
          </palette>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>3</number>
         </property>
         <property name="documentMode">
          <bool>false</bool>
@@ -1482,7 +1482,7 @@ p, li { white-space: pre-wrap; }
            </size>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>4</number>
           </property>
           <widget class="QWidget" name="map_image_widget">
            <property name="geometry">
@@ -1695,6 +1695,9 @@ p, li { white-space: pre-wrap; }
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
              <widget class="QTableWidget" name="sources_table_widget">
+              <property name="sizeAdjustPolicy">
+               <enum>QAbstractScrollArea::AdjustToContents</enum>
+              </property>
               <property name="editTriggers">
                <set>QAbstractItemView::NoEditTriggers</set>
               </property>
@@ -1703,6 +1706,12 @@ p, li { white-space: pre-wrap; }
               </property>
               <property name="selectionBehavior">
                <enum>QAbstractItemView::SelectRows</enum>
+              </property>
+              <property name="rowCount">
+               <number>0</number>
+              </property>
+              <property name="columnCount">
+               <number>0</number>
               </property>
              </widget>
             </item>

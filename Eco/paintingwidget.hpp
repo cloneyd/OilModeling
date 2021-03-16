@@ -1,10 +1,11 @@
 #ifndef PAINTINGWIDGET_HPP
 #define PAINTINGWIDGET_HPP
-
 #include <QWidget>
 #include <QPixmap>
 #include <QImage>
 #include <QString>
+
+#include "ui_paintingwidget.h"
 
 #include  "painttablescene.hpp"
 #include "ui_cell_scale_parameters.h"
@@ -43,6 +44,9 @@ public slots:
 
     void setScenePixmap(const QPixmap &pm);
     void prepareGraphicsView(const QString &file_path);
+    void deleteLastMark(int source_index);
+
+    void updateSources(int count, int index, SourceType type, const QString &name, const QPointF &pos);
 
 private slots:
     void acceptChangesButtonPressed(); // connected with painting_ui->accept_changes_button
@@ -66,28 +70,30 @@ private slots:
 
     void changeLogChanged(int nwrites);
     void changeLogStashChanged(int nwrites);
-    void markPositionChanged();
+    void markPositionChanged(const QPointF &pos);
+    inline void giveCurrentSourceIndex(int &index) { index = m_painting_ui->source_name_combo_box->currentIndex(); }
 
 signals:
     void imageChanged(const QImage &image);
 
     void cellScaleParametersChanged(double width, double height, double scale) const;
 
-    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const std::list<QPointF> &mark_pos,
+    void createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area,
                     const QColor &color, double line_width);
     void deleteGrid() const;
     void drawGridInPixmap(QPixmap &map, const QColor &color, double line_width) const;
-
+    void findMark(int source_index, const QPointF &pos, QPoint *sector = nullptr);
+    void updateCoordinates(const QVector<QVector<QPointF>> &coordinates, const QVector<QVector<QPoint>> &indexes) const;
 
 // overridden functions
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
 
-
 // helpers
 private:
     void setupConnectionsWithCellScaleParametersWidget();
+    void repaint();
 };
 
 #endif // PAINTINGWIDGET_HPP

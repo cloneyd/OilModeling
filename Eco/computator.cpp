@@ -23,7 +23,7 @@ Computator::Computator() :
     m_wind_direction{ WindDirection::North, false },
     m_wind_azimuth{ 0., true },
     m_absolute_speed{ 10. },
-    m_mark_index{ }
+    m_marks_indexes{ }
 {
     // PASS
 }
@@ -37,7 +37,7 @@ Computator::~Computator()
 // public slots
 void Computator::setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid)
 {
-    m_mark_index.clear();
+   // m_marks_positions.clear();
     m_grid_ptr = nullptr;
 
     auto nrows{ grid.size() };
@@ -108,6 +108,26 @@ void Computator::acceptYSpeedsFromTable(QTableWidget &table)
     }
 }
 
+void Computator::updateCoordinates(const QVector<QVector<QPointF>> &coordinates, const QVector<QVector<QPoint>> &sector)
+{
+    // FIXME: diffusion source?
+    m_marks_indexes = sector;
+    const auto nsources{ m_sources.size() };
+    PointSource *current_source{};
+    for(int i{}; i < nsources; ++i) {
+        if(m_sources[i].first.index() == 0) {
+            current_source = std::addressof(std::get<PointSource>(m_sources[i].first));
+        }
+        else {
+            current_source = std::addressof(std::get<DiffusionSource>(m_sources[i].first));
+        }
+
+        current_source->m_x = coordinates[i][0].x();
+        current_source->m_y = coordinates[i][0].y();
+    }
+}
+
+
 void Computator::acceptWindDirection(const QPair<int, bool> &pair)
 {
     auto first{ pair.first };
@@ -126,12 +146,14 @@ void Computator::addNewSource(const std::variant<PointSource, DiffusionSource> &
 
     auto new_size{ m_sources.size() };
     if(source.index() == 0) {
-        emit sourcesChanged(std::get<PointSource>(source), matters);
-        emit sourcesNumberChanged(new_size, new_size - 1, SourceType::Point, std::get<PointSource>(m_sources[new_size - 1].first).m_name);
+        auto current_source{ std::get<PointSource>(source) };
+        emit sourcesChanged(current_source, matters);
+        emit sourcesChanged(new_size, new_size - 1, SourceType::Point, current_source.m_name, { current_source.m_x, current_source.m_y });
     }
     else {
-        emit sourcesChanged(std::get<DiffusionSource>(source), matters);
-        emit sourcesNumberChanged(new_size, new_size - 1, SourceType::Diffusion, std::get<DiffusionSource>(m_sources[new_size - 1].first).m_name);
+        auto current_source{ std::get<DiffusionSource>(source) };
+        emit sourcesChanged(current_source, matters);
+        emit sourcesChanged(new_size, new_size - 1, SourceType::Diffusion, current_source.m_name, { current_source.m_x, current_source.m_y });
     }
 }
 

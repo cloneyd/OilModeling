@@ -26,6 +26,7 @@ HEADERS += \
     computator.hpp \
     computator_utilities.hpp \
     excelworker.hpp \
+    grid_handler_utilities.hpp \
     gridhandler.hpp \
     mainwindow.hpp \
     paintingwidget.hpp \

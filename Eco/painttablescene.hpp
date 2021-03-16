@@ -39,11 +39,11 @@ public:
 private:
     std::list<QVector<QPointF>> m_wo_buffer; // buffer for temporary water object drawn sruff
     std::list<QVector<QPointF>> m_islands_buffer; // buffer for a temporary island drawn stuff
-    std::list<QPointF> m_mark_pos_buffer; // the mark position; {-1., -1.} be default
+    QVector<QVector<QPointF>> m_mark_pos_buffer; // the mark position; {-1., -1.} be default
 
     std::list<QVector<QPointF>> m_wo_stash; // buffer for a currently unused things
     std::list<QVector<QPointF>> m_islands_stash; // buffer for a currently unused things
-    std::list<QPointF> m_mark_pos_stash; // the last mark position; {-1., -1.} be default
+    std::list<QVector<QPointF>> m_mark_pos_stash; // the last mark position; {-1., -1.} be default
 
     std::list<LogValues> m_last_changes_log; // contains the log of changes
     std::list<LogValues> m_last_changes_log_stash; // contains the stash logs
@@ -58,17 +58,20 @@ public slots:
 signals:
     void stashedChangeLogChanged(int number_of_writes);
     void changeLogChanged(int number_of_writes);
-    void markPositionChanged(const std::list<QPointF> &newpos);
+    void markPositionChanged(const QPointF &newpos);
+
+    void getCurrentSourceIndex(int &will_be_index);
+    void getCurrentSourceType(SourceType &type);
 
 // Getters
 public:
     [[nodiscard]] QVector<QPointF> getWaterObjectCoords();
     [[nodiscard]] QVector<QPointF> getIslandsCoords();
-    [[nodiscard]] inline const std::list<QPointF>& getMarkPosition() const noexcept { return m_mark_pos_buffer; }
 
     [[nodiscard]] inline int getNumberOfChanges() const { return m_last_changes_log.size(); }
     [[nodiscard]] inline int getNumberOfStashedChanges() const { return m_last_changes_log_stash.size(); }
-    [[nodiscard]] const QPixmap getEditedPixmap();
+    [[nodiscard]] const QPixmap getEdittedPixmap();
+    [[nodiscard]] inline const QVector<QVector<QPointF>>& getMarks() const noexcept { return m_mark_pos_buffer; }
 
 // Overridden functions
 protected:
@@ -81,6 +84,12 @@ public:
     void hideToStash();
     void getFromStash();
     void resetStashes();
+    inline void deleteLastMark(int source_index) { m_mark_pos_buffer[source_index].pop_back(); }
+
+    inline void insertSource(int index) { m_mark_pos_buffer.insert(index, QVector<QPointF>{}); }
+    inline void insertSource(int index, const QPointF &pos) { m_mark_pos_buffer.insert(index, QVector<QPointF>{ pos }); }
+    inline void deleteSource(int source_index) { m_mark_pos_buffer.remove(source_index); }
+    void updateSource(int index, SourceType type, const QPointF &pos);
 
 // public methods
 public:

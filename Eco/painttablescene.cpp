@@ -83,7 +83,7 @@ void PaintTableScene::clear()
     return area;
 }
 
-[[nodiscard]] const QPixmap PaintTableScene::getEditedPixmap()
+[[nodiscard]] const QPixmap PaintTableScene::getEdittedPixmap()
 {
     QPixmap pixmap(sceneRect().size().toSize()); // WARNING: may throw; Create the image with the exact size of the shrunk scene
 
@@ -198,10 +198,22 @@ void PaintTableScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
             return;
         }
 
-        m_mark_pos_buffer.push_back(pos);
+        if(m_mark_pos_buffer.isEmpty()) return;
+        int index{};
+        emit getCurrentSourceIndex(index);
+        SourceType type;
+        emit getCurrentSourceType(type);
+        if(type == SourceType::Point) {
+            m_mark_pos_buffer[index].resize(1);
+            m_mark_pos_buffer[index][0] = pos;
+        }
+        else {
+            m_mark_pos_buffer[index].append(pos);
+        }
+
         m_last_changes_log.push_back(LogValues::mark);
         m_wo_buffer.pop_back();
-        emit markPositionChanged(m_mark_pos_buffer);
+        emit markPositionChanged(pos);
         emit changeLogChanged(m_last_changes_log.size());
         event->accept();
     }
@@ -278,6 +290,17 @@ void PaintTableScene::resetStashes()
     emit stashedChangeLogChanged(m_last_changes_log_stash.size());
 }
 
+void PaintTableScene::updateSource(int index, SourceType type, const QPointF &pos)
+{
+    if(type == SourceType::Point) {
+        m_mark_pos_buffer[index].resize(1);
+        m_mark_pos_buffer[0][0] = pos;
+    }
+    else {
+        m_mark_pos_buffer[index].append(pos);
+    }
+}
+
 
 // public methods
 QPixmap PaintTableScene::paintContentOnMap(const QPixmap &where, PaintStyle style) const
@@ -337,8 +360,11 @@ QPixmap PaintTableScene::paintContentOnMap(const QPixmap &where, PaintStyle styl
     }
     // TODO:
 
-    for(auto&& mark : m_mark_pos_buffer) {
-        painter.drawImage(QPointF{ mark.x() - 10., mark.y() - 20. }, QImage(mark_icon_filepath).scaled(20, 20, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    for(auto &&vectors : m_mark_pos_buffer) {
+        for(auto &&mark : vectors) {
+            painter.drawImage(QPointF{ mark.x() - 10., mark.y() - 20. },
+                            QImage(mark_icon_filepath).scaled(20, 20, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        }
     }
     return map;
 }

@@ -44,8 +44,10 @@ MainWindow::~MainWindow()
 
 
 // public slots
-void MainWindow::setupTables(const QVector<QVector<QPair<bool, QPointF>>> &grid)
+void MainWindow::gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &grid)
 {
+    setupButtonsAfterGridChanges(grid);
+
     auto& deep_table{ m_deeps_table_container.getTableWidget() };
     auto& xwind_table{ m_xwind_table_container.getTableWidget() };
     auto& ywind_table{ m_ywind_table_container.getTableWidget() };
@@ -85,27 +87,6 @@ void MainWindow::setupTables(const QVector<QVector<QPair<bool, QPointF>>> &grid)
             }
         }
     }
-
-
-}
-
-void MainWindow::createGridSender(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const std::list<QPointF> &mark_pos,
-                                  const QColor &color, double line_width)
-{
-    emit createGrid(pm, water_object_area, islands_area, mark_pos, color, line_width);
-
-    m_ui->open_map_visualization_button->setEnabled(true);
-
-    m_ui->enter_heights_button->setEnabled(true);
-
-    m_ui->save_map_button->setEnabled(true);
-    m_ui->map_save_format_combo_box->setEnabled(true);
-
-    m_xwind_table_container.setEnabled(true);
-    m_ywind_table_container.setEnabled(true);
-    m_ui->force_abs_speed_decompose_button->setEnabled(true);
-
-    m_ui->enter_speed_vectors_button->setEnabled(true);
 }
 
 void MainWindow::updateGridParameters(double cell_width, double cell_height, double scale) const
@@ -113,23 +94,6 @@ void MainWindow::updateGridParameters(double cell_width, double cell_height, dou
     m_ui->cell_width_spin_box->setValue(cell_width);
     m_ui->cell_height_spin_box->setValue(cell_height);
     m_ui->scale_spin_box->setValue(scale);
-}
-
-void MainWindow::deleteGridSender() const
-{
-    emit deleteGrid();
-
-    m_ui->open_map_visualization_button->setEnabled(false);
-
-    m_ui->enter_heights_button->setEnabled(false);
-
-    m_ui->save_map_button->setEnabled(false);
-    m_ui->map_save_format_combo_box->setEnabled(false);
-}
-
-void MainWindow::drawGridInPixmapSender(QPixmap &map, const QColor &color, double line_width) const
-{
-    emit drawGridInPixmap(map, color, line_width);
 }
 
 void MainWindow::saveHeightsFromTableSender(QTableWidget &table)
@@ -264,10 +228,10 @@ void MainWindow::setFlowMap(const QPixmap &pm)
 
 void MainWindow::addSourceToTable(const PointSource &source, const QVector<PolutionMatter> &matters) // matters - for future
 {
-    auto nrows{ m_ui->sources_table_widget->rowCount() };
+    auto nrows{ m_ui->sources_table_widget->rowCount()}; // one row for info
     m_ui->sources_table_widget->setRowCount(nrows + 1);
 
-    updateSourceInTable(nrows, source, matters);
+    updateSourceInTable(nrows - 1, source, matters); // -1 cause updateSource increments value (for computator correct work)
 }
 
 void MainWindow::addSourceToTable(const DiffusionSource &source, const QVector<PolutionMatter> &matters) // matters - for future
@@ -275,31 +239,34 @@ void MainWindow::addSourceToTable(const DiffusionSource &source, const QVector<P
     addSourceToTable(static_cast<const PointSource&>(source), matters);
     auto nrows{ m_ui->sources_table_widget->rowCount() - 1 }; // prev size
 
-    updateSourceInTable(nrows, source, matters);
+    updateSourceInTable(nrows - 1, source, matters); // -1 cause updateSource increments value (for computator correct work)
 }
 
 void MainWindow::updateSourceInTable(int index, const PointSource &source, const QVector<PolutionMatter> &/*matters*/) // matters - for future
 {
-    m_ui->sources_table_widget->setItem(index, 0, createTableWidgetItem(source.m_name));
-    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Точечный"));
-    m_ui->sources_table_widget->setItem(index, 2, createTableWidgetItem(QString("%1").arg(source.m_x)));
-    m_ui->sources_table_widget->setItem(index, 3, createTableWidgetItem(QString("%1").arg(source.m_y)));
-    m_ui->sources_table_widget->setItem(index, 4, createTableWidgetItem(QString("%1").arg(source.m_spending)));
-    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem("-"));
-    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem("-"));
-    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem("-"));
-    m_ui->sources_table_widget->setItem(index, 8, createTableWidgetItem(QString("%1").arg(source.m_initial_dilution_ratio)));
-    m_ui->sources_table_widget->setItem(index, 9, createTableWidgetItem(QString("%1").arg(source.m_main_dilution_ratio)));
-    m_ui->sources_table_widget->setItem(index, 10, createTableWidgetItem(QString("%1").arg(source.m_common_dilution_ratio)));
+    ++index;
+    m_ui->sources_table_widget->setItem(index, 0, createTableWidgetItem(source.m_name, Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Точечный", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 2, createTableWidgetItem(QString("%1").arg(source.m_x), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 3, createTableWidgetItem(QString("%1").arg(source.m_y), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 4, createTableWidgetItem(QString("%1").arg(source.m_spending), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem("-", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem("-", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem("-", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 8, createTableWidgetItem(QString("%1").arg(source.m_initial_dilution_ratio), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 9, createTableWidgetItem(QString("%1").arg(source.m_main_dilution_ratio), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 10, createTableWidgetItem(QString("%1").arg(source.m_common_dilution_ratio), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 10, createTableWidgetItem(QString("%1").arg(source.m_vat), Qt::ItemIsSelectable));
 }
 
 void MainWindow::updateSourceInTable(int index, const DiffusionSource &source, const QVector<PolutionMatter> &matters) // matters - for future
 {
     updateSourceInTable(index, static_cast<const PointSource&>(source), matters);
-    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Диффузионный"));
-    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem(QString("%1").arg(source.m_length)));
-    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem(QString("%1").arg(source.m_direction)));
-    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem(QString("%1").arg(source.m_tubes_number)));
+    ++index;
+    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Диффузионный", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem(QString("%1").arg(source.m_length), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem(QString("%1").arg(source.m_direction), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem(QString("%1").arg(source.m_tubes_number), Qt::ItemIsSelectable));
 }
 
 
@@ -475,27 +442,17 @@ void MainWindow::addNewSourceButtonPressed() const
 
 void MainWindow::displaySelectedSourceButtonPressed()
 {
-    auto selected{ m_ui->sources_table_widget->selectedItems() };
-    if(selected.empty()) {
-        showErrorMessageBox("Выделите источник");
-        return;
-    }
-
-    auto index{ selected.front()->row() };
-    emit displaySelectedSource(index);
+    auto index{ m_ui->sources_table_widget->currentRow() };
+    if(index == 0)  return;
+    emit displaySelectedSource(index - 1);
 }
 
 void MainWindow::deleteSelectedSouceButtonPressed()
 {
-    auto selected{ m_ui->sources_table_widget->selectedItems() };
-    if(selected.empty()) {
-        showErrorMessageBox("Выделите источник");
-        return;
-    }
-
-    auto index{ selected.front()->row() };
+    auto index{ m_ui->sources_table_widget->currentRow() };
+    if(index == 0)  return;
     m_ui->sources_table_widget->removeRow(index);
-    emit deleteSelectedSource(index);
+    emit deleteSelectedSource(index - 1);
 }
 
 
@@ -535,6 +492,8 @@ void MainWindow::setupNewInstance()
 
     m_ui->sources_table_widget->setEnabled(false);
     m_ui->sources_table_widget->clear();
+    addSourceInformationRow();
+    m_ui->sources_table_widget->resizeRowsToContents();
     m_ui->sources_table_widget->setColumnCount(DiffusionSource::number_of_properties + 1);
     m_ui->sources_table_widget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -578,6 +537,74 @@ void MainWindow::imageLoadedSettings()
     m_ui->sources_table_widget->setEnabled(true);
 }
 
+void MainWindow::setupButtonsAfterGridChanges(const QVector<QVector<QPair<bool, QPointF>>> &grid)
+{
+    if(grid.isEmpty() || grid[0].isEmpty()) {
+        m_ui->open_map_visualization_button->setEnabled(false);
+
+        m_ui->enter_heights_button->setEnabled(false);
+
+        m_ui->save_map_button->setEnabled(false);
+        m_ui->map_save_format_combo_box->setEnabled(false);
+    }
+    else {
+        m_ui->open_map_visualization_button->setEnabled(true);
+
+        m_ui->enter_heights_button->setEnabled(true);
+
+        m_ui->save_map_button->setEnabled(true);
+        m_ui->map_save_format_combo_box->setEnabled(true);
+
+        m_xwind_table_container.setEnabled(true);
+        m_ywind_table_container.setEnabled(true);
+        m_ui->force_abs_speed_decompose_button->setEnabled(true);
+
+        m_ui->enter_speed_vectors_button->setEnabled(true);
+    }
+}
+
+void MainWindow::addSourceInformationRow()
+{
+    auto *table{ m_ui->sources_table_widget };
+    table->setRowCount(1);
+
+    auto item{ createTableWidgetItem("Источник") };
+    table->setItem(0, 0, item);
+
+    item = createTableWidgetItem("Тип");
+    table->setItem(0, 1, item);
+
+    item = createTableWidgetItem("X");
+    table->setItem(0, 2, item);
+
+    item = createTableWidgetItem("Y");
+    table->setItem(0, 3, item);
+
+    item = createTableWidgetItem("Расход");
+    table->setItem(0, 4, item);
+
+    item = createTableWidgetItem("Длина");
+    table->setItem(0, 5, item);
+
+    item = createTableWidgetItem("Направление\nвыпуска");
+    table->setItem(0, 6, item);
+
+    item = createTableWidgetItem("Количество\nпатрубков");
+    table->setItem(0, 7, item);
+
+    item = createTableWidgetItem("Кратность начального\nразбравления");
+    table->setItem(0, 8, item);
+
+    item = createTableWidgetItem("Кратность основного\nразбавления");
+    table->setItem(0, 9, item);
+
+    item = createTableWidgetItem("Общее разбавление");
+    table->setItem(0, 10, item);
+
+    item = createTableWidgetItem("НДС");
+    table->setItem(0, 11, item);
+}
+
 void MainWindow::setupIternalConnections()
 {
     connect(&m_deeps_table_container, SIGNAL(saveButtonPressed(QTableWidget &)),
@@ -602,10 +629,11 @@ void MainWindow::setupIternalConnections()
             this, SLOT( systemIndexChanged(int)));
 }
 
-QTableWidgetItem* MainWindow::createTableWidgetItem(const QString &text) const
+QTableWidgetItem* MainWindow::createTableWidgetItem(const QString &text, Qt::ItemFlags flags) const
 {
     auto item{ new QTableWidgetItem };
     item->setTextAlignment(Qt::AlignCenter);
     item->setText(text);
+    item->setFlags(flags);
     return item;
 }

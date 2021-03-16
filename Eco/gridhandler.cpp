@@ -1,9 +1,9 @@
 #include "gridhandler.hpp"
 
 #include <QWidget>
-#include <QScreen>
 #include <QMessageBox>
 #include <QPainter>
+#include <QScreen>
 
 #include <algorithm>
 
@@ -11,15 +11,14 @@ GridHandler::GridHandler() :
     QObject{},
     m_cell_width{},
     m_cell_height{},
-    m_scale{},
-    m_realscale{ QWidget{}.screen()->physicalDotsPerInch() / 2.54 } // 2.54 - inches to sm
+    m_scale{}
 {
-
+    realscale = QWidget{}.screen()->physicalDotsPerInch() / 2.54;
 }
 
 
 // public slots
-void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const std::list<QPointF> &mark_pos, const QColor &color, double line_width)
+void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_area, const QVector<QPointF> &islands_area, const QColor &color, double line_width)
 {
     m_grid.clear();
 
@@ -41,8 +40,8 @@ void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_a
         ymax = std::max(ymax, y);
     }
 
-    auto cell_width{ m_realscale * m_cell_width };
-    auto cell_height{ m_realscale * m_cell_height };
+    auto cell_width{ realscale * m_cell_width };
+    auto cell_height{ realscale * m_cell_height };
     m_grid.reserve(static_cast<int>(std::ceil((ymax - ymin) / cell_height)));
     for(auto y{ ymin }; ymax - y > 0; y += cell_height){
         QVector<QPair<bool, QPointF>> tmp;
@@ -61,9 +60,6 @@ void GridHandler::createGrid(QPixmap &pm, const QVector<QPointF> &water_object_a
     drawGridInPixmap(pm, color, line_width);
 
     emit gridChanged(m_grid);
-
-    if(mark_pos.size() == 0)   return; // default value
-    searchMarkInGrid(mark_pos);
 }
 
 void GridHandler::deleteGrid()
@@ -79,8 +75,8 @@ void GridHandler::drawGridInPixmap(QPixmap &pm, const QColor &color, double line
     painter.begin(&pm);
     painter.setPen({ color, line_width });
     auto grid_size{m_grid.size()};
-    auto cell_width{ m_realscale * m_cell_width };
-    auto cell_height{ m_realscale * m_cell_height };
+    auto cell_width{ realscale * m_cell_width };
+    auto cell_height{ realscale * m_cell_height };
     for(int i{}; i < grid_size; ++i){
         auto size {m_grid[i].size()};
         for(int j{}; j < size; ++j) {
@@ -102,12 +98,12 @@ void GridHandler::drawGridInPixmap(QPixmap &pm, const QColor &color, double line
 void GridHandler::setScale(double scale) noexcept
 {
     if(scale < max_spin_error) {
-        m_realscale = 1.;
+        realscale = 1.;
         m_scale = 0.;
     }
     else {
-        m_realscale = QWidget{}.screen()->physicalDotsPerInch() / 2.54;
-        m_realscale /= scale;
+        realscale = QWidget{}.screen()->physicalDotsPerInch() / 2.54;
+        realscale /= scale;
         m_scale = scale;
     }
 }
@@ -130,8 +126,8 @@ void GridHandler::includeWaterObjectArea(QVector<QPointF> water_object_area, QVe
 {
     auto rows {m_grid.size() };
     auto cols{ rows > 0 ? m_grid[0].size() : 0 };
-    auto cell_height{ m_realscale * m_cell_height };
-    auto cell_width{ m_realscale * m_cell_width };
+    auto cell_height{ realscale * m_cell_height };
+    auto cell_width{ realscale * m_cell_width };
 
     auto water_area_size{ water_object_area.size() };
     std::sort(water_object_area.begin(), water_object_area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
@@ -270,33 +266,35 @@ void GridHandler::includeWaterObjectArea(QVector<QPointF> water_object_area, QVe
     }
 }
 
-void GridHandler::searchMarkInGrid(const std::list<QPointF> &mark_pos) const
+void GridHandler::searchMarkInGrid(int source_index, const QPointF &mark, QPoint *sector) const
 {
     auto nrows { m_grid.size() };
     if(nrows == 0)  return;
     auto ncols{ m_grid[0].size() };
     if(ncols == 0) return;
 
-    auto cell_width{ m_realscale * m_cell_width };
-    auto cell_height{ m_realscale * m_cell_height };
+    auto cell_width{ realscale * m_cell_width };
+    auto cell_height{ realscale * m_cell_height };
 
-    for(auto mark : mark_pos) {
-        if(mark.x() < m_grid[0][0].second.x() || mark.x() > m_grid[0][ncols - 1].second.x() ||
-           mark.y() < m_grid[0][0].second.y() || mark.y() > m_grid[nrows - 1][0].second.y()) {
-             QMessageBox::warning(nullptr, QString("Ошибка"), QString("Источник загрязнения вне водного объекта.\n"));
-             continue;
-        }
+    if(mark.x() < m_grid[0][0].second.x() || mark.x() > m_grid[0][ncols - 1].second.x() ||
+       mark.y() < m_grid[0][0].second.y() || mark.y() > m_grid[nrows - 1][0].second.y()) {
+         QMessageBox::warning(nullptr, QString("Ошибка"), QString("Источник загрязнения вне водного объекта.\n"));
+         emit denyLastMark(source_index);
+         return;
+    }
 
-        for(int i{}; i < nrows; ++i) {
-            if(mark.y() >= m_grid[i][0].second.y() && mark.y() <= m_grid[i][0].second.y() + cell_height) {
-                for(int j{}; j < ncols; ++j) {
-                    if(mark.x() >= m_grid[i][j].second.x() && mark.x() <= m_grid[i][j].second.x() + cell_width) {
-                        if(!m_grid[i][j].first) {
-                            QMessageBox::warning(nullptr, "Ошибка метки", "Источник загрязнения лежит на острове.\nПожалуйста, переставьте метку");
-                            emit markSearched({-1, -1});
-                        }
-                        else {
-                            emit markSearched({i, j});
+    for(int i{}; i < nrows; ++i) {
+        if(mark.y() >= m_grid[i][0].second.y() && mark.y() <= m_grid[i][0].second.y() + cell_height) {
+            for(int j{}; j < ncols; ++j) {
+                if(mark.x() >= m_grid[i][j].second.x() && mark.x() <= m_grid[i][j].second.x() + cell_width) {
+                    if(!m_grid[i][j].first) {
+                        QMessageBox::warning(nullptr, "Ошибка метки", "Источник загрязнения лежит на острове.\n");
+                        emit denyLastMark(source_index);
+                    }
+                    else {
+                        if(sector) {
+                            sector->setX(j);
+                            sector->setY(i);
                         }
                     }
                 }
@@ -304,3 +302,9 @@ void GridHandler::searchMarkInGrid(const std::list<QPointF> &mark_pos) const
         }
     }
 }
+
+
+// non member functions
+double toRealMetres(double pixels) { return pixels / GridHandler::realscale; }
+
+double fromRealMetres(double metres) { return metres * GridHandler::realscale; }
