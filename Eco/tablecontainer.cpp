@@ -2,10 +2,8 @@
 
 #include <QScreen>
 #include <QHeaderView>
-
-// third party functions
-extern void showErrorMessageBox(const QString &msg);
-
+#include <QMessageBox>
+#include <QKeyEvent>
 
 // Ctor and dtor
 TableContainer::TableContainer(const QString &name, QWidget *parent) :
@@ -24,14 +22,14 @@ TableContainer::TableContainer(const QString &name, QWidget *parent) :
     m_table.verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     m_spin_box.setAlignment(Qt::AlignCenter);
-    m_spin_box.setMinimum(-10000.);
-    m_spin_box.setMaximum(10000.);
+    m_spin_box.setMinimum(min_spin_box_value);
+    m_spin_box.setMaximum(max_spin_box_value);
     m_spin_box.setSingleStep(.5);
-    m_spin_box.setDecimals(4);
+    m_spin_box.setDecimals(number_of_spin_decimals);
 
-    m_validator.setBottom(-10000.);
-    m_validator.setTop(10000.);
-    m_validator.setDecimals(4);
+    m_validator.setBottom(min_spin_box_value);
+    m_validator.setTop(max_spin_box_value);
+    m_validator.setDecimals(number_of_spin_decimals);
 
     m_init_button.setFixedSize(150, 40);
     m_save_changes_button.setFixedSize(150, 40);
@@ -71,7 +69,18 @@ void TableContainer::fillSelectedCells() const
 
 void TableContainer::saveButtonPressed()
 {
+    QMessageBox::about(nullptr, windowTitle(), "Значения сохранены");
     emit saveButtonPressed(m_table);
+}
+
+void TableContainer::setEnabled(bool flag)
+{
+    m_init_button.setEnabled(flag);
+    m_save_changes_button.setEnabled(flag);
+    m_spin_box.setEnabled(flag);
+    m_table.setEnabled(flag);
+
+    QWidget::setEnabled(flag);
 }
 
 
@@ -79,7 +88,17 @@ void TableContainer::saveButtonPressed()
 void TableContainer::validateCellValue(int row, int col)
 {
     int will_be_unused{};
-    if(auto&& text{ m_table.item(row, col)->text() }; !(m_validator.validate(text, will_be_unused) == QValidator::Acceptable)) {
+    auto&& text{ m_table.item(row, col)->text() };
+    const auto text_size { text.size() };
+
+    for(int i{}; i < text_size; ++i) {
+        if(text[i] == '.') {
+            text[i] = ',';
+            break;
+        }
+    }
+
+    if(!(m_validator.validate(text, will_be_unused) == QValidator::Acceptable)) {
         text.remove(text.size() - 1, 1);
         m_table.item(row, col)->setText(text);
     }

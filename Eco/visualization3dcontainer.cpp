@@ -10,7 +10,7 @@
 // STL
 #include <algorithm>
 
-extern void showErrorMessageBox(const QString &message);
+extern void showErrorMessageBox(const QString &message, const QString &title = "");
 
 // ctor and dtor
 Visualization3DContainer::Visualization3DContainer(QWidget *parent) :
@@ -19,9 +19,9 @@ Visualization3DContainer::Visualization3DContainer(QWidget *parent) :
     m_3dobject{},
     m_gr_label{ new QLabel } // WARNING: may throw; should be replaced
 {
-    auto graph = new QtDataVisualization::Q3DSurface; // WARNING: may throw; // FIXME!!!: deletion problem (leak now)
+    auto graph{ new QtDataVisualization::Q3DSurface }; // WARNING: may throw; // FIXME!!!: deletion problem (leak now)
     if (!graph->hasContext()) {
-        showErrorMessageBox(QString("Couldn't initialize the OpenGL context."));
+        showErrorMessageBox(QString("Couldn't initialize the OpenGL context."), "OpenGL error");
         return;
     }
     m_container = QWidget::createWindowContainer(graph, this); // adopt the graph to container
@@ -66,7 +66,7 @@ void Visualization3DContainer::setupGrid(const QVector<QVector<QPair<bool, QPoin
 
 void Visualization3DContainer::setupHeights(QTableWidget &table)
 {
-    auto grid{ m_3dobject->getGrid() };
+    const auto &grid{ m_3dobject->getGrid() };
     auto rows{ grid.size() };
     auto cols{ rows > 0 ? grid[0].size() : 0 };
     QVector<QVector<QPair<bool, double>>> heights(rows);
@@ -118,99 +118,17 @@ void Visualization3DContainer::setupScale(double scale)
 void Visualization3DContainer::interpolation_and_approximation(QVector<QVector<QPair<bool, double>>> &heights)
 {
     const auto &grid{ m_3dobject->getGrid() };
-    auto rows{ heights.size() };
-    auto cols{ rows > 0 ? heights[0].size() : 0 };
+    const auto nrows{ heights.size() };
+    if(nrows == 0)  return;
+    const auto ncols{ heights[0].size() };
+    if(ncols == 0)  return;
 
-    if(rows == 0 || cols == 0) {
-        return;
-    }
-
-    for(int i{}; i < rows; ++i) {
-        for(int j{}; j < cols; ++j) {
-            if(heights[i][j].first && heights[i][j].second < 0.) { // using shortcut computation
-                if(i > 0 && i < rows - 1 && j > 0 && j < cols - 1) {
-                    if(heights[i - 1][j - 1].second > 0. && // if 4 or 8 points around (i;j) is determined
-                       heights[i - 1][j + 1].second > 0. &&
-                       heights[i + 1][j - 1].second > 0. &&
-                       heights[i + 1][j + 1].second > 0.) {
-                        if(heights[i - 1][j].second > 0. && // if 8 points is determined
-                           heights[i + 1][j].second > 0. &&
-                           heights[i][j - 1].second > 0. &&
-                           heights[i][j + 1].second > 0.) { // lagrange interpolation; FIXME: problem - valeus of lagrange methods cannot be similar; solution - exclude a repeated values
-                            double x[]{ grid[i - 1][j - 1].second.x(),
-                                        grid[i - 1][j].second.x(),
-                                        grid[i - 1][j + 1].second.x() };
-                            double y[]{ grid[i - 1][j - 1].second.y(),
-                                        grid[i][j - 1].second.y(),
-                                        grid[i + 1][j - 1].second.y() };
-                            double z[]{ heights[i - 1][j - 1].second,
-                                        heights[i - 1][j].second,
-                                        heights[i - 1][j + 1].second,
-                                        heights[i][j - 1].second,
-                                        heights[i][j + 1].second,
-                                        heights[i + 1][j - 1].second,
-                                        heights[i + 1][j].second,
-                                        heights[i + 1][j + 1].second,
-                                        0. }; // NOTE: This value does not affect the final interpolated value and used as a 'stub'
-
-                            double interpol_x{ grid[i][j].second.x() };
-                            double interpol_y{ grid[i][j].second.y() };
-
-                            double L[3]{};
-                            for (int k{}; k < 3; ++k) {
-                                for (int i{}; i < 3; ++i) {
-                                    double l{ z[k * 3 + i] };
-                                    for (int j{}; j < 3; ++j) {
-                                        if (j != i) {
-                                            l *= (interpol_x - x[j]) / (x[i] - x[j]) * (interpol_y - y[j]) / (y[i] - y[j]);
-                                        }
-                                    }
-                                    L[k] += l;
-                                }
-                            }
-                            heights[i][j].second = (L[0] + L[1] + L[2]) / 3.;
-                        }
-                        else { // bilinear interpolation
-                            double x[]{ grid[i - 1][j - 1].second.x(), grid[i - 1][j + 1].second.x() };
-                            double y[]{ grid[i - 1][j - 1].second.y(), grid[i + 1][j - 1].second.y() };
-
-                            auto cur_x{ grid[i][j].second.x() };
-                            auto cur_y{ grid[i][j].second.y() };
-                            auto f1{ heights[i - 1][j - 1].second + (cur_x - x[0]) * (heights[i + 1][j - 1].second - heights[i - 1][j - 1].second) / (x[1] - x[0]) };
-                            auto f2{ heights[i + 1][j - 1].second + (cur_x - x[0]) * (heights[i + 1][j + 1].second - heights[i + 1][j - 1].second) / (x[1] - x[0]) };
-                            heights[i][j].second = f1 + (cur_y - y[0]) * (f2 - f1) / (y[1] - y[0]);
-                        }
-                    }
-                    else if(heights[i][j - 1].second > 0. && heights[i][j + 1].second > 0.) { // linear interpolation
-                        heights[i][j].second = heights[i][j - 1].second + (grid[i][j + 1].second.x() - grid[i][j - 1].second.x()) * (heights[i][j + 1].second - heights[i][j - 1].second) /
-                                    (grid[i][j + 1].second.x() - grid[i][j - 1].second.x());
-                    }
-                    else if(heights[i - 1][j].second > 0. && heights[i + 1][j].second > 0.) { // linear interpolation
-                        heights[i][j].second = heights[i - 1][j].second + (grid[i + 1][j].second.y() - grid[i - 1][j].second.y()) * (heights[i + 1][j].second - heights[i - 1][j].second) /
-                                    (grid[i + 1][j].second.y() - grid[i - 1][j].second.y());
-                    }
-                }
-                else if(j > 0 && j < cols - 1) {
-                    if(heights[i][j - 1].second > 0. && heights[i][j + 1].second > 0.) { // linear interpolation
-                        heights[i][j].second = heights[i][j - 1].second + (grid[i][j + 1].second.x() - grid[i][j - 1].second.x()) * (heights[i][j + 1].second - heights[i][j - 1].second) /
-                                    (grid[i][j + 1].second.x() - grid[i][j - 1].second.x());
-                    }
-                }
-                else if(i > 0 && i < rows - 1) { // linear interpolation
-                    if(heights[i - 1][j].second > 0. && heights[i + 1][j].second > 0.) {
-                        heights[i][j].second = heights[i - 1][j].second + (grid[i + 1][j].second.y() - grid[i - 1][j].second.y()) * (heights[i + 1][j].second - heights[i - 1][j].second) /
-                                    (grid[i + 1][j].second.y() - grid[i - 1][j].second.y());
-                    }
-                }
-                // else - do nothing now
-            }
-        }
-    }
+    interpolation(grid, heights); // first interpolation
 
     // check that there is no uniterlopated values in heights
     auto is_interpolated_flag{ true };
-    for(int i{}; i < rows; ++i) {
-        for(int j{}; j < cols; ++j) {
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
             if(heights[i][j].first && heights[i][j].second < 0.) {
                 is_interpolated_flag = false;
                 break;
@@ -222,175 +140,344 @@ void Visualization3DContainer::interpolation_and_approximation(QVector<QVector<Q
     }
 
     if(!is_interpolated_flag) {
-        QVector<double> values;
-        QVector<QPair<int, double>> interpol_values;
-        QVector<double> z;
-        values.reserve(cols);
-        interpol_values.reserve(cols);
-        z.reserve(cols);
+        // TODO: normalizing with approximated values; these values must be returned by this funtion
+        create_approximation_row(grid, heights); // approximation + second interpolation
+        interpolation(grid, heights); // third interpolation
+    }
+}
 
-        for(int i{}; i < rows; ++i) {
-            for(int j{}; j < cols; ++j) {
-                if(heights[i][j].first) {
-                    if(heights[i][j].second > 0.) {
-                        values.append(grid[i][j].second.x());
-                        z.append(heights[i][j].second);
+void Visualization3DContainer::interpolation(const QVector<QVector<QPair<bool, QPointF>>> &grid, QVector<QVector<QPair<bool, double>>> &heights)
+{
+    const auto nrows{ heights.size() };
+    const auto ncols{ heights[0].size() };
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(heights[i][j].first && heights[i][j].second < 0.) { // if interpolation is needed
+                if(i > 0 && i < nrows - 1 && j > 0 && j < ncols - 1) { // if point not belong to borders
+                    if(heights[i - 1][j - 1].first && heights[i - 1][j + 1].first && heights[i - 1][j - 1].second > 0. && heights[i - 1][j + 1].second > 0.) { // if 11 and 13
+                        double x[]{ grid[i][j - 1].second.x(), grid[i][j + 1].second.x() };
+                        if(heights[i + 1][j - 1].first && heights[i + 1][j + 1].first && heights[i + 1][j - 1].second > 0. && heights[i + 1][j + 1].second > 0.) { // if 31 and 33
+                            double y[]{ grid[i - 1][j].second.y(), grid[i + 1][j].second.y() };
+                            double z[]{ heights[i - 1][j - 1].second, // 11
+                                        heights[i - 1][j + 1].second, // 13
+                                        heights[i + 1][j - 1].second, // 31
+                                        heights[i + 1][j + 1].second }; // 33
+                            heights[i][j].second = bilinear_interpolation(x, y, z, grid[i][j].second.x(), grid[i][j].second.y());
+                        }
+                        else {
+                            double z[]{ heights[i - 1][j - 1].second, // 11
+                                        heights[i - 1][j + 1].second }; // 13
+                            heights[i][j].second = linear_interpolation(x, z, grid[i][j].second.x());
+                        }
                     }
-                    else {
-                        interpol_values.append(qMakePair(j, grid[i][j].second.x()));
+
+                    if(heights[i - 1][j].first && heights[i + 1][j].first && heights[i - 1][j].second > 0. && heights[i + 1][j].second > 0.) { // if 12 and 32
+                        double y[]{ grid[i - 1][j].second.y(), grid[i + 1][j].second.y() };
+                        if(heights[i][j - 1].first && heights[i][j + 1].first && heights[i][j - 1].second > 0. && heights[i][j + 1].second > 0.) { // if 21 and 23
+                            double x[]{ grid[i][j - 1].second.x(), grid[i][j + 1].second.x() };
+                            double z[]{ heights[i - 1][j].second, // 12
+                                        heights[i][j + 1].second, // 23
+                                        heights[i][j - 1].second, // 21
+                                        heights[i + 1][j].second }; // 32
+
+                            if(auto value { bilinear_interpolation(x, y, z, grid[i][j].second.x(), grid[i][j].second.y()) }; heights[i][j].second > 0.) { // if height was interpolated on previous step
+                                heights[i][j].second = (heights[i][j].second + value) / 2.;
+                            }
+                            else {
+                                heights[i][j].second = value;
+                            }
+                        }
+                        else {
+                            double z[] { heights[i - 1][j].second, heights[i + 1][j].second }; // 12 and 32
+                            auto value{ linear_interpolation(y, z, grid[i][j].second.y()) };
+
+                            if(heights[i][j].second > 0.) { // if it was interpolated on previous stage
+                                heights[i][j].second = (heights[i][j].second + value) / 2.;
+                            }
+                            else {
+                                heights[i][j].second = value;
+                            }
+                        }
+                    }
+
+                    if(heights[i][j - 1].first && heights[i][j + 1].first && heights[i][j - 1].second > 0. && heights[i][j + 1].second > 0.) { // 21 and 23
+                        double x[]{ grid[i][j - 1].second.x(), grid[i][j + 1].second.x() };
+                        double z[]{ heights[i][j - 1].second, heights[i][j + 1].second };
+
+                        if(auto value{ linear_interpolation(x, z, grid[i][j].second.x()) }; heights[i][j].second > 0.) { // if value has interpolated already
+                            heights[i][j].second = (heights[i][j].second + value) / 2.;
+                        }
+                        else {
+                            heights[i][j].second = value;
+                        }
+                    }
+
+                    if(heights[i - 1][j - 1].first && heights[i + 1][j + 1].first && heights[i - 1][j - 1].second > 0. && heights[i + 1][j + 1].second > 0.) { // if 11 and 33
+                        double x[]{ grid[i - 1][j - 1].second.x(), grid[i + 1][j + 1].second.x() };
+                        double y[]{ grid[i - 1][j -1].second.y(), grid[i + 1][j + 1].second.y() };
+                        double z[]{ heights[i - 1][j - 1].second, heights[i + 1][j + 1].second };
+
+                        if(auto value{ linear_interpolation(x, z, grid[i][j].second.x()) }; heights[i][j].second > 0.) {
+                            heights[i][j].second = (heights[i][j].second + value) / 2.;
+                        }
+                        else {
+                            heights[i][j].second = value;
+                        }
+                        heights[i][j].second = (heights[i][j].second + linear_interpolation(y, z, grid[i][j].second.y())) / 2.;
+                    }
+
+                }
+                else if(i > 0 && i < nrows - 1) { // if not the row border
+                    if(heights[i - 1][j].first && heights[i + 1][j].first && heights[i - 1][j].second > 0. && heights[i + 1][j].second > 0.) { // if 12 and 32
+                        double y[]{ grid[i - 1][j].second.y(), grid[i + 1][j].second.y() };
+                        double z[]{ heights[i - 1][j].second, heights[i + 1][j].second };
+                        heights[i][j].second = linear_interpolation(y, z, grid[i][j].second.y());
                     }
                 }
-            }
-
-            if(interpol_values.size() > 0 && values.size() >= interpol_values.size()) {
-                auto aprx_value{ approximation(values, z, interpol_values) };
-                auto apr_size{ aprx_value.size() };
-                for(int j{}; j < apr_size; ++j) {
-                    heights[i][interpol_values[j].first].second = aprx_value[j];
-                }
-            }
-
-            values.clear();
-            interpol_values.clear();
-            z.clear();
-        }
-
-        for(int i{}; i < cols; ++i) {
-            for(int j{}; j < rows; ++j) {
-                if(heights[j][i].first) {
-                    if(heights[j][i].second > 0.) {
-                        values.append(grid[j][i].second.y());
-                        z.append(heights[j][i].second);
-                    }
-                    else {
-                        interpol_values.append(qMakePair(j, grid[j][i].second.y()));
+                else if(j > 0 && j < ncols - 1) { // if not the column border
+                    if(heights[i][j - 1].first && heights[i][j + 1].first && heights[i][j - 1].second > 0. && heights[i][j + 1].second > 0.) { // if 21 and 23
+                        double x[]{ grid[i][j - 1].second.x(), grid[i][j + 1].second.x() };
+                        double z[]{ heights[i][j - 1].second, heights[i][j + 1].second };
+                        heights[i][j].second = linear_interpolation(x, z, grid[i][j].second.x());
                     }
                 }
+            // else - do nothing
             }
-
-            if(values.size() >= interpol_values.size()) {
-                auto aprx_value{ approximation(values, z, interpol_values) };
-                auto apr_size{ aprx_value.size() };
-                for(int j{}; j < apr_size; ++j) {
-                    heights[interpol_values[j].first][i].second = aprx_value[j];
-
-                }
-            }
-
-            values.clear();
-            interpol_values.clear();
-            z.clear();
+        // else - do nothing
         }
     }
 }
 
-template <int size_>
-void Visualization3DContainer::gauss(const double(&A)[size_][size_], const double(&B)[size_], double(&C)[size_]) const
+void Visualization3DContainer::create_approximation_row(const QVector<QVector<QPair<bool, QPointF>>> &grid, QVector<QVector<QPair<bool, double>>> &heights)
 {
-    constexpr auto rows{ size_ };
-    constexpr auto cols{ size_ + 1 };
-    double expanded[rows][cols]{};
-       for (int i{}; i < rows; ++i) {
-           for (int j{}; j < rows; ++j) {
-               expanded[i][j] = A[i][j];
-           }
-       }
-       for (int i{}; i < rows; ++i) {
-           expanded[i][cols - 1] = B[i];
-       }
+    const auto nrows{ grid.size() };
+    if(nrows == 0)  return;
+    const auto ncols{ grid[0].size() };
+    if(ncols == 0)  return;
 
+    constexpr double load_factor{ 0.5 }; // load factor is used to determine how many times the number of known approximations should be greater than the number of unknowns
 
-       for (int i{}; i < rows; ++i) {
-           if (expanded[i][i] == 0.) {
-               for (int j{ i + 1 }; j < rows; ++j) {
-                   if (expanded[j][i] != 0.) {
-                       for (int k{ i }; k < cols; ++k) {
-                           std::swap(expanded[i][k], expanded[j][k]);
-                       }
-                   }
+    QVector<double> values;
+    QVector<QPair<int, double>> interpol_values;
+    QVector<double> z;
+    values.reserve(ncols);
+    interpol_values.reserve(ncols);
+    z.reserve(ncols);
 
-                   break;
-               }
-           }
-
-           if (expanded[i][i] != .0) {
-               for (int j{ i }; j < rows - 1; ++j) {
-                   double tmp = -expanded[j + 1][i] / expanded[i][i];
-
-                   for (int k{ i }; k < cols; ++k) {
-                       expanded[j + 1][k] += expanded[i][k] * tmp;
-                   }
-               }
-
-               // Упрощение матрицы
-               auto tmp = expanded[i][i];
-               for (int j{ i }; j < cols; ++j) {
-                   expanded[i][j] /= tmp;
-               }
-           }
-       }
-
-       // обратный ход
-       for (int i = rows - 1; i >= 0; --i) {
-           C[i] = expanded[i][cols - 1] / expanded[i][i];
-           for (int j = i + 1; j < rows; ++j) {
-               C[i] -= expanded[i][j] * C[j] / expanded[i][i];
-           }
-       }
-}
-
-#define FOO1(x) (std::sin(2. * x) * .5) // sin(x) * cos(x)
-#define FOO2(x) ((x) * (x) * (x))
-#define FOO3(x) ((x) * (x))
-#define FOO4(x) (((x) * 2.) + (x))
-#define FOO5(x) (1. / (x))
-
-QVector<double> Visualization3DContainer::approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x)
-{
-    auto size_{ x.size() };
-    constexpr auto num_of_fns{ 5 };
-    QVector<double> fx[num_of_fns];
-
-    for(int i{}; i < num_of_fns; ++i) {
-        fx[i].resize(size_);
-    }
-
-    for (int i{}; i < size_; ++i)   fx[0][i] = FOO1(x[i]);
-    for (int i{}; i < size_; ++i)   fx[1][i] = FOO2(x[i]);
-    for (int i{}; i < size_; ++i)   fx[2][i] = FOO3(x[i]);
-    for (int i{}; i < size_; ++i)   fx[3][i] = FOO4(x[i]);
-    for (int i{}; i < size_; ++i)   fx[4][i] = FOO5(x[i]);
-
-    double A[num_of_fns][num_of_fns]{};
-    for (int i{}; i < num_of_fns; ++i) {
-        for (int j{}; j < num_of_fns; ++j) {
-            for (int k{}; k < size_; ++k) {
-                A[i][j] += fx[i][k] * fx[j][k];
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(heights[i][j].first) {
+                if(heights[i][j].second > 0.) {
+                    values.append(grid[i][j].second.x());
+                    z.append(heights[i][j].second);
+                }
+                else {
+                    interpol_values.append(qMakePair(j, grid[i][j].second.x()));
+                }
             }
         }
+
+        if(interpol_values.size() > 0 && static_cast<int>(std::ceil(load_factor * values.size())) >= interpol_values.size()) {
+            auto aprx_value{ approximation(values, z, interpol_values) };
+            auto apr_size{ aprx_value.size() };
+            for(int j{}; j < apr_size; ++j) {
+                heights[i][interpol_values[j].first].second = aprx_value[j];
+            }
+            interpolation(grid, heights);
+        }
+
+        values.clear();
+        interpol_values.clear();
+        z.clear();
     }
 
-    double B[num_of_fns]{};
-    for (int i{}; i < num_of_fns; ++i) {
-        for (int j{}; j < size_; ++j) {
-            B[i] += y[j] * fx[i][j];
+    for(int i{}; i < ncols; ++i) {
+        for(int j{}; j < nrows; ++j) {
+            if(heights[j][i].first) {
+                if(heights[j][i].second > 0.) {
+                    values.append(grid[j][i].second.y());
+                    z.append(heights[j][i].second);
+                }
+                else {
+                    interpol_values.append(qMakePair(j, grid[j][i].second.y()));
+                }
+            }
+        }
+
+        if(static_cast<int>(std::ceil(load_factor * values.size())) >= interpol_values.size()) {
+            auto aprx_value{ approximation(values, z, interpol_values) };
+            auto apr_size{ aprx_value.size() };
+            for(int j{}; j < apr_size; ++j) {
+                heights[interpol_values[j].first][i].second = aprx_value[j];
+            }
+        }
+
+        values.clear();
+        interpol_values.clear();
+        z.clear();
+    }
+}
+
+// average - shift for the parabola centre
+#define FOO(x, xshift, yshift) (yshift - ((x) + xshift) * ((x) + xshift))
+QVector<double> Visualization3DContainer::approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x) const
+{
+    constexpr auto error{ 1e-4 };
+    const auto app_size{ x.size() };
+    const auto interpol_size{ interpol_x.size() };
+    QVector<double> values(interpol_size, -1.); // return value
+
+    if(app_size == 0) return values;
+    if(interpol_size == 0) return values;
+
+    auto average = [](const QVector<double> &vec) -> double {
+        auto vec_size{ vec.size() };
+        double average_sum{};
+        for(int i{}; i < vec_size; ++i) {
+            average_sum += vec[i];
+        }
+        return average_sum / vec_size;
+    };
+
+    // computating average value of function argument (as approximation so interpolation)
+    double center{}; // must be average for all values (app and inter)
+    for(int i{} ; i < app_size; ++i) {
+        center += x[i];
+    }
+    for(int i{}; i < interpol_size; ++i) {
+        center += interpol_x[i].second;
+    }
+    center /= (app_size + interpol_size);
+
+    // computatin average delta with known function values and average known function arguments
+    double average_ydelta{};
+    double ymax{ y[0] };
+    for(int i{ 1 }; i < app_size; ++i) {
+        average_ydelta += std::fabs(y[i] - y[i - 1]);
+        if(ymax < y[i]) ymax = y[i];
+    }
+    average_ydelta /= app_size - 1;
+
+    // if all function values equal
+    if(average_ydelta < error) {
+        for(int i{}; i < interpol_size; ++i) {
+            values[i] = y[0];
+        }
+        return values;
+    }
+
+    // computating function aspect ratio
+    double min_compression_ratio{ 1e+10 };
+    double max_compression_ratio{ -1. };
+    for(int i{}; i < app_size; ++i) {
+        auto cur_ratio{ std::fabs(FOO(x[i], center, ymax) / y[i]) };
+
+        if(cur_ratio < min_compression_ratio) {
+            min_compression_ratio = cur_ratio;
+        }
+        if(cur_ratio > max_compression_ratio) {
+            max_compression_ratio = cur_ratio;
         }
     }
 
-    double C[num_of_fns]{};
-    gauss(A, B, C);
+    double average_argument{ average(x)};
 
-    auto inter_size{ interpol_x.size() };
-    QVector<double> values(inter_size);
-    for(int i{}; i < inter_size; ++i) {
-        const auto value{ interpol_x[i].second };
-        values[i] = C[0] * FOO1(value) + C[1] * FOO2(value) + C[2] * FOO3(value) + C[3] * FOO4(value) + C[4] * FOO5(value);
+    // computating values in other points
+    double average_compression_ratio{ (max_compression_ratio + min_compression_ratio) / 2. };
+    for(int i{}; i < interpol_size; ++i) {
+        if(interpol_x[i].second > average_argument) {
+            values[i] = std::fabs(FOO(interpol_x[i].second, center, ymax)) / max_compression_ratio;
+        }
+        else {
+            values[i] = std::fabs(FOO(interpol_x[i].second, center, ymax)) / average_compression_ratio;
+        }
     }
+
+    int first_app_index{};
+    for(int i{}; i < interpol_size; ++i)  {
+        if(interpol_x[i].second < x[0]) {
+            first_app_index = i;
+            break;
+        }
+    }
+
+    int last_app_index{ interpol_size - 1};
+    for(int i{ interpol_size - 1}; i >= 0; --i) {
+        if(interpol_x[i].second < x[app_size - 1]) {
+            last_app_index = i;
+            break;
+        }
+    }
+
+    if(first_app_index <= last_app_index) {
+        for(int i{}; i < first_app_index; ++i) {
+            values[i] = (values[i] + y[0]) / 2.;
+        }
+
+        for(int i{ first_app_index }; i <= last_app_index; ++i) {
+            values[i] = (values[i] + y[binary_search(x, interpol_x[i].second)]) / 2.;
+        }
+
+        for(int i{ last_app_index + 1 }; i < interpol_size; ++i) {
+            values[i] = (values[i] + y[app_size - 1]) / 2. - average_ydelta;
+        }
+    }
+    else {
+        for(int i{ }; i < interpol_size; ++i) {
+            values[i] = (values[i] + y[binary_search(x, interpol_x[i].second)]) / 2. - average_ydelta;
+        }
+    }
+
     return values;
 }
+#undef FOO
 
-#undef FOO1
-#undef FOO2
-#undef FOO3
-#undef FOO4
-#undef FOO5
+int Visualization3DContainer::binary_search(const QVector<double> &vec, double value, double atol) const
+{
+    const auto size{ vec.size() };
+    auto left_bound{ 0 };
+    auto right_bound{ size - 1 };
+    auto index{ size - 1 };
+    double min_diff{ vec.back() + 1. };
+    auto cur_index{ right_bound / 2 };
+
+    if (vec.front() > value) {
+        return 0;
+    }
+
+    if (vec.back() < value) {
+        return size - 1;
+    }
+
+    while (left_bound <= right_bound) {
+        if (std::abs(vec[cur_index] - value) < atol) return cur_index;
+        else {
+            if (auto diff{ std::abs(vec[index] - vec[cur_index]) }; diff < min_diff) {
+                min_diff = diff;
+                index = cur_index;
+            }
+            if (value < vec[cur_index]) {
+                right_bound = cur_index - 1;
+            }
+            else {
+                left_bound = cur_index + 1;
+            }
+            cur_index = (right_bound + left_bound) / 2;
+        }
+    }
+
+    return index;
+}
+
+[[nodiscard]] double Visualization3DContainer::bilinear_interpolation(const double (&x)[2], const double (&y)[2], const double (&z)[4], double interpol_x, double interpol_y) const
+{
+    auto f1{ z[0] + (interpol_x - x[0]) * (z[2] - z[0]) / (x[1] - x[0]) };
+    auto f2{ z[2] + (interpol_x - x[0]) * (z[3] - z[2]) / (x[1] - x[0]) };
+    return f1 + (interpol_y - y[0]) * (f2 - f1) / (y[1] - y[0]);
+}
+
+[[nodiscard]] double Visualization3DContainer::linear_interpolation(const double (&x)[2], const double (&y)[2], double interpol_x) const
+{
+    return y[0] + (interpol_x - x[0]) * (y[1] - y[0]) / (x[1] - x[0]);
+}

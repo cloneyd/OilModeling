@@ -31,9 +31,14 @@ signals:
 // Helper functions
 private:
     void interpolation_and_approximation(QVector<QVector<QPair<bool, double>>> &heights);
-    template <int size>
-    void gauss(const double(&A)[size][size], const double(&B)[size], double(&C)[size]) const;
-    QVector<double> approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x);
+    void interpolation(const QVector<QVector<QPair<bool, QPointF>>> &grid, QVector<QVector<QPair<bool, double>>> &heights);
+    void create_approximation_row(const QVector<QVector<QPair<bool, QPointF>>> &grid, QVector<QVector<QPair<bool, double>>> &heights);
+    QVector<double> approximation(const QVector<double> &x, const QVector<double> &y, const QVector<QPair<int, double>> &interpol_x) const;
+
+    [[nodiscard]] double bilinear_interpolation(const double (&x)[2], const double (&y)[2], const double (&z)[4], double interpol_x, double interpol_y) const;
+    [[nodiscard]] double linear_interpolation(const double (&x)[2], const double (&y)[2], double interpol_x) const;
+
+    [[nodiscard]] int binary_search(const QVector<double> &vec, double value, double atol = 1e-4) const; // return index of the nearest to value vec value
 };
 
 #endif // SURFACECONTAINER_HPP

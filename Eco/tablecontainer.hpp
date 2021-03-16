@@ -11,6 +11,12 @@
 class TableContainer : public QWidget
 {
     Q_OBJECT
+
+public:
+    static constexpr double max_spin_box_value{ 10000. };
+    static constexpr double min_spin_box_value{ -10000. };
+    static constexpr int number_of_spin_decimals{ 4 };
+
 private:
     QPushButton m_init_button;
     QPushButton m_save_changes_button;
@@ -33,11 +39,13 @@ public slots:
 
     void saveButtonPressed(); // connected with m_save_changes_button; signal - buttonPressed();
 
+    void setEnabled(bool flag);
+
 private slots:
     void validateCellValue(int row, int col);
 
 signals:
-    void saveButtonPressed(QTableWidget &table);
+    void saveButtonPressed(QTableWidget &table);   
 
 // setters
 public:

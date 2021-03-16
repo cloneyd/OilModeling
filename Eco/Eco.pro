@@ -16,6 +16,8 @@ SOURCES += \
     mainwindow.cpp \
     paintingwidget.cpp \
     painttablescene.cpp \
+    polutionwidget.cpp \
+    polutionwidgetcontainer.cpp \
     tablecontainer.cpp \
     visualization3dcontainer.cpp \
     visualization3dobject.cpp
@@ -27,6 +29,9 @@ HEADERS += \
     mainwindow.hpp \
     paintingwidget.hpp \
     painttablescene.hpp \
+    polutionwidget.hpp \
+    polutionwidgetcontainer.hpp \
+    source_types.hpp \
     tablecontainer.hpp \
     visualization3dcontainer.hpp \
     visualization3dobject.hpp
@@ -34,7 +39,8 @@ HEADERS += \
 FORMS += \
     cell_scale_parameters.ui \
     mainwindow.ui \
-    paintingwidget.ui
+    paintingwidget.ui \
+    polutionwidget.ui
 
 QT += webenginewidgets
 QT += datavisualization
@@ -44,3 +50,6 @@ include(../QtXlsxWriter/src/xlsx/qtxlsx.pri)
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    res.qrc
