@@ -102,7 +102,7 @@ public slots:
     QVector<double> computateACoef(const QVector<PolutionMatter> &matters) const;
     QVector<double> computateCRevMaxI(const QVector<PolutionMatter> &matters) const;
     QVector<double> computateCStAddI(const QVector<PolutionMatter> &matters) const;
-    void computateVAT(const QVector<PolutionMatter> &matters, double n_coef);
+    void computateVAT(const QVector<PolutionMatter> &matters);
 
 signals:
     void xWindProjectionChanged(const QVector<QVector<double>> &speeds);
