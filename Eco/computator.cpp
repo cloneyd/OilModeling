@@ -576,30 +576,46 @@ QVector<QVector<double>> Computator::computateV(const QVector<QVector<double>> &
     return speeds;
 }
 
-// FIXME
-QVector<QVector<double>> Computator::computateU0(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &/*xtan*/) const
+QVector<QVector<double>> Computator::computateU0(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &xtan) const
 {
     // range check must be in caller function
     const auto nrows{ ksi.size() };
     const auto ncols{ ksi[0].size() };
 
+    auto local_ksi{ createShoreBorder(ksi) };
     QVector<QVector<double>> speeds(nrows, QVector<double>(ncols, fill_value));
 
-    // TODO
+    for(int i{ 1 }; i <= nrows; ++i) {
+        for(int j{ 1 }; j <= ncols; ++j) {
+            if((*m_heights_ptr)[i - 1][j - 1].first) {
+                // all values for computating must be created by createShoreBorder
+                double height{ (*m_heights_ptr)[i - 1][j - 1].second };
+                speeds[i - 1][j - 1] = ((3 * (local_ksi[i - 1][j] - local_ksi[i + 1][j])) / (4 * m_xstep * height)) + ((xtan[i - 1][j - 1] * height) / (4 * m_az_ratio));
+            }
+        }
+    }
 
     return speeds;
 }
 
-// FIXME
-QVector<QVector<double>> Computator::computateV0(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &/*ytan*/) const
+QVector<QVector<double>> Computator::computateV0(const QVector<QVector<double>> &ksi, const QVector<QVector<double>> &ytan) const
 {
     // range check must be in caller function
     const auto nrows{ ksi.size() };
     const auto ncols{ ksi[0].size() };
 
+    auto local_ksi{ createShoreBorder(ksi) };
     QVector<QVector<double>> speeds(nrows, QVector<double>(ncols, fill_value));
 
-    // TODO
+    for(int i{ 1 }; i <= nrows; ++i) {
+        for(int j{ 1 }; j <= ncols; ++j) {
+            if((*m_heights_ptr)[i - 1][j - 1].first) {
+                // all values for computating must be created by createShoreBorder
+                double height{ (*m_heights_ptr)[i - 1][j - 1].second };
+                speeds[i - 1][j - 1] = ((3 * (local_ksi[i - 1][j] - local_ksi[i + 1][j]))) / (4 * m_ystep * height) + ((ytan[i - 1][j - 1] * height) / (4 * m_az_ratio));
+            }
+        }
+    }
 
     return speeds;
 }
