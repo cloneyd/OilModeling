@@ -73,18 +73,15 @@ void MainWindow::gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &grid)
     for(int i{}; i < nrows; ++i) {
         for(int j{}; j < ncols; ++j) {
             if(grid[i][j].first) {
-                auto deep_item{ createTableWidgetItem("-1", Qt::ItemIsSelectable) };
-                deep_item->setFlags(Qt::ItemIsEditable);
+                auto deep_item{ createTableWidgetItem("-1") };
                 deep_item->setBackground(Qt::cyan);
                 deep_table.setItem(i, j, deep_item);
 
-                auto xwind_item{ createTableWidgetItem("-1", Qt::ItemIsSelectable) };
-                xwind_item->setFlags(Qt::ItemIsEditable);
+                auto xwind_item{ createTableWidgetItem("-1") };
                 xwind_item->setBackground(Qt::cyan);
                 xwind_table.setItem(i, j, xwind_item);
 
-                auto ywind_item{ createTableWidgetItem("-1", Qt::ItemIsEditable) };
-                ywind_item->setFlags(Qt::ItemIsEditable);
+                auto ywind_item{ createTableWidgetItem("-1") };
                 ywind_item->setBackground(Qt::cyan);
                 ywind_table.setItem(i, j, ywind_item);
             }
@@ -248,28 +245,28 @@ void MainWindow::addSourceToTable(const DiffusionSource &source, const QVector<P
 void MainWindow::updateSourceInTable(int index, const PointSource &source, const QVector<PolutionMatter> &/*matters*/) // matters - for future
 {
     ++index;
-    m_ui->sources_table_widget->setItem(index, 0, createTableWidgetItem(source.m_name, Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Точечный", Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 2, createTableWidgetItem(QString("%1").arg(source.m_x), Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 3, createTableWidgetItem(QString("%1").arg(source.m_y), Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 4, createTableWidgetItem(QString("%1").arg(source.m_spending), Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem("-", Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem("-", Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem("-", Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 8, createTableWidgetItem(QString("%1").arg(source.m_initial_dilution_ratio), Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 9, createTableWidgetItem(QString("%1").arg(source.m_main_dilution_ratio), Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 10, createTableWidgetItem(QString("%1").arg(source.m_common_dilution_ratio), Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 10, createTableWidgetItem(QString("%1").arg(source.m_vat), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 0, createTableWidgetItem(source.m_name));
+    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Точечный"));
+    m_ui->sources_table_widget->setItem(index, 2, createTableWidgetItem(QString("%1").arg(source.m_x)));
+    m_ui->sources_table_widget->setItem(index, 3, createTableWidgetItem(QString("%1").arg(source.m_y)));
+    m_ui->sources_table_widget->setItem(index, 4, createTableWidgetItem(QString("%1").arg(source.m_spending)));
+    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem("-"));
+    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem("-"));
+    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem("-"));
+    m_ui->sources_table_widget->setItem(index, 8, createTableWidgetItem(QString("%1").arg(source.m_initial_dilution_ratio)));
+    m_ui->sources_table_widget->setItem(index, 9, createTableWidgetItem(QString("%1").arg(source.m_main_dilution_ratio)));
+    m_ui->sources_table_widget->setItem(index, 10, createTableWidgetItem(QString("%1").arg(source.m_common_dilution_ratio)));
+    m_ui->sources_table_widget->setItem(index, 10, createTableWidgetItem(QString("%1").arg(source.m_vat)));
 }
 
 void MainWindow::updateSourceInTable(int index, const DiffusionSource &source, const QVector<PolutionMatter> &matters) // matters - for future
 {
     updateSourceInTable(index, static_cast<const PointSource&>(source), matters);
     ++index;
-    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Диффузионный", Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem(QString("%1").arg(source.m_length), Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem(QString("%1").arg(source.m_direction), Qt::ItemIsSelectable));
-    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem(QString("%1").arg(source.m_tubes_number), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Диффузионный"));
+    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem(QString("%1").arg(source.m_length)));
+    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem(QString("%1").arg(source.m_direction)));
+    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem(QString("%1").arg(source.m_tubes_number)));
 }
 
 
@@ -632,11 +629,10 @@ void MainWindow::setupIternalConnections()
             this, SLOT( systemIndexChanged(int)));
 }
 
-QTableWidgetItem* MainWindow::createTableWidgetItem(const QString &text, Qt::ItemFlags flags) const
+QTableWidgetItem* MainWindow::createTableWidgetItem(const QString &text) const
 {
     auto item{ new QTableWidgetItem };
     item->setTextAlignment(Qt::AlignCenter);
     item->setText(text);
-    item->setFlags(flags);
     return item;
 }

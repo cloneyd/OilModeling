@@ -156,6 +156,6 @@ private:
 
     void setupIternalConnections();
 
-    QTableWidgetItem* createTableWidgetItem(const QString &text, Qt::ItemFlags flags = Qt::NoItemFlags) const;
+    QTableWidgetItem* createTableWidgetItem(const QString &text) const;
 };
 #endif // MAINWINDOW_H
