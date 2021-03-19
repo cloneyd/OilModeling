@@ -67,6 +67,11 @@ private:
                                                                     two types: PointSource of DiffusionSource. Must be checked with index() before using;
                                                                     second - vector of polution matters*/
 
+    QVector<double> computateACoef(const QVector<PolutionMatter> &matters) const;
+    QVector<double> computateCRevMaxI(const QVector<PolutionMatter> &matters) const;
+    QVector<double> computateCStAdd(const QVector<PolutionMatter> &matters) const;
+    QVector<double> computateVAT(const QVector<PolutionMatter> &matters, const QVector<PointSource> &sources);
+    void computateRevTask(const QVector<PolutionMatter> &matters);
 public:
     Computator();
     ~Computator();
@@ -98,11 +103,6 @@ public slots:
 
     void decomposeAbsSpeed();
     void computateSpeeds() const; // connected with MainWindow; signal - computateSpeeds();
-
-    QVector<double> computateACoef(const QVector<PolutionMatter> &matters) const;
-    QVector<double> computateCRevMaxI(const QVector<PolutionMatter> &matters) const;
-    QVector<double> computateCStAddI(const QVector<PolutionMatter> &matters) const;
-    void computateVAT(const QVector<PolutionMatter> &matters);
 
 signals:
     void xWindProjectionChanged(const QVector<QVector<double>> &speeds);

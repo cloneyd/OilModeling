@@ -305,7 +305,7 @@ void Computator::computateSpeeds() const
 
 QVector<double> Computator::computateACoef(const QVector<PolutionMatter> &matters) const
 {
-    auto size { matters.size() };
+    auto size{ matters.size() };
     QVector<double> a_coef{};
 
     a_coef.resize(size);
@@ -319,37 +319,52 @@ QVector<double> Computator::computateACoef(const QVector<PolutionMatter> &matter
 
 QVector<double> Computator::computateCRevMaxI(const QVector<PolutionMatter> &matters) const
 {
-    auto size { matters.size() };
+    auto size{ matters.size() };
     QVector<double> c_rev_max{};
 
     c_rev_max.resize(size);
 
     auto a_coef { computateACoef(matters) };
 
-    for(int i{}; i < size; ++i){
+    for(int i{}; i < size; ++i) {
         c_rev_max[i] = matters[i].m_maxc * a_coef[i];
     }
 
     return c_rev_max;
 }
 
-QVector<double> Computator::computateCStAddI(const QVector<PolutionMatter> &matters) const {
+QVector<double> Computator::computateCStAdd(const QVector<PolutionMatter> &matters) const {
     double n{ 1 }; // TODO: need to know how to calculate this bullshit properly
-
-
-}
-
-void Computator::computateVAT(const QVector<PolutionMatter> &matters) {
     auto size{ matters.size() };
-    for (int i{}; i < size; ++i) {
-        if(matters[i].m_bc < matters[i].m_mpc * matters[i].m_part) {
-            auto a_coef { computateACoef(matters) };
-            auto c_rev_max_i { computateCRevMaxI(matters) };
+    QVector<double> c_st_add{};
 
+    c_st_add.resize(size);
 
-        }
+    auto c_rev_max{ computateCRevMaxI(matters) };
+
+    for(int i{}; i < size; ++i) {
+           c_st_add[i] = n * c_rev_max[i] + matters[i].m_bc;
     }
+
+    return c_st_add;
 }
+
+QVector<double> Computator::computateVAT(const QVector<PolutionMatter> &matters, const QVector<PointSource> &sources) {
+    auto size{ matters.size() };
+    QVector<double> vat{};
+
+    vat.resize(size);
+
+    auto c_st_add{ computateCStAdd(matters) };
+
+    for(int i{}; i < size; ++i) {
+        vat[i] = c_st_add[i] * sources[i].m_spending;
+    }
+
+    return vat;
+}
+
+
 
 // private functions
 QVector<QVector<double>> Computator::computateXTanPressure() const

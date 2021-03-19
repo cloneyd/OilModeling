@@ -28,8 +28,8 @@ struct DiffusionSource : public PointSource
 struct PolutionMatter
 {
     // known
-    QString m_name;
-    QString m_group;
+    QString m_name; // Название вещества
+    QString m_group; // Группа ЛПВ
     double m_part; // Доля ЛПВ
     double m_mpc; // ПДК
     double m_bc; // Фоновая концентрация
