@@ -73,15 +73,15 @@ void MainWindow::gridChanged(const QVector<QVector<QPair<bool, QPointF>>> &grid)
     for(int i{}; i < nrows; ++i) {
         for(int j{}; j < ncols; ++j) {
             if(grid[i][j].first) {
-                auto deep_item{ createTableWidgetItem("-1") };
+                auto deep_item{ createTableWidgetItem("-1", Qt::ItemIsEditable) };
                 deep_item->setBackground(Qt::cyan);
                 deep_table.setItem(i, j, deep_item);
 
-                auto xwind_item{ createTableWidgetItem("-1") };
+                auto xwind_item{ createTableWidgetItem("-1", Qt::ItemIsEditable) };
                 xwind_item->setBackground(Qt::cyan);
                 xwind_table.setItem(i, j, xwind_item);
 
-                auto ywind_item{ createTableWidgetItem("-1") };
+                auto ywind_item{ createTableWidgetItem("-1", Qt::ItemIsEditable) };
                 ywind_item->setBackground(Qt::cyan);
                 ywind_table.setItem(i, j, ywind_item);
             }
