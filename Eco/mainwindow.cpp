@@ -173,11 +173,27 @@ void MainWindow::deleteGridSender() const
 
 void MainWindow::saveHeightsFromTableSender(QTableWidget &table)
 {
+<<<<<<< Updated upstream
     emit saveHeightsFromTable(table);
     ui->enter_speed_vectors_button->setEnabled(true);
     m_xwind_table_container.getTableWidget().setEnabled(true);
     m_ywind_table_container.getTableWidget().setEnabled(true);
     ui->save_heights_button->setEnabled(true);
+=======
+    ++index;
+    m_ui->sources_table_widget->setItem(index, 0, createTableWidgetItem(source.m_name, Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 1, createTableWidgetItem("Точечный", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 2, createTableWidgetItem(QString("%1").arg(source.m_x), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 3, createTableWidgetItem(QString("%1").arg(source.m_y), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 4, createTableWidgetItem(QString("%1").arg(source.m_spending), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 5, createTableWidgetItem("-", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 6, createTableWidgetItem("-", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 7, createTableWidgetItem("-", Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 8, createTableWidgetItem(QString("%1").arg(source.m_initial_dilution_ratio), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 9, createTableWidgetItem(QString("%1").arg(source.m_main_dilution_ratio), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 10, createTableWidgetItem(QString("%1").arg(source.m_common_dilution_ratio), Qt::ItemIsSelectable));
+    m_ui->sources_table_widget->setItem(index, 11, createTableWidgetItem(QString("%1").arg(source.m_vat), Qt::ItemIsSelectable));
+>>>>>>> Stashed changes
 }
 
 void MainWindow::saveXSpeedsFromTableSender(QTableWidget &table)
@@ -327,8 +343,63 @@ QString MainWindow::getFormatsFromComboBox(const QComboBox *box) const
 
 void MainWindow::connectPaintingSignalsWithMainWindow()
 {
+<<<<<<< Updated upstream
     connect(&m_painting_widget, SIGNAL(imageChanged(const QImage &)),
             this, SLOT(setImageInMapLabel(const QImage &)));
+=======
+    setupNewInstance();
+    emit resetSources();
+
+    m_ui->edit_image_button->setEnabled(true);
+    m_deeps_table_container.setEnabled(true);
+
+    m_ui->add_new_polution_source_button->setEnabled(true);
+    m_ui->delete_polution_source_button->setEnabled(true);
+    m_ui->current_source_matter_button->setEnabled(true);
+
+    m_ui->sources_table_widget->setEnabled(true);
+}
+
+void MainWindow::setupButtonsAfterGridChanges(const QVector<QVector<QPair<bool, QPointF>>> &grid)
+{
+    if(grid.isEmpty() || grid[0].isEmpty()) {
+        m_ui->open_map_visualization_button->setEnabled(false);
+
+        m_ui->enter_heights_button->setEnabled(false);
+
+        m_ui->save_map_button->setEnabled(false);
+        m_ui->map_save_format_combo_box->setEnabled(false);
+    }
+    else {
+        m_ui->open_map_visualization_button->setEnabled(true);
+
+        m_ui->enter_heights_button->setEnabled(true);
+
+        m_ui->save_map_button->setEnabled(true);
+        m_ui->map_save_format_combo_box->setEnabled(true);
+
+        m_xwind_table_container.setEnabled(true);
+        m_ywind_table_container.setEnabled(true);
+        m_ui->force_abs_speed_decompose_button->setEnabled(true);
+
+        m_ui->enter_speed_vectors_button->setEnabled(true);
+    }
+}
+
+void MainWindow::addSourceInformationRow()
+{
+    auto *table{ m_ui->sources_table_widget };
+    table->setRowCount(1);
+
+    auto item{ createTableWidgetItem("Источник") };
+    table->setItem(0, 0, item);
+
+    item = createTableWidgetItem("Тип");
+    table->setItem(0, 1, item);
+
+    item = createTableWidgetItem("X");
+    table->setItem(0, 2, item);
+>>>>>>> Stashed changes
 
     connect(&m_painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const QColor &)),
             this, SLOT(createGridSender(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &, const QColor &)));

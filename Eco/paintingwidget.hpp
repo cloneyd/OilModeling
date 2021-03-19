@@ -31,6 +31,8 @@ private:
     bool m_is_accept_changes_flag; // checks if changes need to be accepted; if show changes button pressed flag become false, if accept changes button pressed flag become true; true by default
     bool m_is_grid_drawn; // if grid was drawn becomes true; false by default
 
+    QVector<SourceType> m_types;
+
 public:
     explicit PaintingWidget(QWidget *parent = nullptr);
     ~PaintingWidget();
@@ -55,6 +57,15 @@ public slots:
 
     void saveChangesButtonClicked(QAbstractButton *btn); // connected with cell_scale_width->save_changes_button
 
+<<<<<<< Updated upstream
+=======
+    void changeLogChanged(int nwrites);
+    void changeLogStashChanged(int nwrites);
+    void markPositionChanged(int source_index, const QPointF *pos, bool must_be_deleted_if_not_found);
+    inline void giveCurrentSourceIndex(int &index) { index = m_painting_ui->source_name_combo_box->currentIndex(); }
+    void giveSourceType(SourceType &will_be_type, int index);
+
+>>>>>>> Stashed changes
 signals:
     void imageChanged(const QImage &image);
 
@@ -72,6 +83,8 @@ public:
     QPixmap getEdittedMapPixmap() const;
 
     [[nodiscard]] inline const QImage& getMapImage() const noexcept { return m_map_image; }
+
+    void deleteLastMarkInSource(int source_index); // unnecessary
 
 // overridden functions
 protected:

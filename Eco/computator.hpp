@@ -46,6 +46,11 @@ public:
     ~Computator();
 
 public slots:
+<<<<<<< Updated upstream
+=======
+    void resetSettings();
+    void setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid);
+>>>>>>> Stashed changes
     void setupHeights(const QVector<QVector<QPair<bool, double>>> &heights); // connected with GridCreatorWidget(signal - gridChanged(same))
 
     inline void setARatio(double ratio) noexcept { m_az_ratio = ratio; } // connected with double spin box (from MainWindow); signal - valueChanged(double)
@@ -54,9 +59,47 @@ public slots:
     void acceptXSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveXSpeedsFromTable(QTableWidget &)
     void acceptYSpeedsFromTable(QTableWidget &table); // connected with MainWindow; signal - saveYSpeedsFromTable(QTableWidget &)
 
+<<<<<<< Updated upstream
     inline void acceptXStep(const double step) noexcept {  m_xstep = step; }
     inline void acceptYStep(const double step) noexcept { m_ystep = step; }
     inline void acceptHorizon(const double horizon) noexcept {  m_horizon = horizon; }
+=======
+    inline void acceptXStep(const double step) noexcept {  m_xstep = step; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptYStep(const double step) noexcept { m_ystep = step; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptHorizon(const double horizon) noexcept {  m_horizon = horizon; } // connected with QDoubleSpinBox (MainWindow); signal - valueChanged(double)
+    void updateCoordinates(const QVector<QVector<QPointF>> &coordinates, const QVector<QVector<QPoint>> &sector);
+    inline void acceptKsiAtol(double atol) noexcept { m_ksi_atol = atol; } // connected with DoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptAbsSpeed(double speed) noexcept { m_absolute_speed = speed; } // connected with DoubleSpinBox (MainWindow); signal - valueChanged(double)
+    inline void acceptAzimuth(const QPair<double, bool> &pair) { m_wind_azimuth = pair; } // connected with MainWindow; signal - sendAzimuthState(same)
+    void acceptWindDirection(const QPair<int, bool> &pair);// connected with MainWindow; signal - sendSystemState(same)
+    inline void acceptDistance(double distance) noexcept { m_max_computation_distance = distance; }
+
+    inline void giveSourceInfo(int index, std::variant<PointSource, DiffusionSource> &source, QVector<PolutionMatter> &matters) const;
+    void addNewSource(const std::variant<PointSource, DiffusionSource> &source, const QVector<PolutionMatter> &matters);
+    void updateSource(int index, const std::variant<PointSource, DiffusionSource> &source, const QVector<PolutionMatter> &matters);
+    inline void deleteSource(int index);
+    void deleteLastMarkInSource(int source_index);
+
+    void decomposeAbsSpeed();
+    void computateSpeeds() const; // connected with MainWindow; signal - computateSpeeds();
+    void computatePollution();
+
+signals:
+    void xWindProjectionChanged(const QVector<QVector<double>> &speeds);
+    void yWindProjectionChanged(const QVector<QVector<double>> &speeds);
+
+    void uxSpeedChanged(const QVector<QVector<double>> &xspeed) const;
+    void uySpeedChanged(const QVector<QVector<double>> &yspeed) const;
+    void u0xSpeedChanged(const QVector<QVector<double>> &xspeed) const;    
+    void u0ySpeedChanged(const QVector<QVector<double>> &yspeed) const;
+    void uChanged(const QVector<QVector<double>> &speed) const;
+    void u0Changed(const QVector<QVector<double>> &speed) const;
+
+    void speedsComputated() const;
+
+    void getCurrentMapImage(QPixmap &map) const;
+    void flowMapCreated(const QPixmap &map) const;
+>>>>>>> Stashed changes
 
     void computateSpeeds() const;
 

@@ -36,6 +36,24 @@ PaintingWidget::PaintingWidget(QWidget *parent) :
     m_painting_ui->map_editor_graphics_view->setFixedSize(width, height);
     m_painting_ui->map_editor_graphics_view->setMaximumSize(width, height);
     m_painting_ui->map_editor_graphics_view->setAlignment(Qt::AlignCenter);
+<<<<<<< Updated upstream
+=======
+
+    connect(scene, SIGNAL(changeLogChanged(int)),
+            this, SLOT(changeLogChanged(int)));
+
+    connect(scene, SIGNAL(stashedChangeLogChanged(int)),
+            this, SLOT(changeLogStashChanged(int)));
+
+    connect(scene, SIGNAL(markPositionChanged(int, const QPointF *, bool)),
+            this, SLOT(markPositionChanged(int, const QPointF *, bool)));
+
+    connect(scene, SIGNAL(getCurrentSourceIndex(int&)),
+            this, SLOT(giveCurrentSourceIndex(int &)));
+
+    connect(scene, SIGNAL(getSourceType(SourceType &, int)),
+            this, SLOT(giveSourceType(SourceType &, int)));
+>>>>>>> Stashed changes
 }
 
 PaintingWidget::~PaintingWidget()
@@ -58,13 +76,104 @@ void PaintingWidget::acceptChangesButtonPressed()
     m_map_image = pm.toImage();
     emit imageChanged(m_map_image);
 
+<<<<<<< Updated upstream
     close(); // set some flags;
+=======
+void PaintingWidget::deleteLastMark(int source_index)
+{
+    qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene())->deleteLastMark(source_index);
+    repaint();
+    m_is_change_made = true;
+}
+
+void PaintingWidget::updateSources(int count, int index, SourceType type, const QString &name, const QPointF &pos)
+{
+    auto *source_combo_box{ m_painting_ui->source_name_combo_box };
+    auto *type_combo_box{ m_painting_ui->source_type_combo_box };
+    auto *scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
+
+    if(auto current_count{ source_combo_box->count() }; current_count < count) {
+        source_combo_box->insertItem(index, name);
+
+        if(pos.x() > 0.) {
+            scene->insertSource(index, { fromRealMetres(pos.x()), fromRealMetres(pos.y()) });
+        }
+        else {
+            scene->insertSource(index);
+        }
+        m_types.insert(index, type);
+    }
+    else if(current_count > count) {
+        source_combo_box->removeItem(index);
+        scene->deleteSource(index);
+        m_types.remove(index);
+    }
+    else {
+       source_combo_box->setItemText(index, name);
+       scene->updateSource(index, type, { fromRealMetres(pos.x()), fromRealMetres(pos.y()) });
+       m_types[index] = type;
+    }
+
+    if(type == SourceType::Point) {
+        type_combo_box->setCurrentIndex(0);        
+    }
+    else {
+        type_combo_box->setCurrentIndex(1);
+    }
+
+    m_is_change_made = true;
+}
+
+
+// private slots
+void PaintingWidget::acceptChangesButtonPressed()
+{
+    auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
+
+    QPixmap pm{ showChangesButtonPressed(PaintStyle::lines) };
+
+    emit imageChanged(pm.toImage());
+    scene->QGraphicsScene::clear();
+    scene->addPixmap(pm);
+    close();
+
+    const auto &marks{ scene->getMarks() };
+    const auto nsources{ marks.size() };
+    if(nsources == 0)   return;
+    QVector<QVector<QPointF>> coordinates(nsources);
+    QVector<QVector<QPoint>> indexes;
+    for(int i{}; i < nsources; ++i) {
+        const auto nmarks{ marks[i].size() };
+        QVector<QPointF> tmp(nmarks);
+        QVector<QPoint> tmp_index(nmarks);
+        for(int j{}; j < nmarks; ++j) {
+            tmp[j].setX(toRealMetres(marks[i][j].x()));
+            tmp[j].setY(toRealMetres(marks[i][j].y()));
+
+            emit findMark(i, tmp[j], &tmp_index[j]);
+        }
+        coordinates[i] = std::move(tmp);
+    }
+    emit updateCoordinates(coordinates, indexes);
+>>>>>>> Stashed changes
 }
 
 void PaintingWidget::discardAllChangesButtonPressed()
 {
     emit deleteGrid(); // deleting grid in GridHandler
+<<<<<<< Updated upstream
     close(); // set some flags;
+=======
+
+    auto scene{ qobject_cast<PaintTableScene*>(m_painting_ui->map_editor_graphics_view->scene()) };
+    scene->clear();
+    m_is_grid_drawn = false;
+    m_is_change_made = false;
+
+    scene->addPixmap(QPixmap::fromImage(m_map_image.scaled(scene->width(), scene->height(), Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+    imageChanged(m_map_image);
+    close();
+>>>>>>> Stashed changes
 }
 
 // setters
@@ -75,7 +184,31 @@ void PaintingWidget::setScenePixmap(const QPixmap &pm)
     scene->addPixmap(scaled_pm);
     m_map_image = scaled_pm.toImage();
 
+<<<<<<< Updated upstream
     emit imageChanged(m_map_image);
+=======
+void PaintingWidget::markPositionChanged(int source_index, const QPointF *pos, bool must_be_deleted_if_not_found)
+{
+    repaint();
+    m_is_change_made = true;
+    if(pos) {
+        if(must_be_deleted_if_not_found) {
+            QPoint index;
+            emit findMark(m_painting_ui->source_name_combo_box->currentIndex(), *pos, &index);
+            if(index.x() < 0 || index.y() < 0) {
+                deleteLastMarkInSource(source_index);
+            }
+        }
+        else {
+            emit findMark(m_painting_ui->source_name_combo_box->currentIndex(), *pos);
+        }
+    }
+}
+
+void PaintingWidget::giveSourceType(SourceType &will_be_type, int index)
+{
+    will_be_type = m_types[index];
+>>>>>>> Stashed changes
 }
 
 void PaintingWidget::updateMapButtonPressed()

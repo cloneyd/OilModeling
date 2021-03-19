@@ -86,9 +86,23 @@ signals:
 
     void computateSpeeds();
 
+<<<<<<< Updated upstream
     void savePressuresAsExcel(const QString &filepath); // FIXME: must be deleted
     void saveRotAsExcel(const QString &filepath); // FIXME: must be deleted
     void saveF0AsExcel(const QString &filepath); // FIXME: must be deleted
+=======
+    void addNewSource() const;
+    void displaySelectedSource(int index) const; // PolutionWidgetContainer
+    void deleteSelectedSource(int index); // Computator and ui table
+    void resetSources();
+
+    void getMapImage(QImage *image) const;
+    void getEdittedMapPixmap(QPixmap *map) const;
+    void loadImage(const QPixmap &map) const;
+    void loadImage(const QString &filepath) const;
+    void showPaintingWidget() const;
+    void clearPaintingContent() const;
+>>>>>>> Stashed changes
 
 // Getters
 public:

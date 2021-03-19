@@ -52,6 +52,27 @@ int main(int argc, char *argv[])
                      &computator, SLOT(computateSpeeds()));
     QObject::connect(window.getHorizonDoubleSpinBox(), SIGNAL(valueChanged(double)),
                      &computator, SLOT(acceptHorizon(const double)));
+<<<<<<< Updated upstream
+=======
+    QObject::connect(window.getKsiAtolSpinBox(), SIGNAL(valueChanged(double)),
+                     &computator, SLOT(acceptKsiAtol(double)));
+    QObject::connect(&window, SIGNAL(sendAzimuthState(const QPair<double, bool> &)),
+                     &computator, SLOT(acceptAzimuth(const QPair<double, bool> &)));
+    QObject::connect(&window, SIGNAL(sendSystemState(const QPair<int, bool> &)),
+                     &computator, SLOT(acceptWindDirection(const QPair<int, bool> &)));
+    QObject::connect(&window, SIGNAL(forceAbsSpeedDecompose()),
+                     &computator, SLOT(decomposeAbsSpeed()));
+    QObject::connect(window.getSpeedAbsDoubleSpinBox(), SIGNAL(valueChanged(double)),
+                     &computator, SLOT(acceptAbsSpeed(double)));
+    QObject::connect(window.getMaxComputationDistanceDoubleSpinBox(), SIGNAL(valueChanged(double)),
+                     &computator, SLOT(acceptDistance(double)));
+    QObject::connect(&window, SIGNAL(deleteSelectedSource(int)),
+                     &computator, SLOT(deleteSource(int)));
+    QObject::connect(&window, SIGNAL(computatePollution()),
+                     &computator, SLOT(computatePollution()));
+    QObject::connect(&window, SIGNAL(resetSources()),
+                     &computator, SLOT(resetSettings()));
+>>>>>>> Stashed changes
 
     // connections between MainWindow and ExcelWorker
     QObject::connect(&window, SIGNAL(saveMapAsExcel(const QString &)),
@@ -106,6 +127,45 @@ int main(int argc, char *argv[])
     QObject::connect(&excel_worker, SIGNAL(heightsLoaded(QVector<QVector<QPair<bool, double>>> &)),
                      &graphics3D, SLOT(setupHeights(QVector<QVector<QPair<bool, double>>> &)));
 
+<<<<<<< Updated upstream
+=======
+
+    // connections between PaintingWidget and MainWindow
+    QObject::connect(&painting_widget, SIGNAL(imageChanged(const QImage &)),
+                     &window, SLOT(setImageInMapLabel(const QImage &)));
+     QObject::connect(&painting_widget, SIGNAL(cellScaleParametersChanged(double, double, double)),
+                     &window, SLOT(updateGridParameters(double, double, double)));
+
+    // connection between PaintingWidget and GridHandler
+    QObject::connect(&painting_widget, SIGNAL(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &,
+                                                         const QColor &, double)),
+                     &grid_handler, SLOT(createGrid(QPixmap &, const QVector<QPointF> &, const QVector<QPointF> &,
+                                                    const QColor &, double)));
+    QObject::connect(&painting_widget, SIGNAL(deleteGrid()),
+                     &grid_handler, SLOT(deleteGrid()));
+    QObject::connect(&painting_widget, SIGNAL(drawGridInPixmap(QPixmap &, const QColor &, double)),
+                     &grid_handler, SLOT(drawGridInPixmap(QPixmap &, const QColor &, double)));
+    QObject::connect(&painting_widget, SIGNAL(findMark(int, const QPointF &, QPoint *)), // find source in grid
+                     &grid_handler, SLOT(searchMarkInGrid(int, const QPointF &, QPoint *)));
+
+    // connections between PaintingWidget and Computator
+    QObject::connect(&painting_widget, SIGNAL(updateCoordinates(const QVector<QVector<QPointF>> &, const QVector<QVector<QPoint>> &)),
+                     &computator, SLOT(updateCoordinates(const QVector<QVector<QPointF>> &, const QVector<QVector<QPoint>> &)));
+    QObject::connect(&painting_widget, SIGNAL(deleteLastMarkInSource(int)),
+                     &computator, SLOT(deleteLastMarkInSource(int)));
+
+
+    // connections between PolutionWidgetContainer and Computator
+    QObject::connect(&polution_widget_container, SIGNAL(sourceCreated(const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)),
+                     &computator, SLOT(addNewSource(const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)));    
+    QObject::connect(&polution_widget_container, SIGNAL(getSourceInfo(int, std::variant<PointSource, DiffusionSource> &, QVector<PolutionMatter> &)),
+                     &computator, SLOT(giveSourceInfo(int, std::variant<PointSource, DiffusionSource> &, QVector<PolutionMatter> &)));    
+    QObject::connect(&polution_widget_container, SIGNAL(sourceUpdated(int, const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)),
+                     &computator, SLOT(updateSource(int, const std::variant<PointSource, DiffusionSource> &, const QVector<PolutionMatter> &)));
+
+    window.emitUiSignal(); // emit connected ui stuff signals
+
+>>>>>>> Stashed changes
     window.show();
     return app.exec();
 }

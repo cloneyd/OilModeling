@@ -240,6 +240,7 @@ void GridHandler::includeWaterObjectArea(QVector<QPointF> water_object_area, QVe
 
 void GridHandler::drawGridInPixmap(QPixmap &pm, const QColor &color) const
 {
+<<<<<<< Updated upstream
     QPainter painter;
 
     painter.begin(&pm);
@@ -257,6 +258,47 @@ void GridHandler::drawGridInPixmap(QPixmap &pm, const QColor &color) const
                                     QLineF(QPointF(x + cell_width, y), QPointF(x + cell_width, y + cell_height)),
                                     QLineF(QPointF(x + cell_width, y + cell_height), QPointF(x, y + cell_height)),
                                     QLineF(QPointF(x, y + cell_height), m_grid[i][j].second)});
+=======
+    auto nrows { m_grid.size() };
+    if(nrows == 0) {
+        QMessageBox::warning(nullptr, QString("Ошибка"), QString("Сетка не создана.\n"));
+        denyLastMark(source_index);
+        return;
+    }
+
+    auto ncols{ m_grid[0].size() };
+    if(ncols == 0) {
+        QMessageBox::warning(nullptr, QString("Ошибка"), QString("Сетка не создана."));
+        denyLastMark(source_index);
+        return;
+    }
+
+    auto cell_width{ realscale * m_cell_width };
+    auto cell_height{ realscale * m_cell_height };
+
+    if(mark.x() < m_grid[0][0].second.x() || mark.x() > m_grid[0][ncols - 1].second.x() ||
+       mark.y() < m_grid[0][0].second.y() || mark.y() > m_grid[nrows - 1][0].second.y()) {
+         QMessageBox::warning(nullptr, QString("Ошибка"), QString("Сетка не создана."));
+         emit denyLastMark(source_index);
+         return;
+    }
+
+    for(int i{}; i < nrows; ++i) {
+        if(mark.y() >= m_grid[i][0].second.y() && mark.y() <= m_grid[i][0].second.y() + cell_height) {
+            for(int j{}; j < ncols; ++j) {
+                if(mark.x() >= m_grid[i][j].second.x() && mark.x() <= m_grid[i][j].second.x() + cell_width) {
+                    if(!m_grid[i][j].first) {
+                        QMessageBox::warning(nullptr, "Ошибка метки", "Источник загрязнения лежит на острове.");
+                        emit denyLastMark(source_index);
+                    }
+                    else {
+                        if(sector) {
+                            sector->setX(j);
+                            sector->setY(i);
+                        }
+                    }
+                }
+>>>>>>> Stashed changes
             }
         }
     }

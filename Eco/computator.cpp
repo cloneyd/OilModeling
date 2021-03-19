@@ -19,8 +19,20 @@ Computator::Computator() :
     m_u0_vectors{},
     m_v0_vectors{},
     m_horizon{ 1. },
+<<<<<<< Updated upstream
     m_wo_type{ WaterObjectType::river },
     m_az_ratio{ 0.001 }
+=======
+    m_wo_type{ WaterObjectType::River },
+    m_az_ratio{ 0.001 },
+    m_ksi_atol{ 1. },
+    m_max_computation_distance{ 500. },
+    m_wind_direction{ WindDirection::North, false },
+    m_wind_azimuth{ 0., true },
+    m_absolute_speed{ 10. },
+    m_marks_indexes{ },
+    m_sources{}
+>>>>>>> Stashed changes
 {
 
 }
@@ -32,21 +44,45 @@ Computator::~Computator()
 
 
 // public slots
+<<<<<<< Updated upstream
 void Computator::setupHeights(const QVector<QVector<QPair<bool, double>>> &heights)
 {
     auto rows{ heights.size() };
     if(rows < 1) {
         return;
     }
+=======
+void Computator::resetSettings()
+{
+    m_grid_ptr = nullptr;
+    m_heights_ptr = nullptr;
+    m_xspeeds_vectors.clear();
+    m_yspeeds_vectors.clear();
+    m_marks_indexes.clear();
+
+    auto nsources{ m_sources.size() };
+    for(int i{ nsources - 1 }; i >= 0; --i) {
+        deleteSource(i);
+    }
+}
+
+void Computator::setupGrid(const QVector<QVector<QPair<bool, QPointF>>> &grid)
+{
+    m_grid_ptr = nullptr;
+>>>>>>> Stashed changes
 
     auto cols{ heights[0].size() };
     if(cols < 1) {
         return;
     }
 
+<<<<<<< Updated upstream
     m_heights.resize(rows);
     for(int i{}; i < rows; ++i) {
         m_heights[i].resize(cols);
+=======
+    m_heights_ptr = nullptr;
+>>>>>>> Stashed changes
 
         for(int j{}; j < cols; ++j) {
             m_heights[i][j] = heights[i][j];
@@ -109,6 +145,151 @@ void Computator::acceptYSpeedsFromTable(QTableWidget &table)
             }
         }
     }
+<<<<<<< Updated upstream
+=======
+}
+
+void Computator::updateCoordinates(const QVector<QVector<QPointF>> &coordinates, const QVector<QVector<QPoint>> &sector)
+{
+    // FIXME: diffusion source?
+    m_marks_indexes = sector;
+    const auto nsources{ m_sources.size() };
+    PointSource *current_source{};
+    for(int i{}; i < nsources; ++i) {
+        if(m_sources[i].first.index() == 0) {
+            current_source = std::addressof(std::get<PointSource>(m_sources[i].first));
+        }
+        else {
+            current_source = std::addressof(std::get<DiffusionSource>(m_sources[i].first));
+        }
+
+        current_source->m_x = coordinates[i][0].x();
+        current_source->m_y = coordinates[i][0].y();
+    }
+}
+
+
+void Computator::acceptWindDirection(const QPair<int, bool> &pair)
+{
+    auto first{ pair.first };
+    auto second{ pair.second };
+
+    Q_ASSERT_X(first >= static_cast<int>(WindDirection::MIN) && first <= static_cast<int>(WindDirection::MAX),
+               "Class - Computator", "Function - acceptWindDirection, problem - wrong direction");
+
+    m_wind_direction.first = static_cast<WindDirection>(first);
+    m_wind_direction.second = second;
+}
+
+void Computator::addNewSource(const std::variant<PointSource, DiffusionSource> &source, const QVector<PolutionMatter> &matters)
+{
+    m_sources.append(qMakePair(source, matters));
+
+    auto new_size{ m_sources.size() };
+    if(source.index() == 0) {
+        auto current_source{ std::get<PointSource>(source) };
+        emit sourcesChanged(current_source, matters);
+        emit sourcesChanged(new_size, new_size - 1, SourceType::Point, current_source.m_name, { current_source.m_x, current_source.m_y });
+    }
+    else {
+        auto current_source{ std::get<DiffusionSource>(source) };
+        emit sourcesChanged(current_source, matters);
+        emit sourcesChanged(new_size, new_size - 1, SourceType::Diffusion, current_source.m_name, { current_source.m_x, current_source.m_y });
+    }
+}
+
+void Computator::updateSource(int index, const std::variant<PointSource, DiffusionSource> &source, const QVector<PolutionMatter> &matters)
+{
+    m_sources[index] = qMakePair(source, matters);
+
+    if(source.index() == 0) {
+        emit sourceUpdated(index, std::get<PointSource>(source), matters);
+    }
+    else {
+        emit sourceUpdated(index, std::get<DiffusionSource>(source), matters);
+    }
+}
+
+void Computator::deleteLastMarkInSource(int source_index)
+{
+    PointSource *source{};
+    SourceType type{};
+    if(m_sources[source_index].first.index() == 0) {
+        source = std::addressof(std::get<PointSource>(m_sources[source_index].first));
+        type = SourceType::Point;
+    }
+    else {
+        source = std::addressof(std::get<DiffusionSource>(m_sources[source_index].first));
+        type = SourceType::Diffusion;
+    }
+
+    source->m_x = -1.;
+    source->m_y = -1.;
+    emit sourcesChanged(m_sources.size(), source_index, type, source->m_name, { source->m_x, source->m_y });
+}
+
+void Computator::decomposeAbsSpeed()
+{
+    m_xspeeds_vectors.clear();
+    m_yspeeds_vectors.clear();
+
+    if(!m_grid_ptr) return;
+    auto nrows{ (*m_grid_ptr).size() };
+    auto ncols{ (*m_grid_ptr)[0].size() };
+
+    m_xspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
+    m_yspeeds_vectors.fill(QVector<double>(ncols, fill_value), nrows);
+
+    auto fill = [&nrows, &ncols, this](double degrees) mutable {
+        for(int i{}; i < nrows; ++i) {
+            for(int j{}; j < ncols; ++j) {
+                if((*m_grid_ptr)[i][j].first) {
+                    m_xspeeds_vectors[i][j] = m_absolute_speed * std::cos(degrees * pi / 180.); // from radians to degrees
+                    m_yspeeds_vectors[i][j] = m_absolute_speed * std::sin(degrees * pi / 180.);
+                }
+            }
+        }
+    };
+
+    if(m_wind_azimuth.second) {
+        fill(90. -  m_wind_azimuth.first);
+    }
+    else if(m_wind_direction.second) {
+        switch(m_wind_direction.first) {
+        case WindDirection::North: // 0. OR 360.
+            fill(90.);
+            break;
+
+        case WindDirection::Northeast: // 45.
+            fill(45.);
+            break;
+
+        case WindDirection::East: // 90
+            fill(0.);
+            break;
+
+        case WindDirection::Southeast: // 135
+            fill(-45.);
+            break;
+
+        case WindDirection::South: // 180
+            fill(-90.);
+            break;
+
+        case WindDirection::Southwest: // 225
+            fill(-135.);
+            break;
+
+        case WindDirection::West: // 270
+            fill(-180.);
+            break;
+
+        case WindDirection::Northwest: // 325
+            fill(-225.);
+            break;
+        }
+    }
+>>>>>>> Stashed changes
 
     m_is_yspeeds_entered_flag = true;
     emit ySpeedChanged(m_yspeeds_vectors);
