@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/imgs">
+        <file>Images/arrow_1.png</file>
+        <file>Images/arrow_2.png</file>
+        <file>Images/cansel.png</file>
+        <file>Images/fws.png</file>
+        <file>Images/load_from_site_icon.png</file>
+        <file>Images/location.svg</file>
+        <file>Images/pncl.png</file>
+        <file>Images/reld.png</file>
+        <file>Images/save.png</file>
+        <file>Images/sh.png</file>
+        <file>Images/zip.png</file>
+    </qresource>
+    <qresource prefix="/qss">
+        <file>QSS/ManjaroMix.qss</file>
+    </qresource>
+</RCC>

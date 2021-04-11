@@ -1,0 +1,398 @@
+#include "excelworker.hpp"
+
+ExcelWorker::ExcelWorker(QObject *parent) :
+    QObject(parent),
+    m_depth_doc{},
+    m_speeds_doc{},
+    m_pixgrid_ptr{},
+    m_green(0x63BE7B),
+    m_yellow(0xffEB84),
+    m_red(0xf86968)
+{ /* PASS */ }
+
+
+// public slots
+void ExcelWorker::saveMap(const QString &filepath, bool *operation_status)
+{
+    if(!verifyGrid()) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Сетка не задана.\nФайл не был создан");
+        if(operation_status)    *operation_status = false;
+        return;
+    }
+
+    QXlsx::Document map;
+    map.addSheet("Карта");
+    writeToFile(map, 1, 1, 0);
+
+    if(!map.saveAs(filepath)) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл.\nПожалуйста, попробуйте еще раз");
+        if(operation_status)    *operation_status = false;
+        return;
+    }
+    if(operation_status)    *operation_status = true;
+}
+
+void ExcelWorker::loadDepth(const QString &filepath, bool *operation_status) const
+{
+    if(!verifyGrid()) {
+        QMessageBox::warning(nullptr, "Ошибка загрузки глубин", "Сетка не была задана.\nЗадайте сетку и попробуйте снова");
+        if(operation_status)    *operation_status = false;
+        return;
+    }
+
+    const auto nrows{ m_pixgrid_ptr->size() };
+    const auto ncols{ (*m_pixgrid_ptr)[0].size() };
+    QXlsx::Document file(filepath); // open file
+    DepthType depth(nrows, QVector<QPair<bool, double>>(ncols, qMakePair(false, -1.)));
+    bool is_converted{};
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if((*m_pixgrid_ptr)[i][j].first) {
+                if(auto cell{ file.cellAt(i + 1, j + 1) }; cell) { // if cell is exist
+                    if(auto cell_value{ cell->value().toDouble(&is_converted) }; is_converted) { // if cell value is convertable
+                        depth[i][j] = qMakePair(true, cell_value);
+                    }
+                    else {
+                        QMessageBox::warning(nullptr, "Ошибка чтения", QString("Данные ячейки ") +
+                                             QString("%1;%2").arg(i + 1, j + 1) +
+                                             QString(" повреждены или недоступны.\nПроверьте файл и повторите попытку"));
+                        if(operation_status)    *operation_status = false;
+                        return;
+                    }
+                }
+                else {
+                    QMessageBox::warning(nullptr, "Ошибка чтения", QString("Ячейка ") +
+                                         QString("%1;%2").arg(i + 1, j + 1) +
+                                         QString(" повреждена или недоступна.\nПроверьте файл и повторите попытку"));
+                    if(operation_status)    *operation_status = false;
+                    return;
+                }
+            }
+        }
+    }
+
+    emit depthLoaded(depth);
+    if(operation_status)    *operation_status = true;
+}
+
+void ExcelWorker::saveSpeeds(const QString &filepath, bool *operation_status) const
+{
+    if(!verifyGrid()) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Сетка не задана.\nЗадайте сетку и повторите попытку");
+        if(operation_status)    *operation_status = false;
+        return;
+    }
+
+    if(m_speeds_doc.sheetNames().size() != SpeedsDocSheetsIndexes::num_of_sheets) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Файл скоростей поврежден, сохранение невозможно");
+        if(operation_status)    *operation_status = false;
+        return;
+    }
+
+    if(!m_speeds_doc.saveAs(filepath)) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл по указанному пути.\nПопробуйте еще раз");
+        if(operation_status)    *operation_status = false;
+        return;
+    }
+
+    if(operation_status)    *operation_status = true;
+}
+
+void ExcelWorker::acceptGrid(const GridType &pixgrid)
+{
+    m_pixgrid_ptr = std::addressof(pixgrid);
+
+    // clear any content
+    m_depth_doc.~Document();
+    new(std::addressof(m_depth_doc)) QXlsx::Document;
+    m_depth_doc.addSheet("Глубины");
+
+    m_speeds_doc.~Document();
+    new(std::addressof(m_speeds_doc)) QXlsx::Document;
+    m_speeds_doc.addSheet("Проекции скоростей течений");
+    m_speeds_doc.addSheet("Проекции скоростей на поверхности");
+    m_speeds_doc.addSheet("Течения");
+}
+
+void ExcelWorker::saveDepth(const QString &filepath, bool *operation_status) const
+{
+    if(!verifyGrid()) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Сетка не задана.\nЗадайте сетку и повторите попытку");
+        if(operation_status)    *operation_status = false;
+        return;
+    }
+
+    if(!m_depth_doc.saveAs(filepath)) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл по указанному пути.\nПожалуйста, попробуйте еще раз");
+        if(operation_status)    *operation_status = false;
+        return;
+    }
+
+    if(operation_status)    *operation_status = true;
+}
+
+void ExcelWorker::saveOutput(const QString &/*filepth*/, bool */*operation_status*/)
+{
+    // TODO
+    Q_ASSERT_X(false, "Class - ExcelWorker", "Function - saveOutput, problem - idi nahuy and don\'t call me anymore");
+}
+
+void ExcelWorker::acceptDepth(const DepthType &depth)
+{
+    if(depth.size() == 0 || depth[0].size() == 0) {
+        return;
+    }
+
+    if(m_depth_doc.sheetNames().size() != 1) {
+        QMessageBox::warning(nullptr, "Файл поврежден", "Файл глубин поврежден, запись невозможна");
+        return;
+    }
+
+    writeToFile(m_depth_doc, 1, 1, 0, depth);
+}
+
+void ExcelWorker::acceptUXProjections(const QVector<QVector<double>> &speeds)
+{
+    if(speeds.size() == 0 || speeds[0].size() == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptUXProjections, problem - empty speeds");
+        return;
+    }
+
+    if(m_speeds_doc.sheetNames().size() != SpeedsDocSheetsIndexes::num_of_sheets) {
+        QMessageBox::warning(nullptr, "Файл поврежден", "Файл скоростей поврежден, запись в него невозможна");
+        return;
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::u_projection, speeds, "Проекции скоростей течений на OX", &cfm);
+}
+
+void ExcelWorker::acceptUYProjections(const QVector<QVector<double>> &speeds)
+{
+    const auto nrows{ speeds.size() };
+    if(nrows == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptUYProjections, problem - empty rows");
+        return;
+    }
+
+    if(speeds[0].size() == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptUYProjections, problem - empty cols");
+        return;
+    }
+
+    if(m_speeds_doc.sheetNames().size() != SpeedsDocSheetsIndexes::num_of_sheets) {
+        QMessageBox::warning(nullptr, "Ошибка файла", "Файл скоростей поврежден, запись в него невозможна");
+        return;
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::u_projection, speeds, "Проекции скоростей течений на OY", &cfm);
+}
+
+void ExcelWorker::acceptU0XProjections(const QVector<QVector<double>> &speeds)
+{
+    if(speeds.size() == 0 || speeds[0].size() == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptU0XProjections, problem - empty speeds");
+        return;
+    }
+
+    if(m_speeds_doc.sheetNames().size() != SpeedsDocSheetsIndexes::num_of_sheets) {
+        QMessageBox::warning(nullptr, "Файл поврежден", "Файл скоростей поврежден, запись в него невозможна");
+        return;
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::u0_projection, speeds, "Проекции скоростей на поверхности на OX", &cfm);
+}
+
+void ExcelWorker::acceptU0YProjections(const QVector<QVector<double>> &speeds)
+{
+    const auto nrows{ speeds.size() };
+    if(nrows == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptU0YProjections, problem - empty rows");
+        return;
+    }
+
+    if(speeds[0].size() == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptU0YProjections, problem - empty cols");
+        return;
+    }
+
+    if(m_speeds_doc.sheetNames().size() != SpeedsDocSheetsIndexes::num_of_sheets) {
+        QMessageBox::warning(nullptr, "Ошибка файла", "Файл скоростей поврежден, запись в него невозможна");
+        return;
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::u0_projection, speeds, "Проекции скоростей на поверхности на OY", &cfm);
+}
+
+void ExcelWorker::acceptU(const QVector<QVector<double>> &speeds)
+{
+    if(speeds.size() == 0 || speeds[0].size() == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptU, problem - empty speeds");
+        return;
+    }
+
+    if(m_speeds_doc.sheetNames().size() != SpeedsDocSheetsIndexes::num_of_sheets) {
+        QMessageBox::warning(nullptr, "Файл поврежден", "Файл скоростей поврежден, запись в него невозможна");
+        return;
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::flows, speeds, "Cкорости течений", &cfm);
+}
+
+void ExcelWorker::acceptU0(const QVector<QVector<double>> &speeds)
+{
+    const auto nrows{ speeds.size() };
+    if(nrows == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptU0, problem - empty rows");
+        return;
+    }
+
+    if(speeds[0].size() == 0) {
+        Q_ASSERT_X(false, "Class - ExcelWorker", "Function - acceptU0, problem - empty cols");
+        return;
+    }
+
+    if(m_speeds_doc.sheetNames().size() != SpeedsDocSheetsIndexes::num_of_sheets) {
+        QMessageBox::warning(nullptr, "Ошибка файла", "Файл скоростей поврежден, запись в него невозможна");
+        return;
+    }
+
+    QXlsx::ConditionalFormatting cfm;
+    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::flows, speeds, "Cкоростb на поверхности", &cfm);
+}
+
+
+// private functions
+void ExcelWorker::writeToFile(QXlsx::Document &where,
+                 int row_offset, int col_offset,
+                 int sheet_index,
+                 const QVector<QVector<double>> &what, // belondness will be checked with m_pixgrid_ptr.first
+                 const QString &label,
+                 QXlsx::ConditionalFormatting *cfm)
+{
+    where.selectSheet(where.sheetNames()[sheet_index]);
+
+    const auto nrows{ what.size() };
+    const auto ncols{ what[0].size()  };
+
+    int shift{};
+    if(!label.isEmpty()) {
+        if(!where.write(row_offset, col_offset, label)) {
+            QMessageBox::warning(nullptr, "Ошибка записи", QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"));
+            return;
+        }
+        ++shift;
+    }
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if((*m_pixgrid_ptr)[i][j].first) {
+                if(!where.write(row_offset + i + shift, col_offset + j, what[i][j])) {
+                    QMessageBox::warning(nullptr, "Ошибка записи", QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"));
+                    return;
+                }
+            }
+        }
+    }
+
+    if(cfm) {
+        cfm->addRange(row_offset + shift,  col_offset, row_offset + shift + nrows, col_offset + ncols);
+        where.addConditionalFormatting(*cfm);
+    }
+}
+
+void ExcelWorker::writeToFile(QXlsx::Document &where,
+                 int row_offset, int col_offset,
+                 int sheet_index,
+                 const DepthType &what, // belondness will be checked what.first
+                 const QString &label,
+                 QXlsx::ConditionalFormatting *cfm)
+{
+    where.selectSheet(where.sheetNames()[sheet_index]);
+
+    const auto nrows{ what.size() };
+    const auto ncols{ what[0].size()  };
+
+    int shift{};
+    if(!label.isEmpty()) {
+        if(!where.write(row_offset, col_offset, label)) {
+            QMessageBox::warning(nullptr, "Ошибка записи", QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"));
+            return;
+        }
+        ++shift;
+    }
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if(what[i][j].first) {
+                if(!where.write(row_offset + i + shift, col_offset + j, what[i][j].second)) {
+                    QMessageBox::warning(nullptr, "Ошибка записи", QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"));
+                    return;
+                }
+            }
+        }
+    }
+
+    if(cfm) {
+        cfm->addRange(row_offset + shift,  col_offset, row_offset + shift + nrows, col_offset + ncols);
+        where.addConditionalFormatting(*cfm);
+    }
+}
+
+// belondness will be checked with m_pixgrid_ptr.first and will be filled with -1
+void ExcelWorker::writeToFile(QXlsx::Document &where,
+                 int row_offset, int col_offset,
+                 int sheet_index, const QString &label)
+{
+    where.selectSheet(where.sheetNames()[sheet_index]);
+
+    const auto nrows{ (*m_pixgrid_ptr).size() };
+    const auto ncols{ (*m_pixgrid_ptr)[0].size()  };
+
+    int shift{};
+    if(!label.isEmpty()) {
+        if(!where.write(row_offset, col_offset, label)) {
+            QMessageBox::warning(nullptr, "Ошибка записи", QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"));
+            return;
+        }
+        ++shift;
+    }
+
+    for(int i{}; i < nrows; ++i) {
+        for(int j{}; j < ncols; ++j) {
+            if((*m_pixgrid_ptr)[i][j].first) {
+                if(!where.write(row_offset + i + shift, col_offset + j, "-1.")) {
+                    QMessageBox::warning(nullptr, "Ошибка записи", QString("Не удалось записать\nданные в файл. Пожалуйста,\nпопробуйте снова"));
+                    return;
+                }
+            }
+        }
+    }
+}
+
+[[nodiscard]] bool ExcelWorker::verifyGrid() const
+{
+    if(!m_pixgrid_ptr) {
+        return false;
+    }
+
+    if(m_pixgrid_ptr->size() == 0) {
+        return false;
+    }
+
+    if((*m_pixgrid_ptr)[0].size() == 0) {
+        return false;
+    }
+
+    return true;
+}
