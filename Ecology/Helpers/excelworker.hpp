@@ -6,6 +6,7 @@
 // current project
 #include "GridHandlerFiles/grid_handler_utilities.hpp"
 #include "Visualization3D/object3d_utilities.hpp"
+#include "Helpers/errorstatusstructures.hpp"
 
 // 3d party library
 #include "xlsxdocument.h"
@@ -24,9 +25,23 @@ private:
         num_of_sheets = 3
     };
 
+    enum OutputDocSheetIndexes : unsigned char
+    {
+        MIN,
+        depth_page = MIN,
+        xspeed_projections_page,
+        yspeed_projections_page,
+        flows_xprojections_page,
+        flows_yprojections_page,
+        flows_page,
+        concentrations_page,
+        MAX = concentrations_page
+    };
+
 private:
     QXlsx::Document m_depth_doc;
     QXlsx::Document m_speeds_doc;
+    QXlsx::Document m_output_doc;
 
     const GridType *m_pixgrid_ptr; // pointer to pixgrid which allows us search in all containers which have no belongness flags
 
@@ -38,11 +53,11 @@ public:
     explicit ExcelWorker(QObject *parent = nullptr);
 
 public slots:
-    void saveMap(const QString &filepath, bool *operation_status = nullptr); // connected with MainWindow::[7]; saves file where m_pixgrid_ptr.first == true with -1
+    void saveMap(const QString &filepath, SaveOperationStatus *operation_status = nullptr); // connected with MainWindow::[7]; saves file where m_pixgrid_ptr.first == true with -1
     void loadDepth(const QString &filepath, bool *operation_status = nullptr) const; // connected with MainWindow::[20]; emits: [1] if successed
-    void saveSpeeds(const QString &filepath, bool *operation_status = nullptr) const; // connected with MainWindow::[4];
-    void saveDepth(const QString &filepath, bool *operation_status = nullptr) const; // connected with MainWindow::[5];
-    void saveOutput(const QString &filepth, bool *operation_status = nullptr); // connected with MainWindow::[6]
+    void saveSpeeds(const QString &filepath, SaveOperationStatus *operation_status = nullptr) const; // connected with MainWindow::[4];
+    void saveDepth(const QString &filepath, SaveOperationStatus *operation_status = nullptr) const; // connected with MainWindow::[5];
+    void saveOutput(const QString &filepth, SaveOperationStatus *operation_status = nullptr); // connected with MainWindow::[6]
 
     void acceptGrid(const GridType &pixgrid); // connected with GridHandler::[6]
     void acceptDepth(const DepthType &depth); // connected with Object3DContainer::[1]
@@ -52,6 +67,8 @@ public slots:
     void acceptU0YProjections(const QVector<QVector<double>> &speeds); // connected Computator::[4]
     void acceptU(const QVector<QVector<double>> &speeds); // connected Computator::[5]
     void acceptU0(const QVector<QVector<double>> &speeds); // connected Computator::[6]
+    void acceptXProjections(const QVector<QVector<double>> &projections); // connected with Computator::[12]
+    void acceptYProjections(const QVector<QVector<double>> &projections); // connected with Computator::[13]
 
 signals:
     void depthLoaded(DepthType &depth) const; // [1] transfer ownership
@@ -78,6 +95,11 @@ private:
                      int sheet_index, const QString &label = "");
 
     [[nodiscard]] bool verifyGrid() const; // if grid is nullptr or empty - false
+
+    void recreateSheet(QXlsx::Document &doc, int sheet_name_index);
+    void recreateDepthFile();
+    void recreateSpeedsFile();
+    void recreateOutputFile();
 };
 
 #endif // EXCELWORKER_HPP

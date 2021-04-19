@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QMessageBox>
+#include <QTextStream>
 
 // current project
 #include "object3d.hpp"
@@ -26,11 +27,16 @@ public slots:
     void acceptDepth(DepthType &depth); // connected with MainWindow::[1] and ExcelWorker::[1]; TAKES OWNERSHIP on depth
     void show(); // redefined; have no connection yet
 
+    void saveState(QTextStream &stream, const char delim); // connected with InternalConfigurationFilesHandler::[9]
+    // connected with InternalConfigurationFilesHandler::[10]; emits:(1)
+    void restoreState(QTextStream &stream, const char delim);
+
 signals:
     void depthChanged(const DepthType &depth) const;// [1]
 
 // helpers
 private:
+    void acceptDepth_(DepthType &depth, bool interpolate);
     // approximation manager
     void interpolation_and_approximation(DepthType &depth);
     // interpolation

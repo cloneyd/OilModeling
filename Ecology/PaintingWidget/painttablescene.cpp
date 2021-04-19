@@ -272,6 +272,92 @@ void PaintTableScene::clearStashes() /*noexcept*/ // NOT EMITTING
     return pixmap;
 }
 
+void PaintTableScene::saveState(QTextStream &stream, const char delim)
+{
+    auto writeToFile = [&stream](const auto &container, const char obj_delim) {
+        stream << container.size() << obj_delim;
+        for(const auto &cont : container) {
+            stream << cont.size() << obj_delim;
+            for(const auto &point : cont) {
+                stream << point.x() << '\t' << point.y() << '\t';
+            }
+        }
+        stream << obj_delim; // control delim
+    };
+    writeToFile(m_wo_buffer, delim);
+    writeToFile(m_islands_buffer, delim);
+    writeToFile(m_sources_marks_buffer, delim);
+    writeToFile(m_stashed_wo, delim);
+    writeToFile(m_stashed_islands, delim);
+
+    stream << m_stashed_sources_marks.size() << delim;
+    for(const auto &point : m_stashed_sources_marks) {
+        stream << point.x() << '\t' << point.y() << '\t';
+    }
+    stream << delim; // control delim
+}
+
+void PaintTableScene::restoreState(QTextStream &stream, const char delim)
+{
+    auto readUntilDelim = [&stream](const char delim) -> QString {
+        QString result{};
+        char sym{};
+        for(stream >> sym; sym != delim; stream >> sym) {
+            result += sym;
+        }
+        return result;
+    };
+
+    auto readFromFile = [&readUntilDelim, &stream](auto &container, const char obj_delim) {
+        bool is_converted{};
+        const auto container_size{ readUntilDelim(obj_delim).toInt(&is_converted) };
+        Q_ASSERT(is_converted);
+        container.resize(container_size);
+
+        for(auto &cont : container) {
+            const auto cont_size{ readUntilDelim(obj_delim).toInt(&is_converted) };
+            Q_ASSERT(is_converted);
+            cont.resize(cont_size);
+            for(auto &point : cont) {
+                const auto x{ readUntilDelim('\t').toDouble(&is_converted) };
+                Q_ASSERT(is_converted);
+                point.setX(x);
+
+                const auto y{ readUntilDelim('\t').toDouble(&is_converted) };
+                Q_ASSERT(is_converted);
+                point.setY(y);
+            }
+        }
+        char ctrl_delim{};
+        stream >> ctrl_delim;
+        Q_ASSERT(ctrl_delim == obj_delim);
+    };
+
+    readFromFile(m_wo_buffer, delim);
+    readFromFile(m_islands_buffer, delim);
+    readFromFile(m_sources_marks_buffer, delim);
+    readFromFile(m_stashed_wo, delim);
+    readFromFile(m_stashed_islands, delim);
+
+    bool is_converted{};
+    const auto m_stashed_marks_size{ readUntilDelim(delim).toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+    m_stashed_sources_marks.resize(m_stashed_marks_size);
+    for(auto &point : m_stashed_sources_marks) {
+        const auto x{ readUntilDelim('\t').toDouble(&is_converted) };
+        Q_ASSERT(is_converted);
+        point.setX(x);
+
+        const auto y{ readUntilDelim('\t').toDouble(&is_converted) };
+        Q_ASSERT(is_converted);
+        point.setY(y);
+    }
+
+    char ctrl_delim{};
+    stream >> ctrl_delim;
+    Q_ASSERT(ctrl_delim == delim);
+}
+
 
 // private helpers
 [[nodiscard]] bool PaintTableScene::isInSceneRect(const QPointF &pos) const

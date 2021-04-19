@@ -12,6 +12,7 @@ SOURCES += \
     Computations/computator.cpp \
     GridHandlerFiles/gridhandler.cpp \
     Helpers/excelworker.cpp \
+    Helpers/internalconfigurationfileshandler.cpp \
     Helpers/pch.cpp \
     Helpers/tablecontainer.cpp \
     PaintingWidget/paintingwidget.cpp \
@@ -28,7 +29,9 @@ HEADERS += \
     Computations/computator_utilities.hpp \
     GridHandlerFiles/grid_handler_utilities.hpp \
     GridHandlerFiles/gridhandler.hpp \
+    Helpers/errorstatusstructures.hpp \
     Helpers/excelworker.hpp \
+    Helpers/internalconfigurationfileshandler.hpp \
     Helpers/pch.hpp \
     Helpers/tablecontainer.hpp \
     PaintingWidget/paint_table_scene_utilities.hpp \

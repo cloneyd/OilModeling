@@ -14,6 +14,7 @@
 #include "PaintingWidget/paint_table_scene_utilities.hpp"
 #include "Computations/computator_utilities.hpp"
 #include "Helpers/tablecontainer.hpp"
+#include "Helpers/errorstatusstructures.hpp"
 
 // ui
 #include "ui_mainwindow.h"
@@ -46,6 +47,8 @@ public slots:
     void acceptDepth(const DepthType &depth); // connected with Object3DContainer::[1]
     void acceptNewSourceCoordinates(const QVector<QVector<QPointF>> &coordinates); // connected with PaintingWidget::[7]
     void acceptMapImage(const QPixmap &image, bool is_grid_created); // connected with PaintingWidget::[1]; emits: [31]
+    void acceptLegend(const QPixmap &min_speed_pm, const QPixmap &avg_speed_pm,
+                      const QPixmap &max_speed_pm); // connected with Computator::[7]
     inline void resetSources() { resetSourcesTable(); }; // connected with PaintingWidget::[8]
     inline void updateGridParameters(double scale, double width, double height); // connected with PaintingWidget::[2]; must block spin box signals
     inline void acceptFlowMap(const QPixmap &pm); // connected with Computator::[8]
@@ -59,6 +62,10 @@ public slots:
     inline void appendNewSource(const DiffusionSource &source, const QVector<PollutionMatter> &/*matters*/) { appendNewSourceToTable(source); }
     // connected with PollutionWidgetGenerator::[4]; matters currently unused
     inline void updateSource(int source_index, const DiffusionSource &source, const QVector<PollutionMatter> &/*matters*/) { updateSourceInTable(source_index, source); }
+
+    void saveState(QTextStream &where, const char obj_delim); // connected with InternalConfigurationFilesHandler::[1]
+    // connected with InternalConfigurationFilesHandler::[2]; implicitly emits all UI signals
+    void restoreState(QTextStream &from, const char obj_delim);
 
     // should parse tables and create vectors
     void saveDepthTable(const QTableWidget &table); // connected with TableContainer::[1]; emits: [1]
@@ -78,9 +85,9 @@ private slots:
     inline void addNewSourceButtonPressed() const { emit addNewPollutionSource(); } // connected with Ui::[28]; emits: [25]
 
     // connected with UI::[4]
-    inline void openVisualizationButtonPressed() { m_ui->display_info_tool_box->setCurrentIndex(2); m_ui->relief_tab_page->setCurrentIndex(0); }
+    inline void openVisualizationButtonPressed() { m_ui->display_info_tool_box->setCurrentIndex(2); m_ui->relief_tab_page->setCurrentIndex(1); }
      // connected with Ui::[12];
-    inline void enterDepthButtonPressed() { m_ui->display_info_tool_box->setCurrentIndex(2); m_ui->relief_tab_page->setCurrentIndex(1); }
+    inline void enterDepthButtonPressed() { m_ui->display_info_tool_box->setCurrentIndex(2); m_ui->relief_tab_page->setCurrentIndex(0); }
     // connected with Ui::[9]
     inline void enterSpeedsButtonPressed() { m_ui->display_info_tool_box->setCurrentIndex(3); m_ui->winds_direction_tab->setCurrentIndex(1); }
 
@@ -113,16 +120,20 @@ private slots:
     inline void systemCurrentIndexChangedSender(int index) const;
     // connected with Ui::[27]; emits: [15]
     inline void maxComputationDistanceChangedSender(double distance) const { emit maxComputationDistanceChanged(distance); }
+    // connected with Ui::create_configuration_file::pressed();
+    inline void createConfigurationFileButtonPressed() const { emit createConfigurationFile(); }
+    // connected with Ui::load_configuration_file::pressed()
+    inline void loadConfigurationFileButtonPressed() const { emit loadConfigurationFile(); }
 
 signals:
     // NOTE: operation status indicates that operation done successfully
     void saveDepth(DepthType &depth); // [1]; Transfers ownership
     void saveXProjections(QVector<QVector<double>> &speeds); // [2]; Transfers ownership
     void saveYProjections(QVector<QVector<double>> &speeds); // [3]; Transfers ownership
-    void saveSpeedsInFile(const QString &filepath, bool *operation_status) const; // [4]
-    void saveDepthInFile(const QString &filepath, bool *operation_status) const; // [5]
-    void saveOutput(const QString &filepath, bool *operation_status) const; // [6]
-    void saveMapInFile(const QString &filepath, bool *operation_status) const; // [7]
+    void saveSpeedsInFile(const QString &filepath, SaveOperationStatus *operation_status) const; // [4]
+    void saveDepthInFile(const QString &filepath, SaveOperationStatus *operation_status) const; // [5]
+    void saveOutput(const QString &filepath, SaveOperationStatus *operation_status) const; // [6]
+    void saveMapInFile(const QString &filepath, SaveOperationStatus *operation_status) const; // [7]
 
     void azimuthStateChanged(const QPair<bool, double> &state) const; // [8]
     void windSystemStateChanged(const QPair<bool, WindDirection> &state) const; // [9]
@@ -149,6 +160,9 @@ signals:
     void deleteSelectedSource(int source_index) const; // [30]
     void computatePollution(bool *operation_status) const; // [27]
     void getPixgrid(const GridType **will_be_grid); // [31]
+    void createConfigurationFile() const; // [32]
+    void loadConfigurationFile() const; // [33]
+    // [34] is free
 
 // setters
 public:
@@ -195,7 +209,7 @@ inline void MainWindow::updateGridParameters(double scale, double width, double 
 inline void MainWindow::acceptFlowMap(const QPixmap &pm)
 {
     m_ui->map_with_winds_label->clear();
-    m_ui->map_with_winds_label->setPixmap(pm);
+    m_ui->map_with_winds_label->setPixmap(pm.scaled(1200, 650, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)); // 1200 x 650 - hardcode contants
     m_ui->map_with_winds_label->setScaledContents(true);
     m_ui->display_info_tool_box->setCurrentIndex(3);
     m_ui->winds_direction_tab->setCurrentIndex(0);

@@ -12,11 +12,11 @@ ExcelWorker::ExcelWorker(QObject *parent) :
 
 
 // public slots
-void ExcelWorker::saveMap(const QString &filepath, bool *operation_status)
+void ExcelWorker::saveMap(const QString &filepath, SaveOperationStatus *operation_status)
 {
     if(!verifyGrid()) {
         QMessageBox::warning(nullptr, "Ошибка сохранения", "Сетка не задана.\nФайл не был создан");
-        if(operation_status)    *operation_status = false;
+        if(operation_status)    *operation_status = SaveOperationStatus::ObjectError;
         return;
     }
 
@@ -26,10 +26,10 @@ void ExcelWorker::saveMap(const QString &filepath, bool *operation_status)
 
     if(!map.saveAs(filepath)) {
         QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл.\nПожалуйста, попробуйте еще раз");
-        if(operation_status)    *operation_status = false;
+        if(operation_status)    *operation_status = SaveOperationStatus::FilepathError;
         return;
     }
-    if(operation_status)    *operation_status = true;
+    if(operation_status)    *operation_status = SaveOperationStatus::Ok;
 }
 
 void ExcelWorker::loadDepth(const QString &filepath, bool *operation_status) const
@@ -75,27 +75,27 @@ void ExcelWorker::loadDepth(const QString &filepath, bool *operation_status) con
     if(operation_status)    *operation_status = true;
 }
 
-void ExcelWorker::saveSpeeds(const QString &filepath, bool *operation_status) const
+void ExcelWorker::saveSpeeds(const QString &filepath, SaveOperationStatus *operation_status) const
 {
     if(!verifyGrid()) {
         QMessageBox::warning(nullptr, "Ошибка сохранения", "Сетка не задана.\nЗадайте сетку и повторите попытку");
-        if(operation_status)    *operation_status = false;
+        if(operation_status)    *operation_status = SaveOperationStatus::ObjectError;
         return;
     }
 
     if(m_speeds_doc.sheetNames().size() != SpeedsDocSheetsIndexes::num_of_sheets) {
         QMessageBox::warning(nullptr, "Ошибка сохранения", "Файл скоростей поврежден, сохранение невозможно");
-        if(operation_status)    *operation_status = false;
+        if(operation_status)    *operation_status = SaveOperationStatus::FatalObjectError;
         return;
     }
 
     if(!m_speeds_doc.saveAs(filepath)) {
         QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл по указанному пути.\nПопробуйте еще раз");
-        if(operation_status)    *operation_status = false;
+        if(operation_status)    *operation_status = SaveOperationStatus::FilepathError;
         return;
     }
 
-    if(operation_status)    *operation_status = true;
+    if(operation_status)    *operation_status = SaveOperationStatus::Ok;
 }
 
 void ExcelWorker::acceptGrid(const GridType &pixgrid)
@@ -103,38 +103,49 @@ void ExcelWorker::acceptGrid(const GridType &pixgrid)
     m_pixgrid_ptr = std::addressof(pixgrid);
 
     // clear any content
-    m_depth_doc.~Document();
-    new(std::addressof(m_depth_doc)) QXlsx::Document;
-    m_depth_doc.addSheet("Глубины");
-
-    m_speeds_doc.~Document();
-    new(std::addressof(m_speeds_doc)) QXlsx::Document;
-    m_speeds_doc.addSheet("Проекции скоростей течений");
-    m_speeds_doc.addSheet("Проекции скоростей на поверхности");
-    m_speeds_doc.addSheet("Течения");
+    recreateDepthFile();
+    recreateSpeedsFile();
+    recreateOutputFile();
 }
 
-void ExcelWorker::saveDepth(const QString &filepath, bool *operation_status) const
+void ExcelWorker::saveDepth(const QString &filepath, SaveOperationStatus *operation_status) const
 {
     if(!verifyGrid()) {
         QMessageBox::warning(nullptr, "Ошибка сохранения", "Сетка не задана.\nЗадайте сетку и повторите попытку");
-        if(operation_status)    *operation_status = false;
+        if(operation_status)    *operation_status = SaveOperationStatus::ObjectError;
         return;
     }
 
     if(!m_depth_doc.saveAs(filepath)) {
         QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл по указанному пути.\nПожалуйста, попробуйте еще раз");
-        if(operation_status)    *operation_status = false;
+        if(operation_status)    *operation_status = SaveOperationStatus::FilepathError;
         return;
     }
 
-    if(operation_status)    *operation_status = true;
+    if(operation_status)    *operation_status = SaveOperationStatus::Ok;
 }
 
-void ExcelWorker::saveOutput(const QString &/*filepth*/, bool */*operation_status*/)
+void ExcelWorker::saveOutput(const QString &filepath, SaveOperationStatus *operation_status)
 {
-    // TODO
-    Q_ASSERT_X(false, "Class - ExcelWorker", "Function - saveOutput, problem - idi nahuy and don\'t call me anymore");
+    if(!verifyGrid()) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Сетка не задана.\nЗадайте сетку и повторите попытку");
+        if(operation_status)    *operation_status = SaveOperationStatus::ObjectError;
+        return;
+    }
+
+    if(m_output_doc.sheetNames().size() != OutputDocSheetIndexes::MAX + 1) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Файл скоростей поврежден, сохранение невозможно");
+        if(operation_status)    *operation_status = SaveOperationStatus::FatalObjectError;
+        return;
+    }
+
+    if(!m_output_doc.saveAs(filepath)) {
+        QMessageBox::warning(nullptr, "Ошибка сохранения", "Не удалось сохранить файл по указанному пути.\nПопробуйте еще раз");
+        if(operation_status)    *operation_status = SaveOperationStatus::FilepathError;
+        return;
+    }
+
+    if(operation_status)    *operation_status = SaveOperationStatus::Ok;
 }
 
 void ExcelWorker::acceptDepth(const DepthType &depth)
@@ -143,12 +154,18 @@ void ExcelWorker::acceptDepth(const DepthType &depth)
         return;
     }
 
-    if(m_depth_doc.sheetNames().size() != 1) {
+    const auto sheet_names{ m_depth_doc.sheetNames() };
+    if(sheet_names.size() != 1) {
         QMessageBox::warning(nullptr, "Файл поврежден", "Файл глубин поврежден, запись невозможна");
         return;
     }
 
+    recreateSheet(m_depth_doc, 0);
+
     writeToFile(m_depth_doc, 1, 1, 0, depth);
+
+    Q_ASSERT_X(m_output_doc.sheetNames().size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Function - AcceptDepth, problem - wrong number of output file sheets");
+    writeToFile(m_output_doc, 1, 1, OutputDocSheetIndexes::depth_page, depth);
 }
 
 void ExcelWorker::acceptUXProjections(const QVector<QVector<double>> &speeds)
@@ -163,9 +180,17 @@ void ExcelWorker::acceptUXProjections(const QVector<QVector<double>> &speeds)
         return;
     }
 
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
-    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::u_projection, speeds, "Проекции скоростей течений на OX", &cfm);
+    recreateSheet(m_speeds_doc, SpeedsDocSheetsIndexes::u_projection);
+    QXlsx::ConditionalFormatting speeds_doc_cfm;
+    speeds_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::u_projection, speeds, "Проекции скоростей течений на OX", &speeds_doc_cfm);
+
+    Q_ASSERT_X(m_output_doc.sheetNames().size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Function - acceptUXProjections"
+                                                                                    "problem - wrong output file sheets number");
+    recreateSheet(m_output_doc, OutputDocSheetIndexes::flows_xprojections_page);
+    QXlsx::ConditionalFormatting output_doc_cfm;
+    output_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_output_doc, 1, 1, OutputDocSheetIndexes::flows_xprojections_page, speeds, "Проекции скоростей течений", &output_doc_cfm);
 }
 
 void ExcelWorker::acceptUYProjections(const QVector<QVector<double>> &speeds)
@@ -186,9 +211,17 @@ void ExcelWorker::acceptUYProjections(const QVector<QVector<double>> &speeds)
         return;
     }
 
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
-    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::u_projection, speeds, "Проекции скоростей течений на OY", &cfm);
+    QXlsx::ConditionalFormatting speeds_doc_cfm;
+    speeds_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::u_projection, speeds, "Проекции скоростей течений на OY", &speeds_doc_cfm);
+
+    Q_ASSERT_X(m_output_doc.sheetNames().size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Function - acceptUYProjections"
+                                                                                    "problem - wrong output file sheets number");
+    recreateSheet(m_output_doc, OutputDocSheetIndexes::flows_yprojections_page);
+    QXlsx::ConditionalFormatting output_doc_cfm;
+    output_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_output_doc, 1, 1, OutputDocSheetIndexes::flows_yprojections_page, speeds,
+                "Проекции скоростей течений", &output_doc_cfm);
 }
 
 void ExcelWorker::acceptU0XProjections(const QVector<QVector<double>> &speeds)
@@ -203,9 +236,17 @@ void ExcelWorker::acceptU0XProjections(const QVector<QVector<double>> &speeds)
         return;
     }
 
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
-    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::u0_projection, speeds, "Проекции скоростей на поверхности на OX", &cfm);
+    recreateSheet(m_speeds_doc, SpeedsDocSheetsIndexes::u0_projection);
+    QXlsx::ConditionalFormatting speeds_doc_cfm;
+    speeds_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::u0_projection, speeds, "Проекции скоростей на поверхности на OX", &speeds_doc_cfm);
+
+    Q_ASSERT_X(m_output_doc.sheetNames().size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Function - acceptU0XProjections"
+                                                                                    "problem - wrong output file sheets number");
+    QXlsx::ConditionalFormatting output_doc_cfm;
+    output_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_output_doc, speeds.size() + 4, 1, OutputDocSheetIndexes::flows_xprojections_page,
+                speeds, "Проекции скоростей на поверхности", &output_doc_cfm);
 }
 
 void ExcelWorker::acceptU0YProjections(const QVector<QVector<double>> &speeds)
@@ -226,9 +267,17 @@ void ExcelWorker::acceptU0YProjections(const QVector<QVector<double>> &speeds)
         return;
     }
 
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
-    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::u0_projection, speeds, "Проекции скоростей на поверхности на OY", &cfm);
+    QXlsx::ConditionalFormatting speeds_doc_cfm;
+    speeds_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::u0_projection,
+                speeds, "Проекции скоростей на поверхности на OY", &speeds_doc_cfm);
+
+    Q_ASSERT_X(m_output_doc.sheetNames().size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Function - acceptU0YProjections"
+                                                                                    "problem - wrong output file sheets number");
+    QXlsx::ConditionalFormatting output_doc_cfm;
+    output_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_output_doc, nrows + 4, 1, OutputDocSheetIndexes::flows_yprojections_page,
+                speeds, "Проекции скоростей на поверхности", &output_doc_cfm);
 }
 
 void ExcelWorker::acceptU(const QVector<QVector<double>> &speeds)
@@ -243,9 +292,17 @@ void ExcelWorker::acceptU(const QVector<QVector<double>> &speeds)
         return;
     }
 
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
-    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::flows, speeds, "Cкорости течений", &cfm);
+    QXlsx::ConditionalFormatting speeds_cfm;
+    speeds_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, 1, 1, SpeedsDocSheetsIndexes::flows, speeds, "Cкорости течений", &speeds_cfm);
+
+    Q_ASSERT_X(m_output_doc.sheetNames().size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Function - acceptU"
+                                                                                    "problem - wrong output file sheets number");
+    recreateSheet(m_output_doc, OutputDocSheetIndexes::flows_page);
+    QXlsx::ConditionalFormatting output_doc_cfm;
+    output_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_output_doc, 1, 1, OutputDocSheetIndexes::flows_page,
+                speeds, "Скорости течений", &output_doc_cfm);
 }
 
 void ExcelWorker::acceptU0(const QVector<QVector<double>> &speeds)
@@ -266,9 +323,51 @@ void ExcelWorker::acceptU0(const QVector<QVector<double>> &speeds)
         return;
     }
 
-    QXlsx::ConditionalFormatting cfm;
-    cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
-    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::flows, speeds, "Cкоростb на поверхности", &cfm);
+    QXlsx::ConditionalFormatting speeds_doc_cfm;
+    speeds_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_speeds_doc, nrows + 4, 1, SpeedsDocSheetsIndexes::flows, speeds, "Cкорости на поверхности", &speeds_doc_cfm);
+
+    Q_ASSERT_X(m_output_doc.sheetNames().size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Function - acceptU0"
+                                                                                    "problem - wrong output file sheets number");
+    QXlsx::ConditionalFormatting output_doc_cfm;
+    output_doc_cfm.add3ColorScaleRule(m_green, m_yellow, m_red);
+    writeToFile(m_output_doc, nrows + 4, 1, OutputDocSheetIndexes::flows_page,
+                speeds, "Скорости на поверхности", &output_doc_cfm);
+}
+
+void ExcelWorker::acceptXProjections(const QVector<QVector<double>> &projections)
+{
+    const auto sheet_names{ m_output_doc.sheetNames() };
+    Q_ASSERT_X(sheet_names.size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Functions - acceptXProjections,"
+                                                                                            "problem - wrong sheet number");
+    if(projections.size() == 0) {
+        Q_ASSERT_X(false, "Class - Computator", "Function - acceptXProjections, problem - empty rows");
+        return;
+    }
+
+    if(projections[0].size() == 0) {
+        Q_ASSERT_X(false, "Class - Computator", "Function - acceptXProjections, problem - empty cols");
+        return;
+    }
+
+    writeToFile(m_output_doc, 1, 1, OutputDocSheetIndexes::xspeed_projections_page);
+}
+void ExcelWorker::acceptYProjections(const QVector<QVector<double>> &projections)
+{
+    const auto sheet_names{ m_output_doc.sheetNames() };
+    Q_ASSERT_X(sheet_names.size() == OutputDocSheetIndexes::MAX + 1, "Class - Computator", "Functions - acceptYProjections,"
+                                                                                            "problem - wrong sheet number");
+    if(projections.size() == 0) {
+        Q_ASSERT_X(false, "Class - Computator", "Function - acceptYProjections, problem - empty rows");
+        return;
+    }
+
+    if(projections[0].size() == 0) {
+        Q_ASSERT_X(false, "Class - Computator", "Function - acceptYProjections, problem - empty cols");
+        return;
+    }
+
+    writeToFile(m_output_doc, 1, 1, OutputDocSheetIndexes::yspeed_projections_page);
 }
 
 
@@ -349,7 +448,7 @@ void ExcelWorker::writeToFile(QXlsx::Document &where,
     }
 }
 
-// belondness will be checked with m_pixgrid_ptr.first and will be filled with -1
+// belongness will be checked with m_pixgrid_ptr.first and will be filled with -1
 void ExcelWorker::writeToFile(QXlsx::Document &where,
                  int row_offset, int col_offset,
                  int sheet_index, const QString &label)
@@ -395,4 +494,58 @@ void ExcelWorker::writeToFile(QXlsx::Document &where,
     }
 
     return true;
+}
+
+void ExcelWorker::recreateSheet(QXlsx::Document &doc, int sheet_name_index)
+{
+    auto sheet_names{ doc.sheetNames() };
+
+    if(sheet_names.size() == 1) {
+        doc.renameSheet(sheet_names.front(), "Deleted");
+        if(!doc.addSheet(sheet_names.front())) {
+            Q_ASSERT_X(false, "Class - Computator", "Function - recreateSheet, problem - sheet name already used");
+        }
+
+        if(!doc.deleteSheet("Deleted")) {
+            Q_ASSERT_X(false, "Class - Computator", "Function - recreateSheet, problem - sheet was not deleted");
+        }
+    }
+    else {
+        if(!doc.deleteSheet(sheet_names[sheet_name_index])) {
+            Q_ASSERT_X(false, "Class - Computator", "Function - recreateSheet, problem - sheet was not deleted");
+        }
+
+        if(!doc.insertSheet(sheet_name_index, sheet_names[sheet_name_index])) {
+            Q_ASSERT_X(false, "Class - Computator", "Function - recreateSheet, problem - sheet name already used");
+        }
+    }
+}
+
+void ExcelWorker::recreateDepthFile()
+{
+    m_depth_doc.~Document();
+    new(std::addressof(m_depth_doc)) QXlsx::Document;
+    m_depth_doc.addSheet("Глубины");
+}
+
+void ExcelWorker::recreateSpeedsFile()
+{
+    m_speeds_doc.~Document();
+    new(std::addressof(m_speeds_doc)) QXlsx::Document;
+    m_speeds_doc.addSheet("Проекции скоростей течений");
+    m_speeds_doc.addSheet("Проекции скоростей на поверхности");
+    m_speeds_doc.addSheet("Течения");
+}
+
+void ExcelWorker::recreateOutputFile()
+{
+   m_output_doc.~Document();
+   new(std::addressof(m_output_doc)) QXlsx::Document;
+   m_output_doc.addSheet("Глубины");
+   m_output_doc.addSheet("Поле ветров (по оси x)");
+   m_output_doc.addSheet("Поле ветров (по оси y)");
+   m_output_doc.addSheet("Поле течений (по оси x)");
+   m_output_doc.addSheet("Поле течений (по оси y)");
+   m_output_doc.addSheet("Поле течений");
+   m_output_doc.addSheet("Поле концентраций");
 }

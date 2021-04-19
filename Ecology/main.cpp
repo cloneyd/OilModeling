@@ -10,11 +10,10 @@
 #include "PollutionWidget/pollutionwidgetgenerator.hpp"
 #include "Computations/computator.hpp"
 #include "Helpers/excelworker.hpp"
-
+#include "Helpers/internalconfigurationfileshandler.hpp"
 
 /* TODO:
- * 1) Наложение изображения на таблицу глубин (это точно возможно)
- * 2) Выделение ячеек рандомной областью (а это точно возможно?)
+ * 1) Выделение ячеек рандомной областью (а это точно возможно?)
  */
 int main(int argc, char *argv[])
 {
@@ -26,6 +25,7 @@ int main(int argc, char *argv[])
     Object3DContainer graph;
     PollutionWidgetGenerator pollut_gen;
     Computator computator;
+    InternalConfigurationFilesHandler conf_handler;
 
     
     // connections between MainWindow and GridHandler
@@ -127,27 +127,35 @@ int main(int argc, char *argv[])
                      &computator, SLOT(deleteSource(int)));
     
     // connections between MainWindow and ExcelWorker
-    QObject::connect(&main_window, SIGNAL(saveMapInFile(const QString &/*filepath*/, bool */*operation status*/)), // [7]
-                     &excel_worker, SLOT(saveMap(const QString &, bool *)));
+    QObject::connect(&main_window, SIGNAL(saveMapInFile(const QString &/*filepath*/, SaveOperationStatus */*operation status*/)), // [7]
+                     &excel_worker, SLOT(saveMap(const QString &, SaveOperationStatus *)));
     
     QObject::connect(&main_window, SIGNAL(loadDepthFromFile(const QString &/*filepath*/, bool */*operation status*/)), // [20]
                      &excel_worker, SLOT(loadDepth(const QString &, bool *)));
     
-    QObject::connect(&main_window, SIGNAL(saveSpeedsInFile(const QString &/*filepath*/, bool */*operation status*/)), // [4]
-                     &excel_worker, SLOT(saveSpeeds(const QString &, bool *)));
+    QObject::connect(&main_window, SIGNAL(saveSpeedsInFile(const QString &/*filepath*/, SaveOperationStatus */*operation status*/)), // [4]
+                     &excel_worker, SLOT(saveSpeeds(const QString &, SaveOperationStatus *)));
     
-    QObject::connect(&main_window, SIGNAL(saveDepthInFile(const QString &/*filepath*/, bool */*operation status*/)), // [5]
-                     &excel_worker, SLOT(saveDepth(const QString &, bool *)));
+    QObject::connect(&main_window, SIGNAL(saveDepthInFile(const QString &/*filepath*/, SaveOperationStatus */*operation status*/)), // [5]
+                     &excel_worker, SLOT(saveDepth(const QString &, SaveOperationStatus *)));
     
-    QObject::connect(&main_window, SIGNAL(saveOutput(const QString &/*filepath*/, bool */*operation status*/)), // [6]
-                     &excel_worker, SLOT(saveOutput(const QString &, bool *)));
+    QObject::connect(&main_window, SIGNAL(saveOutput(const QString &/*filepath*/, SaveOperationStatus */*operation status*/)), // [6]
+                     &excel_worker, SLOT(saveOutput(const QString &, SaveOperationStatus*)));
     
     // connections between MainWindow and PollutionWidgetGenerator
     QObject::connect(&main_window, SIGNAL(addNewPollutionSource()), // [25]
                      &pollut_gen, SLOT(createDefaultConstructedWidget()));    
 
     QObject::connect(&main_window, SIGNAL(displaySelectedSource(int /*source index*/)), // [26]
-                     &pollut_gen, SLOT(createFilledWidget(int)));    
+                     &pollut_gen, SLOT(createFilledWidget(int)));
+
+    // connections between MainWindow and InternalConfigurationFilesHandler
+    QObject::connect(&main_window, SIGNAL(createConfigurationFile()), // [32]
+                     &conf_handler, SLOT(createConfigurationFile()));
+
+    QObject::connect(&main_window, SIGNAL(loadConfigurationFile()), // [33]
+                     &conf_handler, SLOT(loadConfigurationFile()));
+
     
     // connections between GridHandler and MainWindow
     QObject::connect(&grid_handler, SIGNAL(gridChanged(const GridType &/*pixel grid*/)), // [1]
@@ -216,6 +224,11 @@ int main(int argc, char *argv[])
     QObject::connect(&computator, SIGNAL(flowMapCreated(const QPixmap &/*flow map image*/)), // [8]
                      &main_window, SLOT(acceptFlowMap(const QPixmap &)));
 
+    QObject::connect(&computator, SIGNAL(legendCreated(const QPixmap &/*min_speed_pm*/,
+                                                       const QPixmap &/*avg_speed_pm*/, const QPixmap &/*max_speed_pm*/)), // [7]
+                     &main_window, SLOT(acceptLegend(const QPixmap &/*min_speed_pm*/,
+                                                     const QPixmap &/*avg_speed_pm*/, const QPixmap &/*max_speed_pm*/)));
+
     QObject::connect(&computator, SIGNAL(xProjectionsDecomposed(const QVector<QVector<double>> &/*projections*/)), // [10]
                      &main_window, SLOT(acceptXProjections(const QVector<QVector<double>> &)));
 
@@ -241,6 +254,11 @@ int main(int argc, char *argv[])
     QObject::connect(&computator, SIGNAL(u0Computated(const QVector<QVector<double>> &/*speeds*/)), // [6]
                      &excel_worker, SLOT(acceptU0(const QVector<QVector<double>> &)));
 
+    QObject::connect(&computator, SIGNAL(xProjectionsChanged(const QVector<QVector<double>> &/*speeds*/)), // [12]
+                     &excel_worker, SLOT(acceptXProjections(const QVector<QVector<double>> &)));
+
+    QObject::connect(&computator, SIGNAL(yProjectionsChanged(const QVector<QVector<double>> &/*speeds*/)), // [13]
+                     &excel_worker, SLOT(acceptYProjections(const QVector<QVector<double>> &)));
 
     // connections between Object3DContainer and MainWindow
     QObject::connect(&graph, SIGNAL(depthChanged(const DepthType &/*depth*/)), // [1]
@@ -264,6 +282,41 @@ int main(int argc, char *argv[])
     QObject::connect(&excel_worker, SIGNAL(depthLoaded(DepthType &/*depth*/)), // [1]
                      &graph, SLOT(acceptDepth(DepthType &)));
 
+
+    // connections between InternalConfigurationFilesHandler and MainWindow
+    QObject::connect(&conf_handler, SIGNAL(saveMainWindowState(QTextStream &/*where*/, const char /*obj_delim*/)), // [1]
+                     &main_window, SLOT(saveState(QTextStream &, const char)));
+
+    QObject::connect(&conf_handler, SIGNAL(restoreMainWindowState(QTextStream &/*from*/, const char /*obj_delim*/)), // [2]
+                     &main_window, SLOT(restoreState(QTextStream &, const char)));
+
+    // connections between InternalConfigurationFilesHandler and GridHandler
+    QObject::connect(&conf_handler, SIGNAL(saveGridHandlerState(QTextStream &/*where*/, const char /*obj_delim*/)), // [3]
+                     &grid_handler, SLOT(saveState(QTextStream &, const char)));
+
+    QObject::connect(&conf_handler, SIGNAL(restoreGridHandlerState(QTextStream &/*from*/, const char /*obj_delim*/)), // [4]
+                     &grid_handler, SLOT(restoreState(QTextStream &, const char)));
+
+    // connections between InternalConfigurationFilesHandler and PaintingWidget
+    QObject::connect(&conf_handler, SIGNAL(savePaintingWidgetState(QTextStream &/*where*/, const char /*obj_delim*/)), // [5]
+                     &painting_widget, SLOT(saveState(QTextStream &, const char)));
+
+    QObject::connect(&conf_handler, SIGNAL(restorePaintingWidgetState(QTextStream &/*from*/, const char /*obj_delim*/)), // [6]
+                     &painting_widget, SLOT(restoreState(QTextStream &, const char)));
+
+    // connections between InternalConfigurationFilesHandler and Computator
+    QObject::connect(&conf_handler, SIGNAL(saveComputatorState(QTextStream &/*where*/, const char /*obj_delim*/)), // [7]
+                     &computator, SLOT(saveState(QTextStream &, const char)));
+
+    QObject::connect(&conf_handler, SIGNAL(restoreComputatorState(QTextStream &/*from*/, const char /*obj_delim*/)), // [8]
+                     &computator, SLOT(restoreState(QTextStream &, const char)));
+
+    // connections between InternalConfigurationFilesHandler and Object3DContainer
+    QObject::connect(&conf_handler, SIGNAL(saveObject3DContainerState(QTextStream &/*where*/, const char /*obj_delim*/)), // [9]
+                     &graph, SLOT(saveState(QTextStream &, const char)));
+
+    QObject::connect(&conf_handler, SIGNAL(restoreObject3DContainerState(QTextStream &/*from*/, const char /*obj_delim*/)), // [10]
+                     &graph, SLOT(restoreState(QTextStream &, const char)));
 
 
     // Connections order important functions. MUST BE FIXED

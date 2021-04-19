@@ -56,12 +56,7 @@ void Object3DContainer::acceptPixGrid(const GridType &pixgrid)
 
 void Object3DContainer::acceptDepth(DepthType &depth)
 {
-    interpolation_and_approximation(depth);
-    m_3dobject.setDepth(std::move(depth));
-    m_3dobject.repaint();
-
-    m_gradient_label.clear();
-    m_gradient_label.setPixmap(m_3dobject.getGradientPixmap());
+    acceptDepth_(depth, true);
     emit depthChanged(m_3dobject.getDepth());
 }
 
@@ -71,8 +66,69 @@ void Object3DContainer::show()
     QWidget::show();
 }
 
+void Object3DContainer::saveState(QTextStream &stream, const char delim)
+{
+    const auto &depth{ m_3dobject.getDepth() };
+    const auto nrows{ depth.size() };
+    const auto ncols{ nrows > 0 ? depth[0].size() : 0 };
+    stream << nrows << '\t' << ncols << delim;
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            stream << depth[row_index][col_index].first << '\t';
+            stream << depth[row_index][col_index].second << '\t';
+        }
+    }
+    stream << delim; // control delim
+}
+
+void Object3DContainer::restoreState(QTextStream &stream, const char delim)
+{
+    auto readUntilDelim = [&stream](const char delim) -> QString {
+        QString result{};
+        char sym{};
+        for(stream >> sym; sym != delim; stream >> sym) {
+            result += sym;
+        }
+        return result;
+    };
+    bool is_converted{};
+    const auto nrows{ readUntilDelim('\t').toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+
+    const auto ncols{ readUntilDelim(delim).toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+
+    DepthType depth(nrows, QVector<QPair<bool, double>>(ncols, qMakePair(false, -1.)));
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            const bool belongness = readUntilDelim('\t').toInt(&is_converted); // narrow
+            Q_ASSERT(is_converted);
+
+            const double value{ readUntilDelim('\t').toDouble(&is_converted) };
+            Q_ASSERT(is_converted);
+            depth[row_index][col_index] = qMakePair(belongness, value);
+        }
+    }
+    char ctrl_delim{};
+    stream >> ctrl_delim;
+    Q_ASSERT(ctrl_delim == delim);
+
+    acceptDepth_(depth, false);
+    emit depthChanged(m_3dobject.getDepth());
+}
+
 
 // private functions
+void Object3DContainer::acceptDepth_(DepthType &depth, bool interpolate)
+{
+    if(interpolate) interpolation_and_approximation(depth);
+    m_3dobject.setDepth(std::move(depth));
+    m_3dobject.repaint();
+
+    m_gradient_label.clear();
+    m_gradient_label.setPixmap(m_3dobject.getGradientPixmap());
+}
+
 void Object3DContainer::interpolation_and_approximation(DepthType &depth)
 {
     const auto &grid{ m_3dobject.getRealMetersGrid() };

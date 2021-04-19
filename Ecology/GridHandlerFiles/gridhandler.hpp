@@ -3,6 +3,7 @@
 // QT
 #include <QObject>
 #include <QColor>
+#include <QTextStream>
 
 // FIXME: it should be replaced; ???
 #include <QWidget>
@@ -47,8 +48,12 @@ public slots:
        result copies to this values; .x() - contain index of x, .y() - contains index of y */
     QPoint findPoint(const QPointF &pixel_pos, QPoint *search_result = nullptr) const;
 
+    void saveState(QTextStream &stream, const char delim); // connected with InternalConfigurationFilesHandler::[3]
+    // connected with InternalConfigurationFilesHandler::[4]; emits: [1]
+    void restoreState(QTextStream &stream, const char delim);
+
 signals:
-    void gridChanged(const GridType &grid) const;
+    void gridChanged(const GridType &grid) const; // [1]
 
 // helpers
 private:

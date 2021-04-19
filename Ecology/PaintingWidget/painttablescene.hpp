@@ -4,6 +4,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
 #include <QPixmap>
+#include <QTextStream>
 
 // STL
 #include <list>
@@ -87,10 +88,13 @@ public:
     inline void appendSourceMarks(QVector<QPointF> &&marks) { m_sources_marks_buffer.append(std::move(marks)); };
     // applies marks to source with given index; TAKES OWNERSHIP on marks; NOT EMITTING
     inline void applySourceMarks(int source_index, QVector<QPointF> &&marks) { m_sources_marks_buffer[source_index] = std::move(marks); }
-// helpers
+
+    // helpers
 public:
     // draw current content on Pixmap and returns it
     [[nodiscard]] QPixmap paintContent(const QPixmap &pm, PaintStyle style = PaintStyle::Lines) const;
+    void saveState(QTextStream &stream, const char delim);
+    void restoreState(QTextStream &stream, const char delim);
 
 private:
     [[nodiscard]] bool isInSceneRect(const QPointF &pos) const;

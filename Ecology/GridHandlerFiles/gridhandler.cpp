@@ -159,6 +159,65 @@ QPoint GridHandler::findPoint(const QPointF &pixel_pos, QPoint *search_result) c
     return result;
 }
 
+void GridHandler::saveState(QTextStream &stream, const char delim)
+{
+    const auto nrows{ m_pixgrid.size() };
+    const auto ncols{ nrows > 0 ? m_pixgrid[0].size() : 0 };
+    stream << nrows << '\t' << ncols << delim;
+    if(nrows > 0 && ncols > 0) {
+        for(int row_index{}; row_index < nrows; ++row_index) {
+            for(int col_index{}; col_index < ncols; ++col_index) {
+                stream << m_pixgrid[row_index][col_index].first << '\t';
+                stream << m_pixgrid[row_index][col_index].second.x() << '\t' << m_pixgrid[row_index][col_index].second.y() << '\t';
+            }
+        }
+    }
+    stream << delim;
+    // scale will be restored by MainWindow::restoreState
+    // cell width will be restored by MainWindow::restoreState
+    // cell height will be restored by MainWindow::restoreState
+}
+
+void GridHandler::restoreState(QTextStream &stream, const char delim)
+{
+    auto readUntilDelim = [&stream](const char delim) -> QString {
+        QString result{};
+        char sym{};
+        for(stream >> sym; sym != delim; stream >> sym) {
+            result += sym;
+        }
+        return result;
+    };
+
+    bool is_converted{};
+    const auto nrows{ readUntilDelim('\t').toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+
+    const auto ncols{ readUntilDelim(delim).toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+    m_pixgrid.fill(QVector<QPair<bool, QPointF>>(ncols, qMakePair(false, QPointF(-1., -1.))), nrows);
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            const bool belongness = readUntilDelim('\t').toInt(&is_converted); // narrows
+            Q_ASSERT(is_converted);
+
+            const double x{ readUntilDelim('\t').toDouble(&is_converted) };
+            Q_ASSERT(is_converted);
+
+            const double y{ readUntilDelim('\t').toDouble(&is_converted) };
+            Q_ASSERT(is_converted);
+
+            m_pixgrid[row_index][col_index] = qMakePair(belongness, QPointF(x, y));
+        }
+    }
+
+    char control_delim{};
+    stream >> control_delim;
+    Q_ASSERT(control_delim == delim);
+
+    emit gridChanged(m_pixgrid);
+}
+
 
 // private functions
 bool GridHandler::verifyGridParameters() const

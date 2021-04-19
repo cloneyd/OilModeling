@@ -57,7 +57,7 @@ void PollutionWidgetGenerator::connectDefaultWidget(const PollutionWidget *widge
 
 void PollutionWidgetGenerator::connectFilledWidget(const PollutionWidget *widget) const
 {
-    connect(widget, SIGNAL((int, const PointSource &, const QVector<PollutionMatter> &)), // [2]
+    connect(widget, SIGNAL(sourceUpdated(int, const PointSource &, const QVector<PollutionMatter> &)), // [2]
             this, SLOT(sourceUpdatedEmitter(int, const PointSource &, const QVector<PollutionMatter> &)));
 
     connect(widget, SIGNAL(sourceUpdated(int, const DiffusionSource &, const QVector<PollutionMatter> &)), // [4]

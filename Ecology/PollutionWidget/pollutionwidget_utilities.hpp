@@ -5,14 +5,18 @@
 
 enum class SourceType : unsigned char
 {
-    PointSource,
-    DiffusionSource
+    MIN,
+    PointSource = MIN,
+    DiffusionSource,
+    MAX = DiffusionSource
 };
 
 enum class WidgetMode : unsigned char
 {
-    Create,
-    Display
+    MIN,
+    Create = MIN,
+    Display,
+    MAX = Display
 };
 
 #endif // POLLUTIONWIDGET_UTILITIES_HPP

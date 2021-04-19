@@ -11,6 +11,7 @@ PaintingWidget::PaintingWidget(QWidget *parent, Qt::WindowFlags flags) :
     m_sources_types_buf{},
     m_is_ctrl_held{},
     m_is_grid_created{},
+    m_is_update_required{},
     m_grid_parameters_widget{},
     m_ui{ std::make_unique<Ui::PaintingWidget>() }, // WARNING: throws
     m_grid_parameters_ui{ std::make_unique<Ui::GridParameters>() }, // WARNING: throws,
@@ -49,6 +50,7 @@ void PaintingWidget::setImage(QPixmap &image)
 
     emit deleteGrid();
     m_is_grid_created = false;
+    m_is_update_required = false;
     emit resetSources();
     emit imageChanged(m_map_pixmap, m_is_grid_created);
 }
@@ -69,6 +71,7 @@ void PaintingWidget::setImage(const QString &filepath, bool *operation_status)
 
     emit deleteGrid();
     m_is_grid_created = false;
+    m_is_update_required = false;
     emit resetSources();
     emit imageChanged(m_map_pixmap, m_is_grid_created);
 
@@ -164,6 +167,10 @@ void PaintingWidget::updateSource(int source_index, const PointSource &source)
     m_ui->source_type_combo_box->setCurrentIndex(0);
 
     // try to update coordinates
+    if((std::fabs(source.m_x)) - 1. < 1e-4) {
+        updateSourcesCoordinates(); // reset last coordinates changes
+        return;
+    }
     QPointF pixpoint(toPixels(source.m_x), toPixels(source.m_y));
     if(m_is_grid_created) {
         QPoint indexes{};
@@ -200,11 +207,137 @@ void PaintingWidget::updateSource(int source_index, const DiffusionSource &sourc
     // FIXME: sync()
 }
 
+void PaintingWidget::saveState(QTextStream &stream, const char delim)
+{
+    // m_grid_parameters_widget{} will be setted up by MainWindow::restoreState
+    m_scene->saveState(stream, delim);
+
+    auto writeToFileCasted = [&stream](const auto &container, const char delim) {
+        stream << container.size() << delim;
+        for(const auto &entity : container) {
+            stream << static_cast<int>(entity) << '\t';
+        }
+        stream << delim; // control delim
+    };
+
+    auto writeToFile = [&stream](const auto &container, const char delim) {
+        stream << container.size() << delim;
+        for(const auto &entity : container) {
+            stream << entity << '\t';
+        }
+        stream << delim; // control delim
+    };
+
+    writeToFileCasted(m_actions_buf, delim);
+    writeToFileCasted(m_stashed_actions, delim);
+    writeToFile(m_source_indexes_buffer, delim);
+    writeToFile(m_stashed_indexes, delim);
+    writeToFileCasted(m_sources_types_buf, delim);
+
+    stream << m_is_ctrl_held << delim;
+    stream << m_is_grid_created << delim;
+    stream << m_is_update_required << delim;
+
+    stream << delim; // control delim
+}
+void PaintingWidget::restoreState(QTextStream &stream, const char delim)
+{
+    // m_grid_parameters_widget{} will be setted up by MainWindow::restoreState
+    m_scene->restoreState(stream, delim);
+
+    auto readUntilDelim = [&stream](const char delim) -> QString {
+        QString result{};
+        char sym{};
+        for(stream >> sym; sym != delim; stream >> sym) {
+            result += sym;
+        }
+        return result;
+    };
+
+    auto readActionMakersFromFile = [&readUntilDelim, &stream](auto &container, const char delim) {
+        stream << container.size() << delim;
+        bool is_converted{};
+        const auto container_size{ readUntilDelim(delim).toInt(&is_converted) };
+        Q_ASSERT(is_converted);
+        container.resize(container_size);
+
+        for(auto &entity : container) {
+            entity = static_cast<ActionMakers>(readUntilDelim('\t').toInt(&is_converted));
+            Q_ASSERT(is_converted);
+            Q_ASSERT(entity >= ActionMakers::MIN && entity <= ActionMakers::MAX);
+        }
+        char ctrl_delim{};
+        stream >> ctrl_delim;
+        Q_ASSERT(ctrl_delim == delim);
+    };
+
+    auto readSourceTypesFromFile = [&readUntilDelim, &stream](auto &container, const char delim) {
+        stream << container.size() << delim;
+        bool is_converted{};
+        const auto container_size{ readUntilDelim(delim).toInt(&is_converted) };
+        Q_ASSERT(is_converted);
+        container.resize(container_size);
+
+        for(auto &entity : container) {
+            entity = static_cast<SourceType>(readUntilDelim('\t').toInt(&is_converted));
+            Q_ASSERT(is_converted);
+            Q_ASSERT(entity >= SourceType::MIN && entity <= SourceType::MAX);
+        }
+        char ctrl_delim{};
+        stream >> ctrl_delim;
+        Q_ASSERT(ctrl_delim == delim);
+    };
+
+    auto readFromFile = [&stream, &readUntilDelim](auto &container, const char delim) {
+        bool is_converted{};
+        const auto container_size{ readUntilDelim(delim).toInt(&is_converted) };
+        Q_ASSERT(is_converted);
+        container.resize(container_size);
+
+        for(auto &entity : container) {
+            entity = readUntilDelim('\t').toInt(&is_converted);
+            Q_ASSERT(is_converted);
+        }
+        char ctrl_delim{};
+        stream >> ctrl_delim;
+        Q_ASSERT(ctrl_delim == delim);
+    };
+
+    readActionMakersFromFile(m_actions_buf, delim);
+    readActionMakersFromFile(m_stashed_actions, delim);
+    readFromFile(m_source_indexes_buffer, delim);
+    readFromFile(m_stashed_indexes, delim);
+    readSourceTypesFromFile(m_sources_types_buf, delim);
+
+    bool is_converted{};
+    m_is_ctrl_held = readUntilDelim(delim).toInt(&is_converted);
+    Q_ASSERT(is_converted);
+
+    m_is_grid_created = readUntilDelim(delim).toInt(&is_converted);
+    Q_ASSERT(is_converted);
+
+    m_is_update_required = readUntilDelim(delim).toInt(&is_converted);
+    Q_ASSERT(is_converted);
+
+    char ctrl_delim;
+    stream >> ctrl_delim;
+    Q_ASSERT(ctrl_delim == delim);
+
+    repaintScene(PaintStyle::Lines);
+    updateSourcesCoordinates();
+
+    QPixmap pm{ m_scene->sceneRect().size().toSize() };
+    QPainter painter(&pm);
+    m_scene->render(&painter);
+    emit imageChanged(pm, m_is_grid_created);
+}
+
 
 //private slots
 void PaintingWidget::waterObjectChanged(ChangeType change_type)
 {
     clearStashes();
+    m_is_update_required = true;
 
     switch(change_type) {
     case ChangeType::Buffering:
@@ -224,6 +357,7 @@ void PaintingWidget::waterObjectChanged(ChangeType change_type)
 
 void PaintingWidget::islandsChanged(ChangeType /*unused*/)
 {
+    m_is_update_required = true;
     clearStashes();
     m_actions_buf.push_back(ActionMakers::islands);
     actionMadeCheck();
@@ -243,6 +377,12 @@ void PaintingWidget::sourcesMarksChanged(ChangeType /*unused*/, const QPointF &p
         }
     }
 
+    if((m_actions_buf.back() != ActionMakers::grid && m_actions_buf.back() != ActionMakers::mark) || !m_is_grid_created) {
+        m_is_update_required = true;
+    }
+    else {
+        m_is_update_required = false;
+    }
     // repaint
     repaintScene(PaintStyle::Lines);
     m_actions_buf.push_back(ActionMakers::mark);
@@ -275,11 +415,13 @@ void PaintingWidget::returnButtonPressed()
         if(m_is_grid_created) {
             emit deleteGrid();
             m_is_grid_created = false;
+            m_is_update_required = true;
             break;
         }
         else {
             emit createGrid(m_scene->getWaterObjectPoints(), m_scene->getIslandsPoints());
             m_is_grid_created = true;
+            m_is_update_required = false;
             repaintScene(PaintStyle::Ellipse);
             return; // no work with buffer is needed
         }
@@ -318,12 +460,14 @@ void PaintingWidget::forwardButtonPressed()
         if(m_is_grid_created) {
             emit deleteGrid();
             m_is_grid_created = false;
+            m_is_update_required = true;
             repaintScene(PaintStyle::Ellipse);
             return; // no work with buffer is needed
         }
         else {
             emit createGrid(m_scene->getWaterObjectPoints(), m_scene->getIslandsPoints());
             m_is_grid_created = true;
+            m_is_update_required = false;
             break;
         }
 
@@ -366,6 +510,7 @@ void PaintingWidget::createGridButtonPressed(PaintStyle style)
     clearStashes();
     emit createGrid(m_scene->getWaterObjectPoints(), m_scene->getIslandsPoints());
     m_is_grid_created = true;
+    m_is_update_required = false;
     repaintScene(style);
 
     m_actions_buf.push_back(ActionMakers::grid);
@@ -374,7 +519,12 @@ void PaintingWidget::createGridButtonPressed(PaintStyle style)
 
 void PaintingWidget::saveChangesButtonPressed()
 {
-    createGridButtonPressed(PaintStyle::Lines);
+    if(m_is_update_required || !m_is_grid_created) {
+        createGridButtonPressed(PaintStyle::Lines);
+    }
+    else {
+        repaintScene(PaintStyle::Lines);
+    }
 
     updateSourcesCoordinates();
 

@@ -4,10 +4,12 @@
 
 enum class ActionMakers : unsigned char
 {
-    water_object,
+    MIN,
+    water_object = MIN,
     islands,
     grid,
-    mark
+    mark,
+    MAX = mark
 };
 
 #endif // PAINTINGWIDGET_UTILITIES_HPP

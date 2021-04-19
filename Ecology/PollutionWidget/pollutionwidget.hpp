@@ -37,10 +37,10 @@ private slots:
 
 signals:
     void sourceCreated(const PointSource &source, const QVector<PollutionMatter> &matters) const; // [1]
-    void sourceUpdated(int source_index, const PointSource &source, QVector<PollutionMatter> &matters) const; // [2]
+    void sourceUpdated(int source_index, const PointSource &source, const QVector<PollutionMatter> &matters) const; // [2]
 
     void sourceCreated(const DiffusionSource &source, const QVector<PollutionMatter> &matters) const; // [3]
-    void sourceUpdated(int source_index, const DiffusionSource &source, QVector<PollutionMatter> &matters) const; // [4]
+    void sourceUpdated(int source_index, const DiffusionSource &source, const QVector<PollutionMatter> &matters) const; // [4]
 
 // setters
 public:

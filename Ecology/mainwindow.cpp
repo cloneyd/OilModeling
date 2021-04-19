@@ -107,6 +107,10 @@ void MainWindow::acceptDepth(const DepthType &depth)
             }
         }
     }
+    m_ui->save_depth_button->setEnabled(true);
+    m_ui->save_depth_button_2->setEnabled(true);
+    m_ui->computate_speeds_button->setEnabled(true);
+    m_ui->computate_pollutions_push_button->setEnabled(true);
 }
 
 void MainWindow::acceptNewSourceCoordinates(const QVector<QVector<QPointF>> &coordinates)
@@ -135,6 +139,121 @@ void MainWindow::acceptMapImage(const QPixmap &image, bool is_grid_created)
     }
 }
 
+void MainWindow::acceptLegend(const QPixmap &min_speed_pm, const QPixmap &avg_speed_pm, const QPixmap &max_speed_pm)
+{
+    m_ui->min_speed_label->clear();
+    m_ui->min_speed_label->setPixmap(min_speed_pm);
+    m_ui->min_speed_label->setScaledContents(true);
+
+    m_ui->avg_speed_label->clear();
+    m_ui->avg_speed_label->setPixmap(avg_speed_pm);
+    m_ui->avg_speed_label->setScaledContents(true);
+
+    m_ui->max_speed_label->clear();
+    m_ui->max_speed_label->setPixmap(max_speed_pm);
+    m_ui->max_speed_label->setScaledContents(true);
+}
+
+void MainWindow::saveState(QTextStream &where, const char obj_delim)
+{
+    where << m_ui->scale_spin_box->value() << obj_delim;
+    where << m_ui->cell_width_spin_box->value() << obj_delim;
+    where << m_ui->cell_height_spin_box->value() << obj_delim;
+    where << m_ui->horizon_spin_box->value() << obj_delim;
+    where << m_ui->ratio_double_spin_box->value() << obj_delim;
+    where << m_ui->atol_percents_spin_box->value() << obj_delim;
+    where << m_ui->abs_wind_speed_spin_box->value() << obj_delim;
+    where << m_ui->azimuth_check_box->isChecked() << '\t' << m_ui->azimuth_double_spin_box->value() << obj_delim;
+    where << m_ui->system_check_box->isChecked() << '\t' << m_ui->system_combo_box->currentIndex() << obj_delim;
+    where << m_ui->max_computations_distance_double_spin_box->value() << obj_delim;
+    where << m_ui->water_object_type_combo_box->currentIndex() << obj_delim;
+
+    const auto nrows{ m_ui->sources_table_widget->rowCount() };
+    where << nrows << obj_delim;
+    for(int source_index{ 1 }; source_index < nrows; ++source_index) {
+        for(int col_index{}; col_index <= 10; ++col_index) {
+            where << m_ui->sources_table_widget->item(source_index, col_index)->text() << '\t';
+        }
+        where << m_ui->sources_table_widget->item(source_index, 11)->text() << obj_delim;
+    }
+
+    where << obj_delim; // control delimeter
+}
+
+void MainWindow::restoreState(QTextStream &from, const char obj_delim) // emits
+{
+    auto readUntilDelim = [&from](const char obj_delim) {
+        char sym{};
+        QString result_value{};
+        for(from >> sym; sym != obj_delim; from >> sym) {
+            result_value += sym;
+        }
+        return result_value;
+    };
+
+    bool is_converted{};
+    m_ui->scale_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->cell_width_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->cell_height_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->horizon_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->ratio_double_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->atol_percents_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->abs_wind_speed_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->azimuth_check_box->setChecked(readUntilDelim('\t').toInt(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->azimuth_double_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->system_check_box->setChecked(readUntilDelim('\t').toInt(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    const auto system_index{ readUntilDelim(obj_delim).toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+    Q_ASSERT(system_index >= static_cast<int>(WindDirection::MIN) &&
+             system_index <= static_cast<int>(WindDirection::MAX));
+    m_ui->system_combo_box->setCurrentIndex(system_index); // implicit emit
+    Q_ASSERT(is_converted);
+
+    m_ui->max_computations_distance_double_spin_box->setValue(readUntilDelim(obj_delim).toDouble(&is_converted)); // implicit emit
+    Q_ASSERT(is_converted);
+
+    const auto water_object_index{ readUntilDelim(obj_delim).toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+    Q_ASSERT(water_object_index >= static_cast<int>(WaterObjectType::MIN) &&
+             water_object_index <= static_cast<int>(WaterObjectType::MAX));
+    m_ui->water_object_type_combo_box->setCurrentIndex(water_object_index); // implicit emit
+
+    resetSourcesTable();
+    const auto nrows{ readUntilDelim(obj_delim).toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+    m_ui->sources_table_widget->setRowCount(nrows);
+    for(int source_index{ 1 }; source_index < nrows; ++source_index) {
+        for(int col_index{}; col_index <= 10; ++col_index) {
+            m_ui->sources_table_widget->setItem(source_index, col_index, createTableWidgetItem(readUntilDelim('\t')));
+        }
+        m_ui->sources_table_widget->setItem(source_index, 11, createTableWidgetItem(readUntilDelim(obj_delim)));
+    }
+
+    char ctrl_delim{};
+    from >> ctrl_delim;
+    Q_ASSERT(ctrl_delim == obj_delim);
+}
+
 void MainWindow::saveDepthTable(const QTableWidget &table)
 {
     const auto nrows{ table.rowCount() };
@@ -158,8 +277,6 @@ void MainWindow::saveDepthTable(const QTableWidget &table)
     }
 
     emit saveDepth(vector);
-    m_ui->computate_speeds_button->setEnabled(true);
-    m_ui->computate_pollutions_push_button->setEnabled(true);
 }
 
 void MainWindow::saveXProjectionTable(const QTableWidget &table)
@@ -307,53 +424,37 @@ void MainWindow::forceSpeedDecomposeButtonPressed() const
 {
     bool is_operation_done{};
     emit forceAbsSpeedDecompose(&is_operation_done);
-    while(!is_operation_done) {
-        const auto answer{ QMessageBox::question(nullptr, "Не удалось завершить операцию", "Не удалось выполнить разложение скорости на составляющие.\nПовторить операцию?") };
-        if(answer == QMessageBox::No) {
-            // How repair it?
-            return;
-        }
-        else {
-            emit forceAbsSpeedDecompose(&is_operation_done); // try again
-        }
+    if(is_operation_done) {
+        QMessageBox::about(nullptr, "Операция завершена", "Значения рассчитаны");
     }
-    QMessageBox::about(nullptr, "Операция завершена", "Значения рассчитаны");
+    else {
+        QMessageBox::about(nullptr, "Не удалось завершить операцию", "Не удалось выполнить разложение скорости на составляющие.");
+    }
 }
 
 void MainWindow::computateSpeedsButtonPressed() const
 {
     bool is_operation_done{};
     emit computateSpeeds(&is_operation_done);
-    while(!is_operation_done) {
-        const auto answer{ QMessageBox::question(nullptr, "Не удалось завершить операцию", "Не удалось выполнить расчет скоростей течений.\nПовторить попытку?") };
-        if(answer == QMessageBox::No) {
-            // FIXME: how to repair this operation?
-            return;
-        }
-        else {
-            emit computateSpeeds(&is_operation_done);
-        }
+    if(is_operation_done) {
+        QMessageBox::about(nullptr, "Операция завершена", "Значения рассчитаны");
+        m_ui->save_wind_button->setEnabled(true);
     }
-    QMessageBox::about(nullptr, "Операция завершена", "Значения рассчитаны");
-    m_ui->save_wind_button->setEnabled(true);
+    else {
+        QMessageBox::about(nullptr, "Не удалось завершить операцию", "Не удалось выполнить расчет скоростей течений.");
+    }
 }
 
 void MainWindow::computatePollutionButtonPressed() const
 {
     bool is_operation_done{};
     emit computatePollution(&is_operation_done);
-    while(!is_operation_done) {
-        const auto answer{ QMessageBox::question(nullptr, "Не удалось завершить операцию",
-                                                 "Не удалось выполнить расчет загрязнений.\nПовторить попытку?") };
-        if(answer == QMessageBox::No) {
-            // FIXME: how to repair this operation?
-            return;
-        }
-        else {
-            emit computatePollution(&is_operation_done);
-        }
+    if(is_operation_done) {
+        QMessageBox::about(nullptr, "Операция завершена", "Значения рассчитаны");
     }
-    QMessageBox::about(nullptr, "Операция завершена", "Значения рассчитаны");
+    else {
+        QMessageBox::about(nullptr, "Не удалось завершить операцию", "Не удалось выполнить расчет загрязнений.");
+    }
 }
 
 void MainWindow::saveMapInFileButtonPressed()
@@ -371,19 +472,31 @@ void MainWindow::saveMapInFileButtonPressed()
     }
 
     if(file_format == QString("xlsx")) {
-        m_ui->load_depth_from_file_button->setEnabled(true);
-        bool is_operation_done{};
-        emit saveMapInFile(file_path, &is_operation_done);
-        while(!is_operation_done) {
-            const auto answer{ QMessageBox::question(nullptr, "Не удалось завершить операцию",
-                                                     "Не удалось сохранить карту.\nПовторить попытку?") };
-            if(answer == QMessageBox::No) {
-                return;
+        SaveOperationStatus operation_status{ SaveOperationStatus::FilepathError };
+        emit saveMapInFile(file_path, &operation_status);
+        while(operation_status != SaveOperationStatus::Ok) {
+            switch (operation_status) {
+            case SaveOperationStatus::FilepathError: {
+                const auto answer{ QMessageBox::question(nullptr, "Не удалось завершить операцию",
+                                                         "Не удалось сохранить карту.\nПовторить попытку?") };
+                if(answer == QMessageBox::No) {
+                    return;
+                }
+                else {
+                    file_path = QFileDialog::getSaveFileName(this, tr("Save file"), "/home/map.xlsx", "Excel files (*.xlsx)");
+                    if(file_path.isEmpty()) return;
+                    emit saveMapInFile(file_path, &operation_status);
+                }
+                break;
             }
-            else {
-                file_path = QFileDialog::getSaveFileName(this, tr("Save file"), "/home/map.xlsx", "Excel files (*.xlsx)");
-                if(file_path.isEmpty()) return;
-                emit saveMapInFile(file_path, &is_operation_done);
+
+            case SaveOperationStatus::FatalObjectError:
+                // FIXME: #implementme
+                return;
+
+            default:
+                QMessageBox::warning(this, "Не удалось завершить операцию", "Не удалось сохранить карту");
+                return;
             }
         }
         QMessageBox::about(this, "Операция завершена", "Значения сохранены");
@@ -412,19 +525,34 @@ void MainWindow::saveDepthInFileButtonPressed()
                                                   tr("Excel files(*.xlsx")) };
     if(file_path.isEmpty()) return;
 
-    bool is_operation_done{};
-    emit saveDepthInFile(file_path, &is_operation_done);
-    while(!is_operation_done) {
-        const auto answer{ QMessageBox::question(this, "Не удалось завершить операцию", "Не удалось сохранить файл глубин.\nПовторить попытку?") };
-        if(answer == QMessageBox::No) {
-            return; // do nothing
+    SaveOperationStatus operation_status{ SaveOperationStatus::FilepathError };
+    emit saveDepthInFile(file_path, &operation_status);
+    while(operation_status != SaveOperationStatus::Ok) {
+        switch(operation_status) {
+        case SaveOperationStatus::FilepathError: {
+            const auto answer{ QMessageBox::question(this, "Не удалось завершить операцию",
+                                                     "Не удалось сохранить файл глубин.\nПовторить попытку?") };
+            if(answer == QMessageBox::No) {
+                return; // do nothing
+            }
+            else {
+                file_path = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        "/home/depth.xlsx",
+                                                        tr("Excel files(*.xlsx"));
+                if(file_path.isEmpty()) return;
+                emit saveDepthInFile(file_path, &operation_status);
+            }
+            break;
         }
-        else {
-            file_path = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                    "/home/depth.xlsx",
-                                                    tr("Excel files(*.xlsx"));
-            if(file_path.isEmpty()) return;
-            emit saveDepthInFile(file_path, &is_operation_done);
+
+        case SaveOperationStatus::FatalObjectError:
+            QMessageBox::warning(this, "Не удалось завершить операцию", "Не удалось сохранить файл глубин.\nПопробуйте "
+                                                                        "перезагрузить приложение"); // FIXME: must be restarted
+            return;
+
+        default:
+            QMessageBox::warning(this, "Не удалось завершить операцию", "Не удалось сохранить файл глубин.");
+            return;
         }
     }
     QMessageBox::about(this, "Операция завершена", "Значения сохранены");
@@ -437,29 +565,77 @@ void MainWindow::saveSpeedsInFileButtonPressed()
                                                   tr("Excel files(*.xlsx")) };
     if(file_path.isEmpty()) return;
 
-    bool is_operation_done{};
-    emit saveSpeedsInFile(file_path, &is_operation_done);
-    while(!is_operation_done) {
-        const auto answer{ QMessageBox::question(this, "Не удалось завершить операцию",
-                                                "Не удалось сохранить файл скоростей.\nПовторить попытку?") };
-        if(answer == QMessageBox::No) {
-            return; // do nothing
+    SaveOperationStatus operation_status{ SaveOperationStatus::FilepathError };
+    emit saveSpeedsInFile(file_path, &operation_status);
+    while(operation_status != SaveOperationStatus::Ok) {
+        switch(operation_status) {
+        case SaveOperationStatus::FilepathError: {
+            const auto answer{ QMessageBox::question(this, "Не удалось завершить операцию",
+                                                    "Не удалось сохранить файл скоростей.\nПовторить попытку?") };
+            if(answer == QMessageBox::No) {
+                return; // do nothing
+            }
+            else {
+                file_path = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                         "/home/speeds.xlsx",
+                                                         tr("Excel files(*.xlsx"));
+                if(file_path.isEmpty()) return;
+                emit saveSpeedsInFile(file_path, &operation_status);
+            }
+
+            break;
         }
-        else {
-            file_path = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                     "/home/speeds.xlsx",
-                                                     tr("Excel files(*.xlsx"));
-            if(file_path.isEmpty()) return;
-            emit saveSpeedsInFile(file_path, &is_operation_done);
+
+        case SaveOperationStatus::FatalObjectError:
+            QMessageBox::warning(this, "Не удалось завершить операцию", "Не удалось сохранить файл скоростей.\n"
+                                                                        "Попробуйте перезапустить приложение"); // FIXME: must be restarted
+            return;
+
+        default:
+            QMessageBox::warning(this, "Не удалось завершить операцию", "Не удалось сохранить файл скоростей");
+            return;
         }
     }
     QMessageBox::about(this, "Операция завершена", "Значения сохранены");
 }
 
-// FIXME: #implementme
 void MainWindow::createCommonOutputFileButtonPressed()
 {
-    return;
+    auto filepath{ QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                  "/home/output_file.xlsx",
+                                                  tr("Excel files(*.xlsx")) };
+    if(filepath.isEmpty()) return;
+
+    SaveOperationStatus operation_status{ SaveOperationStatus::SaveError };
+    emit saveOutput(filepath, &operation_status);
+    while(!(operation_status == SaveOperationStatus::Ok)) {
+        switch(operation_status) {
+        case SaveOperationStatus::FilepathError: {
+            const auto answer{ QMessageBox::question(this, "Не удалось завершить операцию", "Не удалось создать файл отчета по "
+                                                                                            "указанному пути.\nПопробовать еще раз?") };
+            if(answer == QMessageBox::No) {
+                return;
+            }
+            else {
+                filepath = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        "/home/output_file.xlsx",
+                                                        tr("Excel files(*.xlsx"));
+                if(filepath.isEmpty()) return;
+                emit saveOutput(filepath, &operation_status);
+            }
+            break;
+        }
+
+        case SaveOperationStatus::FatalObjectError:
+            QMessageBox::warning(this, "Не удалось завершить операцию", "Не удалось создать файл отчета.\n"
+                                                                        "Попробуйте перезапустить приложение"); // FIXME: must be restarted
+            return;
+
+        default:
+            QMessageBox::warning(this, "Не удалось завершить операцию", "Не удалось создать файл отчета.");
+            return;
+        }
+    }
 }
 
 void MainWindow::azimuthStateChangedSender(int /*state*/)
@@ -520,7 +696,7 @@ void MainWindow::emitInitialSignals() const
 void MainWindow::resetSourcesTable()
 {
     auto nrows{ m_ui->sources_table_widget->rowCount() };
-    if(nrows == 1)  return; // do not delete first row
+    if(nrows <= 1)  return; // do not delete first row
     for(int i{ 1 }; i < nrows; ++i) {
         m_ui->sources_table_widget->removeRow(i);
     }
@@ -530,6 +706,9 @@ void MainWindow::appendNewSourceToTable(const PointSource &source)
 {
     auto nrows{ m_ui->sources_table_widget->rowCount()}; // one row for info
     m_ui->sources_table_widget->setRowCount(nrows + 1);
+    for(int col_index{}; col_index < 12; ++col_index) {
+        m_ui->sources_table_widget->setItem(nrows, col_index, createTableWidgetItem(""));
+    }
 
     updateSourceInTable(nrows - 1, source); // -1 cause updateSource increments value (for computator correct work)
 }
@@ -537,18 +716,18 @@ void MainWindow::appendNewSourceToTable(const PointSource &source)
 void MainWindow::updateSourceInTable(int source_index, const PointSource &source)
 {
     ++source_index; // increment in because source table have shifted indexes
-    m_ui->sources_table_widget->setItem(source_index, 0, createTableWidgetItem(source.m_name));
-    m_ui->sources_table_widget->setItem(source_index, 1, createTableWidgetItem("Точечный"));
-    m_ui->sources_table_widget->setItem(source_index, 2, createTableWidgetItem(QString("%1").arg(source.m_x)));
-    m_ui->sources_table_widget->setItem(source_index, 3, createTableWidgetItem(QString("%1").arg(source.m_y)));
-    m_ui->sources_table_widget->setItem(source_index, 4, createTableWidgetItem(QString("%1").arg(source.m_spending)));
-    m_ui->sources_table_widget->setItem(source_index, 5, createTableWidgetItem("-"));
-    m_ui->sources_table_widget->setItem(source_index, 6, createTableWidgetItem("-"));
-    m_ui->sources_table_widget->setItem(source_index, 7, createTableWidgetItem("-"));
-    m_ui->sources_table_widget->setItem(source_index, 8, createTableWidgetItem(QString("%1").arg(source.m_initial_dilution_ratio)));
-    m_ui->sources_table_widget->setItem(source_index, 9, createTableWidgetItem(QString("%1").arg(source.m_main_dilution_ratio)));
-    m_ui->sources_table_widget->setItem(source_index, 10, createTableWidgetItem(QString("%1").arg(source.m_common_dilution_ratio)));
-    m_ui->sources_table_widget->setItem(source_index, 11, createTableWidgetItem(QString("%1").arg(source.m_vat)));
+    m_ui->sources_table_widget->item(source_index, 0)->setText(source.m_name);
+    m_ui->sources_table_widget->item(source_index, 1)->setText("Точечный");
+    m_ui->sources_table_widget->item(source_index, 2)->setText(QString("%1").arg(source.m_x));
+    m_ui->sources_table_widget->item(source_index, 3)->setText(QString("%1").arg(source.m_y));
+    m_ui->sources_table_widget->item(source_index, 4)->setText(QString("%1").arg(source.m_spending));
+    m_ui->sources_table_widget->item(source_index, 5)->setText("-");
+    m_ui->sources_table_widget->item(source_index, 6)->setText("-");
+    m_ui->sources_table_widget->item(source_index, 7)->setText("-");
+    m_ui->sources_table_widget->item(source_index, 8)->setText(QString("%1").arg(source.m_initial_dilution_ratio));
+    m_ui->sources_table_widget->item(source_index, 9)->setText(QString("%1").arg(source.m_main_dilution_ratio));
+    m_ui->sources_table_widget->item(source_index, 10)->setText(QString("%1").arg(source.m_common_dilution_ratio));
+    m_ui->sources_table_widget->item(source_index, 11)->setText(QString("%1").arg(source.m_vat));
 }
 
 void MainWindow::appendNewSourceToTable(const DiffusionSource &source)
@@ -563,10 +742,10 @@ void MainWindow::updateSourceInTable(int source_index, const DiffusionSource &so
 {
     updateSourceInTable(source_index, static_cast<const PointSource&>(source));
     ++source_index;
-    m_ui->sources_table_widget->setItem(source_index, 1, createTableWidgetItem("Диффузионный"));
-    m_ui->sources_table_widget->setItem(source_index, 5, createTableWidgetItem(QString("%1").arg(source.m_length)));
-    m_ui->sources_table_widget->setItem(source_index, 6, createTableWidgetItem(QString("%1").arg(source.m_direction)));
-    m_ui->sources_table_widget->setItem(source_index, 7, createTableWidgetItem(QString("%1").arg(source.m_tubes_number)));
+    m_ui->sources_table_widget->item(source_index, 1)->setText("Диффузионный");
+    m_ui->sources_table_widget->item(source_index, 5)->setText(QString("%1").arg(source.m_length));
+    m_ui->sources_table_widget->item(source_index, 6)->setText(QString("%1").arg(source.m_direction));
+    m_ui->sources_table_widget->item(source_index, 7)->setText(QString("%1").arg(source.m_tubes_number));
 }
 
 void MainWindow::createGridBackgroundedTables()
@@ -767,17 +946,19 @@ void MainWindow::applyNewInstanceSettings(bool enabled)
     m_ui->map_save_format_combo_box->setEnabled(enabled);
     m_ui->save_map_button->setEnabled(enabled);
     m_ui->create_common_output_file_button->setEnabled(enabled);
+    m_ui->create_configuration_file->setEnabled(enabled);
+    m_ui->load_configuration_file->setEnabled(enabled);
     m_ui->computate_speeds_button->setEnabled(enabled);
     m_ui->computate_pollutions_push_button->setEnabled(enabled);
     m_ui->enter_speed_vectors_button->setEnabled(enabled);
     m_ui->force_abs_speed_decompose_button->setEnabled(enabled);
-    m_ui->load_depth_from_file_button->setEnabled(enabled);
     m_ui->save_depth_button->setEnabled(enabled);
     m_ui->save_depth_button_2->setEnabled(enabled);
 }
 
 void MainWindow::applyNewImageLoadedSettings(bool enabled)
 {
+    m_ui->load_configuration_file->setEnabled(enabled);
     m_ui->edit_image_button->setEnabled(enabled);
     m_depth_table.setEnabled(enabled);
     m_ui->add_new_polution_source_button->setEnabled(enabled);
@@ -791,6 +972,9 @@ void MainWindow::applyNewGridCreatedSettings(bool enabled)
     m_xprojections_table.setEnabled(enabled);
     m_yprojections_table.setEnabled(enabled);
 
+    m_ui->load_depth_from_file_button->setEnabled(enabled);
+    m_ui->create_common_output_file_button->setEnabled(enabled);
+    m_ui->create_configuration_file->setEnabled(enabled);
     m_ui->force_abs_speed_decompose_button->setEnabled(enabled);
     m_ui->enter_speed_vectors_button->setEnabled(enabled);
     m_ui->open_3d_visualization_button->setEnabled(enabled);
@@ -827,6 +1011,12 @@ void MainWindow::setupUiConnections()
 
     connect(m_ui->create_common_output_file_button, SIGNAL(pressed()), // [8]
             this, SLOT(createCommonOutputFileButtonPressed()));
+
+    connect(m_ui->create_configuration_file, SIGNAL(pressed()), // [Ui::create_configuration_file::pressed()]
+            this, SLOT(createConfigurationFileButtonPressed()));
+
+    connect(m_ui->load_configuration_file, SIGNAL(pressed()), // [Ui::load_configuration_file::pressed()]
+            this, SLOT(loadConfigurationFileButtonPressed()));
 
     connect(m_ui->enter_speed_vectors_button, SIGNAL(pressed()), // [9]
             this, SLOT(enterSpeedsButtonPressed()));

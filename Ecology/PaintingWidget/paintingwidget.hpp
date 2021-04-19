@@ -40,7 +40,7 @@ private: // data
     /* this class in charge of action log; PaintTableScene emit signals which will change log in two cases:
      * 1) smth was drawn with mouse (mousePressEvent and MouseDoubleClickEvent)
      * 2) smth was deleted by PaintTableScene (mouseDoubleClickEvent)
-     *  all other cases must be tracked by PaintingWidget */
+     * all other cases must be tracked by PaintingWidget */
     std::list<ActionMakers> m_actions_buf; // contains log of buffering actions
     std::list<ActionMakers> m_stashed_actions; // contains log of stashing actions
     std::list<int> m_source_indexes_buffer; // contains indexes of sources where mark was added; used for marks (deletion and creation)
@@ -55,6 +55,7 @@ private: // data
 
     bool m_is_ctrl_held; // false by default
     bool m_is_grid_created; // false by default
+    bool m_is_update_required; // false by default
 
     // ui
     QWidget m_grid_parameters_widget;
@@ -80,6 +81,10 @@ public slots:
     void appendNewSource(const DiffusionSource &source); // connected with PollutionWidgetGenerator::[3]; emits [6], {7}
     void updateSource(int source_index, const PointSource &source); // connected with PollutionWidgetGenerator::[2]; emits: [6], {7}
     void updateSource(int source_index, const DiffusionSource &source); // connected with PollutionWidgetGenerator::[4]; emits [6], {7}
+
+    void saveState(QTextStream &stream, const char delim); // connected with InternalConfigurationFilesHandler::[5]
+    // connected with InternalConfigurationFilesHandler::[6]; emits: [1], (5), (6), [7]
+    void restoreState(QTextStream &stream, const char delim);
 
 private slots:
     void waterObjectChanged(ChangeType change_type); // connected with PaintTableScene::[1]

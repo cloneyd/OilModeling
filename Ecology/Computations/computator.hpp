@@ -2,6 +2,7 @@
 #define COMPUTATIONS_HPP
 // QT
 #include <QObject>
+#include <QTextStream>
 
 // STL
 #include <variant>
@@ -14,6 +15,7 @@
 
 // TODO: create wind directions
 // TODO: refactoring
+// [] - emit, () - indirect emit, {} - conditional emit
 class Computator : public QObject
 {
     Q_OBJECT
@@ -54,10 +56,10 @@ public:
     Computator(QObject *parent = nullptr);
 
 public slots:
-    void acceptGrid(const GridType &pixgrid) noexcept; // connected with GridHandler::[1]
+    void acceptGrid(const GridType &pixgrid) noexcept; // connected with GridHandler::[1]; emits: (10), (11), [12], [13]
     void acceptDepth(const DepthType &depth) noexcept; // connected with Object3DContainer::[1]
-    void acceptXSpeedProjections(QVector<QVector<double>> &speeds); // connected MainWindow::[2]; TAKES OWNERSHIP
-    void acceptYSpeedProjections(QVector<QVector<double>> &speeds);  // connected with MainWindow::[3]; TAKES OWNERSHIP
+    void acceptXSpeedProjections(QVector<QVector<double>> &speeds); // connected MainWindow::[2]; TAKES OWNERSHIP; emits: [12]
+    void acceptYSpeedProjections(QVector<QVector<double>> &speeds);  // connected with MainWindow::[3]; TAKES OWNERSHIP; emits: [13]
 
     void computateSpeeds(bool *operation_status = nullptr); // connected with MainWindow::[21]; emits: {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, implicitely {9}
     void decomposeAbsSpeed(bool *operation_status = nullptr); // connected with MainWindow::[19]; emits: [10], [11]
@@ -70,6 +72,9 @@ public slots:
     void appendNewSource(const DiffusionSource &source, const QVector<PollutionMatter> &matters); // connected with PollutionWidgetGenerator::[3]
     void updateSource(int source_index, const DiffusionSource &source, const QVector<PollutionMatter> &matters); // connected with PollutionWidgetGenerator::[4]
     void giveSourceInfo(int source_index, std::variant<PointSource, DiffusionSource> &will_be_source, QVector<PollutionMatter> &will_be_matters); // connected with PollutionWidgetGenerator::[5]
+
+    void saveState(QTextStream &stream, const char delim); // connected with InternalConfigurationFilesHandler::[7]
+    void restoreState(QTextStream &stream, const char delim); // connected with InternalConfigurationFilesHandler::[8]
 
     inline void acceptAzimuthState(const QPair<bool, double> &state) { m_azimuth = state; } // connected with MainWindow::[8]
     inline void acceptSystemState(const QPair<bool, WindDirection> &state) { m_wind_system = state; } // connected with MainWindow::[9]
@@ -94,11 +99,13 @@ signals:
     void u0yProjectionsComputated(const QVector<QVector<double>> &speeds) const; // [4]
     void uComputated(const QVector<QVector<double>> &speeds) const; // [5]
     void u0Computated(const QVector<QVector<double>> &speeds) const; // [6]
-    // [7] is free now
+    void legendCreated(const QPixmap &min_speed_pm, const QPixmap &avg_speed_pm, const QPixmap &max_speed_pm) const; // [7], transfer ownership
     void flowMapCreated(const QPixmap &pm) const; // [8]
     void getCurrentMapImage(QPixmap &will_be_pm) const; // [9]
     void xProjectionsDecomposed(const QVector<QVector<double>> &speed) const; // [10]
-    void yProjectionsDecomposed(const QVector<QVector<double>> &speed)const; // [10]
+    void yProjectionsDecomposed(const QVector<QVector<double>> &speed)const; // [11]
+    void xProjectionsChanged(const QVector<QVector<double>> &speeds); // [12]
+    void yProjectionsChanged(const QVector<QVector<double>> &speeds); // [13]
 
 // helpers
 private:
@@ -117,10 +124,11 @@ private:
     [[nodiscard]] bool findInVector(const QVector<QPair<int, int>> &where, const Cmp &cmp, const QPair<int, int> what) const;
     [[nodiscard]] double getCurrentAngle() const noexcept;
 
-    // emits: [9]
+    // emits: (7), [9]
     [[nodiscard]] QPixmap createFlowMap(const QVector<QVector<double>> &ux, const QVector<QVector<double>> &uy,
                          const QVector<QVector<double>> &u0x, const QVector<QVector<double>> &u0y,
                          const QVector<QVector<double>> &u, const QVector<QVector<double>> &u0) const;
+    void createLegend(const QColor &min_color, const QColor &avg_color, const QColor &max_color, const double max_speed) const; // emits: [7]
 };
 
 // inline function implementation

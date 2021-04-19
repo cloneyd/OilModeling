@@ -41,6 +41,9 @@ void Computator::acceptGrid(const GridType &pixgrid) noexcept
 
     m_pixgrid_ptr = std::addressof(pixgrid);
     decomposeAbsSpeed();
+
+    emit xProjectionsChanged(m_xspeeds_vectors);
+    emit yProjectionsChanged(m_yspeeds_vectors);
 }
 
 void Computator::acceptDepth(const DepthType &depth) noexcept
@@ -78,6 +81,8 @@ void Computator::acceptXSpeedProjections(QVector<QVector<double>> &speeds)
             }
         }
     }
+
+    emit xProjectionsChanged(m_xspeeds_vectors);
 }
 
 void Computator::acceptYSpeedProjections(QVector<QVector<double>> &speeds)
@@ -105,6 +110,8 @@ void Computator::acceptYSpeedProjections(QVector<QVector<double>> &speeds)
             }
         }
     }
+
+    emit yProjectionsChanged(m_yspeeds_vectors);
 }
 
 void Computator::computateSpeeds(bool *operation_status)
@@ -276,7 +283,7 @@ void Computator::appendNewSource(const DiffusionSource &source, const QVector<Po
 
 void Computator::updateSource(int source_index, const DiffusionSource &source, const QVector<PollutionMatter> &matters)
 {
-    m_sources[source_index] = qMakePair(source, matters); // marks_indexes and marks_coordinates become invalid;
+    m_sources[source_index] = qMakePair(source, matters); // marks_indexes and marks_coordinates become invalid until PaintingWidget::updateCoordinates;
     // FIXME: sync();
 }
 
@@ -284,6 +291,205 @@ void Computator::giveSourceInfo(int source_index, std::variant<PointSource, Diff
 {
     will_be_source = m_sources[source_index].first;
     will_be_matters = m_sources[source_index].second;
+}
+
+void Computator::saveState(QTextStream &stream, const char delim)
+{
+    // pixgrid_ptr will be setted up by GridHandler::restoreState
+    // depth_ptr will be setted up by Object3DContainer::restoreState
+    const auto nrows{ m_xspeeds_vectors.size() };
+    const auto ncols{ nrows > 0 ? m_xspeeds_vectors[0].size() : 0 };
+    stream << nrows << '\t' << ncols << delim;
+    if(nrows > 0 && ncols > 0) {
+        Q_ASSERT(nrows == m_yspeeds_vectors.size() && ncols == m_yspeeds_vectors[0].size());
+        for(int row_index{}; row_index < nrows; ++row_index) {
+            for(int col_index{}; col_index < ncols; ++col_index) {
+                stream << m_xspeeds_vectors[row_index][col_index] << '\t';
+            }
+        }
+
+        for(int row_index{}; row_index < nrows; ++row_index) {
+            for(int col_index{}; col_index < ncols; ++col_index) {
+                stream << m_yspeeds_vectors[row_index][col_index] << '\t';
+            }
+        }
+    }
+
+    // xstep will be setted up by MainWindow::restoreState
+    // ystep will be setted up by MainWindow::restoreState
+    // horizon will be setted up by MainWindow::restoreState
+    // m_wo_type will be setted up by MainWindow::restoreState
+    // m_az_ratio will be setted up by MainWindow::restoreState
+    // m_psi_atol will be setted up by MainWindow::restoreState
+    // m_max_computation_distance will be setted up by MainWindow::restoreState
+    // m_wind_system will be setted up by MainWindow::restoreState
+    // m_azimuth will be setted up by MainWindow::restoreState
+    // m_absolute_speed will be setted up by MainWindow::restoreState
+
+    // m_marks_indexes will be setted up by PaintingWidget::updateSourcesCoordinates
+    // m_marks_coordinates will be setted up by PaintingWidget::updateSourcesCoordinates
+    const auto nsources{ m_sources.size() };
+    stream << nsources << delim;
+    auto extracter = [&stream](const PointSource &source, const char delim) {
+        stream << source.m_name << '\t';
+        stream << source.m_x << '\t';
+        stream << source.m_y << '\t';
+        stream << source.m_spending << '\t';
+        stream << source.m_initial_dilution_ratio << '\t';
+        stream << source.m_main_dilution_ratio << '\t';
+        stream << source.m_common_dilution_ratio << '\t';
+        stream << source.m_vat << delim;
+    };
+    for(int source_index{}; source_index < nsources; ++source_index) {
+        if(m_sources[source_index].first.index() == 0) {
+            const auto &source{ std::get<PointSource>(m_sources[source_index].first) };
+            stream << '0' << delim; // source type
+            extracter(source, delim);
+        }
+        else {
+            const auto &source{ std::get<DiffusionSource>(m_sources[source_index].first) };
+            stream << '1' << delim; // source type
+            extracter(source, '\t');
+            stream << source.m_length << '\t';
+            stream << source.m_direction << '\t';
+            stream << source.m_tubes_number << delim;
+        }
+
+        const auto nmatters{ m_sources[source_index].second.size() };
+        stream << nmatters << delim;
+        for(int matter_index{}; matter_index < nmatters; ++matter_index) {
+            const auto &matter{ m_sources[source_index].second[matter_index] };
+            stream << matter.m_name << '\t';
+            stream << matter.m_group << '\t';
+            stream << matter.m_part << '\t';
+            stream << matter.m_mpc << '\t';
+            stream << matter.m_bc << '\t';
+            stream << matter.m_sewerc << '\t';
+            stream << matter.m_maxc << '\t';
+            stream << matter.m_averagec << '\t';
+            stream << matter.m_maxsewerc << delim;
+        }
+    }
+    stream << delim; // control delimeter
+}
+
+void Computator::restoreState(QTextStream &stream, const char delim)
+{
+    auto readUntilDelim = [&stream](const char delim) -> QString {
+        QString result{};
+        char sym{};
+        for(stream >> sym; sym != delim; stream >> sym) {
+            result += sym;
+        }
+        return result;
+    };
+    bool is_converted{};
+    const int nrows{ readUntilDelim('\t').toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+
+    const int ncols{readUntilDelim(delim).toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+    m_xspeeds_vectors.fill(QVector<double>(ncols, s_fill_value), nrows);
+    m_yspeeds_vectors.fill(QVector<double>(ncols, s_fill_value), nrows);
+    if(nrows > 0 && ncols > 0) {
+        for(int row_index{}; row_index < nrows; ++row_index) {
+            for(int col_index{}; col_index < ncols; ++col_index) {
+                m_xspeeds_vectors[row_index][col_index] = readUntilDelim('\t').toDouble(&is_converted);
+                Q_ASSERT(is_converted);
+            }
+        }
+
+        for(int row_index{}; row_index < nrows; ++row_index) {
+            for(int col_index{}; col_index < ncols; ++col_index) {
+                m_yspeeds_vectors[row_index][col_index] = readUntilDelim('\t').toDouble(&is_converted);
+                Q_ASSERT(is_converted);
+            }
+        }
+    }
+
+    const auto nsources{ readUntilDelim(delim).toInt(&is_converted) };
+    Q_ASSERT(is_converted);
+    m_sources.resize(nsources);
+    auto filler = [&readUntilDelim](PointSource &source, const char delim) {
+        bool is_converted{};
+
+        source.m_name = readUntilDelim('\t');
+
+        source.m_x = readUntilDelim('\t').toDouble(&is_converted);
+        Q_ASSERT(is_converted);
+
+        source.m_y = readUntilDelim('\t').toDouble(&is_converted);
+        Q_ASSERT(is_converted);
+
+        source.m_spending = readUntilDelim('\t').toDouble(&is_converted);
+        Q_ASSERT(is_converted);
+
+        source.m_initial_dilution_ratio = readUntilDelim('\t').toDouble(&is_converted);
+        Q_ASSERT(is_converted);
+
+        source.m_main_dilution_ratio = readUntilDelim('\t').toDouble(&is_converted);
+        Q_ASSERT(is_converted);
+
+        source.m_common_dilution_ratio = readUntilDelim('\t').toDouble(&is_converted);
+        Q_ASSERT(is_converted);
+
+        source.m_vat = readUntilDelim(delim).toDouble(&is_converted);
+        Q_ASSERT(is_converted);
+    };
+    for(int source_index{}; source_index < nsources; ++source_index) {
+        const auto type{ readUntilDelim(delim).toInt(&is_converted) };
+        Q_ASSERT(is_converted);
+        if(type == 0) {
+            PointSource source{};
+            filler(source, delim);
+        }
+        else {
+            DiffusionSource source{};
+            filler(source, '\t');
+            source.m_length = readUntilDelim('\t').toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+
+            source.m_direction = readUntilDelim('\t').toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+
+            source.m_tubes_number = readUntilDelim(delim).toInt(&is_converted);
+            Q_ASSERT(is_converted);
+        }
+
+        const auto nmatters{ readUntilDelim(delim).toInt(&is_converted) };
+        Q_ASSERT(is_converted);
+
+        auto &matters{ m_sources[source_index].second };
+        matters.resize(nmatters);
+        for(int matter_index{}; matter_index < nmatters; ++matter_index) {
+            matters[matter_index].m_name = readUntilDelim('\t');
+            matters[matter_index].m_group = readUntilDelim('\t');
+            matters[matter_index].m_part = readUntilDelim('\t').toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+
+            matters[matter_index].m_mpc = readUntilDelim('\t').toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+
+            matters[matter_index].m_bc = readUntilDelim('\t').toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+
+            matters[matter_index].m_sewerc = readUntilDelim('\t').toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+
+            matters[matter_index].m_maxc = readUntilDelim('\t').toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+
+            matters[matter_index].m_averagec = readUntilDelim('\t').toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+
+            matters[matter_index].m_maxsewerc = readUntilDelim(delim).toDouble(&is_converted);
+            Q_ASSERT(is_converted);
+        }
+    }
+
+    char control_delim{};
+    stream >> control_delim;
+    Q_ASSERT(control_delim == delim);
 }
 
 
@@ -707,8 +913,13 @@ template <class Cmp>
 
         case WindDirection::Northwest:
             return 315.;
+
+        default:
+            Q_ASSERT_X(false, "Class - Computator", "Function - getCurrentAngle, problem - default case");
         }
     }
+
+    return -1.; // slience the compiler
 }
 
 [[nodiscard]] QPixmap Computator::createFlowMap(const QVector<QVector<double>> &ux, const QVector<QVector<double>> &uy,
@@ -736,6 +947,11 @@ template <class Cmp>
         }
     }
 
+    const QColor min_color{ Qt::darkCyan };
+    const QColor avg_color{ Qt::darkMagenta };
+    const QColor max_color{ Qt::red };
+    createLegend(min_color, avg_color, max_color, max_speed); // emits:
+
     static constexpr double narrow_ratio{ 0.6 };
     static constexpr double arrow_angle{ 75. };
     auto pix_xstep{ (*m_pixgrid_ptr)[0][1].second.x() -  (*m_pixgrid_ptr)[0][0].second.x() };
@@ -752,13 +968,13 @@ template <class Cmp>
                 double cos{};
                 if((*m_depth_ptr)[i][j].second > m_horizon) {
                     if(u[i][j] <= max_speed / 3.) {
-                        painter.setPen(QPen(Qt::darkGreen, 1.));
+                        painter.setPen(QPen(min_color, 1.));
                     }
                     else if(u[i][j] <= max_speed / 3. * 2.) {
-                        painter.setPen(QPen(Qt::yellow, 1.));
+                        painter.setPen(QPen(avg_color, 1.));
                     }
                     else {
-                        painter.setPen(QPen(Qt::red, 1.));
+                        painter.setPen(QPen(max_color, 1.));
                     }
 
                     sin = uy[i][j] / u[i][j];
@@ -766,13 +982,13 @@ template <class Cmp>
                 }
                 else {
                     if(u0[i][j] <= max_speed / 3.) {
-                        painter.setPen(QPen(Qt::darkGreen, 1.));
+                        painter.setPen(QPen(min_color, 1.));
                     }
                     else if(u0[i][j] <= max_speed / 3. * 2.) {
-                        painter.setPen(QPen(Qt::yellow, 1.));
+                        painter.setPen(QPen(avg_color, 1.));
                     }
                     else {
-                        painter.setPen(QPen(Qt::red, 1.));
+                        painter.setPen(QPen(max_color, 1.));
                     }
 
                     sin = u0y[i][j] / u0[i][j];
@@ -788,8 +1004,8 @@ template <class Cmp>
                                          (*m_pixgrid_ptr)[i][j].second.y() + pix_ystep / 2. + pix_vec * sin));
 
                 const auto angle{ 90. - getCurrentAngle() };
-                const QPointF begin{ (*m_pixgrid_ptr)[i][j].second.x() + pix_xstep / 2. + pix_vec * cos,
-                                     (*m_pixgrid_ptr)[i][j].second.y() + pix_ystep / 2. - pix_vec * sin };
+                const QPointF begin{ (*m_pixgrid_ptr)[i][j].second.x() + pix_xstep / 2. + std::fabs(pix_vec * cos),
+                                     (*m_pixgrid_ptr)[i][j].second.y() + pix_ystep / 2. - std::fabs(pix_vec * sin) };
                 const QPointF end{ begin.x() + arrow_length, begin.y() }; // set line length
                 QLineF arrow(begin, end);
                 arrow.setAngle(angle - arrow_angle - 90.);
@@ -802,4 +1018,42 @@ template <class Cmp>
     painter.end();
 
     return pm;
+}
+
+void Computator::createLegend(const QColor &min_color, const QColor &avg_color,
+                              const QColor &max_color, const double max_speed) const
+{
+    constexpr auto pm_width{ 200. };
+    constexpr auto pm_height{ 25. };
+
+    auto createPm = [](const double width, const double height, const QString &text, const QColor &color) -> QPixmap {
+        QPixmap pm(width, height);
+        pm.fill();
+
+        QPainter painter(&pm);
+        painter.setPen(QPen(color, 1.));
+
+        constexpr int font_size{ 12 };
+        auto font{ painter.font() };
+        font.setPixelSize(font_size);
+        painter.setFont(font);
+
+        painter.drawLine(QLineF(QPointF(0., height / 2.), QPointF(width / 5., height / 2.)));
+        painter.drawText(QPointF(width / 5. + width / 10., height / 2. + font_size / 2), text); //
+        return pm;
+    };
+
+    QString pm_text("%1 - %2");
+    pm_text = pm_text.arg(0.).arg(max_speed / 3.);
+    auto min_speed_pm{ createPm(pm_width, pm_height, pm_text, min_color) };
+
+    pm_text = "%1 - %2";
+    pm_text = pm_text.arg(max_speed / 3.).arg(2. * max_speed / 3.);
+    auto avg_speed_pm{ createPm(pm_width, pm_height, pm_text, avg_color) };
+
+    pm_text = "%1 - %2";
+    pm_text = pm_text.arg(2. * max_speed / 3.).arg(max_speed);
+    auto max_speed_pm{ createPm(pm_width, pm_height, pm_text, max_color) };
+
+    emit legendCreated(min_speed_pm, avg_speed_pm, max_speed_pm);
 }

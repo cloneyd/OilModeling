@@ -43,7 +43,7 @@
            </size>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="map_image_widget">
            <property name="geometry">
@@ -173,8 +173,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1511</width>
-             <height>595</height>
+             <width>1497</width>
+             <height>715</height>
             </rect>
            </property>
            <attribute name="label">
@@ -191,6 +191,40 @@
                 <string>Карта</string>
                </attribute>
                <layout class="QGridLayout" name="gridLayout_2">
+                <item row="0" column="0" rowspan="2">
+                 <widget class="QLabel" name="map_with_winds_label">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>1200</width>
+                    <height>650</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>1200</width>
+                    <height>650</height>
+                   </size>
+                  </property>
+                  <property name="baseSize">
+                   <size>
+                    <width>1200</width>
+                    <height>650</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Здесь будет изображение карты ветров</string>
+                  </property>
+                  <property name="alignment">
+                   <set>Qt::AlignCenter</set>
+                  </property>
+                 </widget>
+                </item>
                 <item row="0" column="1">
                  <widget class="QGroupBox" name="legend_group_box">
                   <property name="sizePolicy">
@@ -210,12 +244,56 @@
                   </property>
                   <layout class="QVBoxLayout" name="verticalLayout_3">
                    <item>
-                    <widget class="QLabel" name="label">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
+                    <widget class="QLabel" name="min_speed_label">
+                     <property name="minimumSize">
+                      <size>
+                       <width>200</width>
+                       <height>25</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>200</width>
+                       <height>25</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="avg_speed_label">
+                     <property name="minimumSize">
+                      <size>
+                       <width>200</width>
+                       <height>25</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>200</width>
+                       <height>25</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string/>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="max_speed_label">
+                     <property name="minimumSize">
+                      <size>
+                       <width>200</width>
+                       <height>25</height>
+                      </size>
+                     </property>
+                     <property name="maximumSize">
+                      <size>
+                       <width>200</width>
+                       <height>25</height>
+                      </size>
                      </property>
                      <property name="text">
                       <string/>
@@ -223,16 +301,6 @@
                     </widget>
                    </item>
                   </layout>
-                 </widget>
-                </item>
-                <item row="0" column="0" rowspan="2">
-                 <widget class="QLabel" name="map_with_winds_label">
-                  <property name="text">
-                   <string>Здесь будет изображение карты ветров</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
                  </widget>
                 </item>
                </layout>
@@ -506,7 +574,7 @@
        </palette>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <property name="documentMode">
        <bool>false</bool>
@@ -967,8 +1035,8 @@
          <rect>
           <x>970</x>
           <y>20</y>
-          <width>421</width>
-          <height>71</height>
+          <width>328</width>
+          <height>42</height>
          </rect>
         </property>
         <property name="font">
@@ -989,6 +1057,35 @@
           <height>40</height>
          </size>
         </property>
+       </widget>
+       <widget class="QSplitter" name="splitter">
+        <property name="geometry">
+         <rect>
+          <x>1330</x>
+          <y>23</y>
+          <width>165</width>
+          <height>42</height>
+         </rect>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <widget class="QPushButton" name="load_configuration_file">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Загрузить файл конфигурации</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="create_configuration_file">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Создать файл конфигурации</string>
+         </property>
+        </widget>
        </widget>
       </widget>
       <widget class="QWidget" name="tab_2">
