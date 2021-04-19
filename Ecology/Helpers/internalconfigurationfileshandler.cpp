@@ -31,6 +31,9 @@ void InternalConfigurationFilesHandler::createConfigurationFile() const
 
     stream << '$' << ObjectID::Object3DContainerID << m_obj_delim;
     emit saveObject3DContainerState(stream, m_obj_delim);
+
+    Q_ASSERT(file.setPermissions(QFile::ReadUser | QFile::ReadGroup | QFile::ReadOther));
+    file.close();
 }
 
 void InternalConfigurationFilesHandler::loadConfigurationFile() const
@@ -81,4 +84,6 @@ void InternalConfigurationFilesHandler::loadConfigurationFile() const
             break;
         }
     }
+
+    file.close();
 }
