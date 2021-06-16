@@ -122,8 +122,8 @@ public:
     AbstractSheet *currentSheet() const;
     Worksheet *currentWorksheet() const;
 
-    bool save() const;
-    bool saveAs(const QString &xlsXname) const;
+    bool save(bool force_save = false) const;
+    bool saveAs(const QString &xlsXname, bool force_save = false) const;
     bool saveAs(QIODevice *device) const;
 
 private:

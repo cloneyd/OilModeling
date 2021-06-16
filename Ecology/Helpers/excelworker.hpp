@@ -7,6 +7,7 @@
 #include "GridHandlerFiles/grid_handler_utilities.hpp"
 #include "Visualization3D/object3d_utilities.hpp"
 #include "Helpers/errorstatusstructures.hpp"
+#include "PollutionWidget/pollutionwidget_utilities.hpp"
 
 // 3d party library
 #include "xlsxdocument.h"
@@ -69,6 +70,8 @@ public slots:
     void acceptU0(const QVector<QVector<double>> &speeds); // connected Computator::[6]
     void acceptXProjections(const QVector<QVector<double>> &projections); // connected with Computator::[12]
     void acceptYProjections(const QVector<QVector<double>> &projections); // connected with Computator::[13]
+    void loadMattersInformation(const int page_number, const int page_size, QVector<FileMatterInformation> &where,
+                                ReadingState& state) const; // connected with PollutionWidgetGenerator::[6]
 
 signals:
     void depthLoaded(DepthType &depth) const; // [1] transfer ownership
@@ -102,4 +105,6 @@ private:
     void recreateOutputFile();
 };
 
+// nonmember functions
+WrittingState addNewNoteToDatabase(const FileMatterInformation& info);
 #endif // EXCELWORKER_HPP

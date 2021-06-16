@@ -11,6 +11,7 @@ CONFIG += c++17
 SOURCES += \
     Computations/computator.cpp \
     GridHandlerFiles/gridhandler.cpp \
+    Helpers/databasenote.cpp \
     Helpers/excelworker.cpp \
     Helpers/internalconfigurationfileshandler.cpp \
     Helpers/pch.cpp \
@@ -29,6 +30,7 @@ HEADERS += \
     Computations/computator_utilities.hpp \
     GridHandlerFiles/grid_handler_utilities.hpp \
     GridHandlerFiles/gridhandler.hpp \
+    Helpers/databasenote.hpp \
     Helpers/errorstatusstructures.hpp \
     Helpers/excelworker.hpp \
     Helpers/internalconfigurationfileshandler.hpp \
@@ -48,6 +50,7 @@ HEADERS += \
     mainwindow.hpp
 
 FORMS += \
+    Helpers/databasenote.ui \
     PaintingWidget/grid_parameters.ui \
     PaintingWidget/paintingwidget.ui \
     PollutionWidget/pollutionwidget.ui \

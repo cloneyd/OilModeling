@@ -220,6 +220,15 @@ int main(int argc, char *argv[])
                                                        QVector<PollutionMatter> &/*callback matters*/)), // [5]
                      &computator, SLOT(giveSourceInfo(int, std::variant<PointSource, DiffusionSource> &, QVector<PollutionMatter> &)));    
 
+    // connections between PollutionWidgetGenerator and ExcelWorker
+    QObject::connect(&pollut_gen, SIGNAL(transferInfromationLoading(const int /*page_number*/, const int /*page_size*/,
+                                                                    QVector<FileMatterInformation> &/*where*/, ReadingState &/*state*/)), // [6]
+                     &excel_worker, SLOT(loadMattersInformation(const int, const int,
+                                                                QVector<FileMatterInformation> &,
+                                                                ReadingState &)));
+
+
+
     // connections between Computator and MainWindow
     QObject::connect(&computator, SIGNAL(flowMapCreated(const QPixmap &/*flow map image*/)), // [8]
                      &main_window, SLOT(acceptFlowMap(const QPixmap &)));

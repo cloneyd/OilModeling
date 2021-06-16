@@ -1030,22 +1030,22 @@ QStringList Document::sheetNames() const
  * the document constructed, a default name "book1.xlsx" will be used.
  * Returns true if saved successfully.
  */
-bool Document::save() const
+bool Document::save(bool force_save) const
 {
     Q_D(const Document);
     QString name = d->packageName.isEmpty() ? d->defaultPackageName : d->packageName;
 
-    return saveAs(name);
+    return saveAs(name, force_save);
 }
 
 /*!
  * Saves the document to the file with the given \a name.
  * Returns true if saved successfully.
  */
-bool Document::saveAs(const QString &name) const
+bool Document::saveAs(const QString &name, bool force_save) const
 {
     QFile file(name);
-    if (file.open(QIODevice::WriteOnly))
+    if (file.open(QIODevice::WriteOnly) || force_save)
         return saveAs(&file);
     return false;
 }

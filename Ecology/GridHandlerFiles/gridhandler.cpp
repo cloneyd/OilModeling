@@ -44,9 +44,9 @@ const GridType& GridHandler::createGrid(const QVector<QPointF> &wo_area, const Q
     auto ymin{ wo_area[0].y() };
     auto ymax{ ymin };
 
-    for(int i{ 1 }; i < wo_npoints; ++i){
-        auto x{ wo_area[i].x() };
-        auto y{ wo_area[i].y() };
+    for(int row_index{ 1 }; row_index < wo_npoints; ++row_index){
+        auto x{ wo_area[row_index].x() };
+        auto y{ wo_area[row_index].y() };
 
         xmin = std::min(xmin, x);
         xmax = std::max(xmax, x);
@@ -55,9 +55,9 @@ const GridType& GridHandler::createGrid(const QVector<QPointF> &wo_area, const Q
     }
 
     const auto islands_npoints{ islands_area.size() };
-    for(int i{ 1 }; i < islands_npoints; ++i){
-        auto x{ islands_area[i].x() };
-        auto y{ islands_area[i].y() };
+    for(int row_index{ 1 }; row_index < islands_npoints; ++row_index){
+        auto x{ islands_area[row_index].x() };
+        auto y{ islands_area[row_index].y() };
 
         xmin = std::min(xmin, x);
         xmax = std::max(xmax, x);
@@ -105,15 +105,15 @@ void GridHandler::drawGridInPixmap(QPixmap &pm, const QColor &color, double line
     painter.setPen({ color, line_width });
     auto cell_width{ s_pixscale * m_cell_width };
     auto cell_height{ s_pixscale * m_cell_height };
-    for(int i{}; i < nrows; ++i){
-        for(int j{}; j < ncols; ++j) {
-            if(m_pixgrid[i][j].first) {
-                auto x{ m_pixgrid[i][j].second.x() };
-                auto y{ m_pixgrid[i][j].second.y() };
-                painter.drawLines({ QLineF(m_pixgrid[i][j].second, QPointF(x + cell_width, y)),
+    for(int row_index{}; row_index < nrows; ++row_index){
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            if(m_pixgrid[row_index][col_index].first) {
+                auto x{ m_pixgrid[row_index][col_index].second.x() };
+                auto y{ m_pixgrid[row_index][col_index].second.y() };
+                painter.drawLines({ QLineF(m_pixgrid[row_index][col_index].second, QPointF(x + cell_width, y)),
                                     QLineF(QPointF(x + cell_width, y), QPointF(x + cell_width, y + cell_height)),
                                     QLineF(QPointF(x + cell_width, y + cell_height), QPointF(x, y + cell_height)),
-                                    QLineF(QPointF(x, y + cell_height), m_pixgrid[i][j].second)});
+                                    QLineF(QPointF(x, y + cell_height), m_pixgrid[row_index][col_index].second) });
             }
         }
     }
@@ -139,11 +139,11 @@ QPoint GridHandler::findPoint(const QPointF &pixel_pos, QPoint *search_result) c
         return result;
     }
 
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if(isBelongToGridSector(i, j, pixel_pos)) {
-                 result.setX(j);
-                result.setY(i);
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            if(isBelongToGridSector(row_index, col_index, pixel_pos) && m_pixgrid[row_index][col_index].first) {
+                result.setX(col_index);
+                result.setY(row_index);
 
                 if(search_result) {
                     *search_result = result;
@@ -168,7 +168,8 @@ void GridHandler::saveState(QTextStream &stream, const char delim)
         for(int row_index{}; row_index < nrows; ++row_index) {
             for(int col_index{}; col_index < ncols; ++col_index) {
                 stream << m_pixgrid[row_index][col_index].first << '\t';
-                stream << m_pixgrid[row_index][col_index].second.x() << '\t' << m_pixgrid[row_index][col_index].second.y() << '\t';
+                stream << m_pixgrid[row_index][col_index].second.x() << '\t' <<
+                          m_pixgrid[row_index][col_index].second.y() << '\t';
             }
         }
     }
@@ -254,80 +255,95 @@ bool GridHandler::isBelongToGridSector(int row, int col, const QPointF &pos) con
        pos.x() <= m_pixgrid[row][col].second.x() + cell_width &&
        pos.y() >= m_pixgrid[row][col].second.y() &&
        pos.y() <= m_pixgrid[row][col].second.y() + cell_height) {
-        return true && m_pixgrid[row][col].first;
+        return true;
     }
     return false;
 }
 
 void GridHandler::includeWaterObject(QVector<QPointF> water_object_area) // takes to copies
 {
-    const auto nrows {m_pixgrid.size() };
-    const auto ncols{ nrows > 0 ? m_pixgrid[0].size() : 0 };
-    const auto cell_height{ s_pixscale * m_cell_height };
-    const auto cell_width{ s_pixscale * m_cell_width };
+    const auto nrows { m_pixgrid.size() };
+    if(nrows == 0)  return;
+    const auto ncols{ m_pixgrid[0].size() };
+    if(ncols == 0)  return;
 
     auto water_area_size{ water_object_area.size() };
-    std::sort(water_object_area.begin(), water_object_area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
-    QVector<QVector<int>> water_object_width_indexes(nrows);
-    QVector<QVector<int>> water_object_height_indexes(ncols);
+    QVector<QVector<int>> width_indexes(nrows);
+    QVector<QVector<int>> height_indexes(ncols);
 
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            for(int k{ }; k < water_area_size; ++k) {
-                // WARNING: if the cell size will be small enough (relative to scale) there is will be empty spaces
-                if(water_object_area[k].x() >= m_pixgrid[i][j].second.x() && // WARNING: float point number compare
-                    water_object_area[k].x() <= m_pixgrid[i][j].second.x() + cell_width &&
-                    water_object_area[k].y() >= m_pixgrid[i][j].second.y() &&
-                    water_object_area[k].y() <= m_pixgrid[i][j].second.y() + cell_height) {
-                    m_pixgrid[i][j].first = true;
-                    water_object_width_indexes[i].append(j);
-                    water_object_height_indexes[j].append(i);
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        auto last_row{ -1 };
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            auto last_col{ -1 };
+            for(int point_index{ }; point_index < water_area_size; ++point_index) {
+                if(isBelongToGridSector(row_index, col_index, water_object_area[point_index])) {
+                    if(row_index != last_row || col_index != last_col) {
+                        m_pixgrid[row_index][col_index].first = true;
+                        width_indexes[row_index].append(col_index);
+                        height_indexes[col_index].append(row_index);
+                        last_row = row_index;
+                        last_col = col_index;
+                    }
                 }
             }
         }
 
     }
 
-    for(int i{}; i < nrows; ++i) {
-        if(auto size{ water_object_width_indexes[i].size() }; size < 2) {
-            if(size == 0) {
-                water_object_width_indexes[i].append(QVector{ ncols, -1 });
-            }
-            else {
-                if(i == 0) {
-                    water_object_width_indexes[i].append(water_object_width_indexes[i][0]);
-                }
-                else {
-                    water_object_width_indexes[i].append(water_object_width_indexes[i - 1][water_object_width_indexes[i - 1].size() - 1]);
-                }
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        if(auto size{ width_indexes[row_index].size() }; size < 2) {
+            switch(size) {
+            case 0:
+                width_indexes[row_index].append(QVector{ ncols, -1 });
+                break;
+
+            case 1:
+                width_indexes[row_index].append(width_indexes.front());
+                break;
+
+            default:
+                Q_ASSERT(false);
             }
         }
     }
 
-    for(int i{}; i < ncols; ++i) {
-        if(auto size{ water_object_height_indexes[i].size() }; size < 2) {
-            if(size == 0) {
-                water_object_height_indexes[i].append(QVector{ nrows, -1 });
-            }
-            else {
-                if(i == 0) {
-                    water_object_height_indexes[i].append(water_object_height_indexes[i][0]);
-                }
-                else {
-                    water_object_height_indexes[i].append(water_object_height_indexes[i - 1][water_object_height_indexes[i - 1].size() - 1]);
-                }
+    for(int col_index{}; col_index < ncols; ++col_index) {
+        if(auto size{ height_indexes[col_index].size() }; size < 2) {
+            switch (size) {
+            case 0:
+                height_indexes[col_index].append(QVector{ nrows, -1 });
+                break;
+
+            case 1:
+                height_indexes[col_index].append(height_indexes[col_index].front());
+                break;
+
+            default:
+                Q_ASSERT(false);
             }
         }
     }
 
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if(!m_pixgrid[i][j].first) {
-                if(j > water_object_width_indexes[i][0] &&
-                    j < water_object_width_indexes[i][water_object_width_indexes[i].size() - 1] &&
-                    i > water_object_height_indexes[j][0] &&
-                    i < water_object_height_indexes[j][water_object_height_indexes[j].size() - 1]) {
-                    m_pixgrid[i][j].first = true;
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        if(width_indexes[row_index].back() > 0.) {
+            std::sort(width_indexes[row_index].begin(), width_indexes[row_index].end());
+        }
+    }
+
+    for(int col_index{}; col_index < ncols; ++col_index) {
+        if(height_indexes[col_index].back() > 0.) {
+            std::sort(height_indexes[col_index].begin(), height_indexes[col_index].end());
+        }
+    }
+
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            if(!m_pixgrid[row_index][col_index].first) {
+                if(col_index >= width_indexes[row_index].front() &&
+                    col_index <= width_indexes[row_index].back() &&
+                    row_index >= height_indexes[col_index].front() &&
+                    row_index <= height_indexes[col_index].back()) {
+                    m_pixgrid[row_index][col_index].first = true;
                 }
             }
         }
@@ -343,72 +359,84 @@ void GridHandler::excludeIslands(QVector<QPointF> islands_area)
     if(nrows == 0)  return;
     const auto ncols{ m_pixgrid[0].size() };
     if(ncols == 0)  return;
-    const auto cell_height{ s_pixscale * m_cell_height };
-    const auto cell_width{ s_pixscale * m_cell_width };
 
-    QVector<QVector<int>> islands_width_indexes;
-    QVector<QVector<int>> islands_height_indexes;
-    std::sort(islands_area.begin(), islands_area.end(), [](QPointF first, QPointF second) {return (first.y() - second.y()) < 0.; }); // WARNING: floating point number comparation)
-    islands_width_indexes.resize(nrows);
-    islands_height_indexes.resize(ncols);
+    QVector<QVector<int>> width_indexes;
+    QVector<QVector<int>> height_indexes;
+    width_indexes.resize(nrows);
+    height_indexes.resize(ncols);
 
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            for(int k{}; k < islands_area_size; ++k) {
-                if(islands_area[k].x() >= m_pixgrid[i][j].second.x() && // WARNING: float point number compare
-                    islands_area[k].x() <= m_pixgrid[i][j].second.x() + cell_width &&
-                    islands_area[k].y() >= m_pixgrid[i][j].second.y() &&
-                    islands_area[k].y() <= m_pixgrid[i][j].second.y() + cell_height) {
-                    m_pixgrid[i][j].first = true;
-                    islands_width_indexes[i].append(j);
-                    islands_height_indexes[j].append(i);
-                }
-            }
-        }
-    }
-
-    if(islands_area_size > 0) {
-        for(int i{}; i < nrows; ++i) {
-            if(auto size{ islands_width_indexes[i].size() }; size < 2) {
-                if(size == 0) {
-                    islands_width_indexes[i].append(QVector{ ncols, -1 });
-                }
-                else {
-                    if(i == 0) {
-                        islands_width_indexes[i].append(islands_width_indexes[i][0]);
-                    }
-                    else {
-                        islands_width_indexes[i].append(islands_width_indexes[i - 1][islands_width_indexes[i - 1].size() - 1]);
-                    }
-                }
-            }
-        }
-
-       for(int i{}; i < ncols; ++i) {
-            if(auto size{ islands_height_indexes[i].size() }; size < 2) {
-                if(size == 0) {
-                    islands_height_indexes[i].append(QVector{ nrows, -1 });
-                }
-                else {
-                    if(i == 0) {
-                        islands_height_indexes[i].append(islands_height_indexes[i][0]);
-                    }
-                    else {
-                        islands_height_indexes[i].append(islands_height_indexes[i - 1][islands_height_indexes[i - 1].size() - 1]);
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        auto last_row{ -1 };
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            auto last_col{ -1 };
+            for(int point_index{}; point_index < islands_area_size; ++point_index) {
+                if(isBelongToGridSector(row_index, col_index, islands_area[point_index])) {
+                    if(row_index != last_row || col_index != last_col) {
+                        m_pixgrid[row_index][col_index].first = true;
+                        width_indexes[row_index].append(col_index);
+                        height_indexes[col_index].append(row_index);
+                        last_row = row_index;
+                        last_col = col_index;
                     }
                 }
             }
         }
     }
 
-    for(int i{}; i < nrows; ++i) {
-        for(int j{}; j < ncols; ++j) {
-            if(j > islands_width_indexes[i][0] &&
-                j < islands_width_indexes[i][islands_width_indexes[i].size() - 1] &&
-                i > islands_height_indexes[j][0] &&
-                i < islands_height_indexes[j][islands_height_indexes[j].size() - 1])
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        if(auto size{ width_indexes[row_index].size() }; size < 2) {
+            switch (size) {
+            case 0:
+                width_indexes[row_index].append(QVector{ ncols, -1 });
+                break;
+
+            case 1:
+                width_indexes[row_index].append(width_indexes[row_index].front());
+                break;
+
+            default:
+                Q_ASSERT(false);
+            }
+        }
+    }
+
+    for(int col_index{}; col_index < ncols; ++col_index) {
+        if(auto size{ height_indexes[col_index].size() }; size < 2) {
+            switch (size) {
+            case 0:
+                height_indexes[col_index].append(QVector{ nrows, -1 });
+                break;
+
+            case 1:
+                height_indexes[col_index].append(height_indexes[col_index].front());
+                break;
+
+            default:
+                Q_ASSERT(false);
+            }
+        }
+    }
+
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        if(width_indexes[row_index].back() > 0.) {
+            std::sort(width_indexes[row_index].begin(), width_indexes[row_index].end());
+        }
+    }
+
+    for(int col_index{}; col_index < ncols; ++col_index) {
+        if(height_indexes[col_index].back() > 0.) {
+            std::sort(height_indexes[col_index].begin(), height_indexes[col_index].end());
+        }
+    }
+
+    for(int row_index{}; row_index < nrows; ++row_index) {
+        for(int col_index{}; col_index < ncols; ++col_index) {
+            if(col_index > width_indexes[row_index].front() &&
+                col_index < width_indexes[row_index].back() &&
+                row_index > height_indexes[col_index].front() &&
+                row_index < height_indexes[col_index].back())
             {
-                m_pixgrid[i][j].first = false;
+                m_pixgrid[row_index][col_index].first = false;
             }
         }
     }

@@ -145,6 +145,7 @@ private:
 inline void PaintingWidget::updateGridParameters() { emit gridParametersChanged(m_grid_parameters_ui->scale_double_spin_box->value(),
                                                                       m_grid_parameters_ui->cell_width_double_spin_box->value(),
                                                                       m_grid_parameters_ui->cell_height_double_spin_box->value());
-                                                     m_grid_parameters_buffer = {-1., -1., -1. }; }
+                                                     m_grid_parameters_buffer = {-1., -1., -1. };
+                                                     m_grid_parameters_widget.close(); }
 
 #endif // PAINTINGWIDGET_HPP

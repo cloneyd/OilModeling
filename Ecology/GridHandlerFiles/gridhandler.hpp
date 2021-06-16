@@ -14,6 +14,8 @@
 #include "grid_handler_utilities.hpp"
 #include "PaintingWidget/paint_table_scene_utilities.hpp"
 
+
+// FIXME: the area outline
 class GridHandler : public QObject
 {
     Q_OBJECT

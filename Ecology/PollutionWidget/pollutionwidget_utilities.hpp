@@ -19,4 +19,11 @@ enum class WidgetMode : unsigned char
     MAX = Display
 };
 
+struct FileMatterInformation // struct represent information about matter which can be read from file
+{
+    QString m_name;
+    double m_mpc;
+    QString m_group;
+};
+
 #endif // POLLUTIONWIDGET_UTILITIES_HPP

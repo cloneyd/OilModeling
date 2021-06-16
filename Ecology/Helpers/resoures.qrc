@@ -15,4 +15,7 @@
     <qresource prefix="/qss">
         <file>QSS/ManjaroMix.qss</file>
     </qresource>
+    <qresource prefix="/text">
+        <file>TextInformation/Matters</file>
+    </qresource>
 </RCC>

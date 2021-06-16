@@ -3,7 +3,7 @@
 PollutionWidgetGenerator::PollutionWidgetGenerator(QObject *parent) :
     QObject(parent),
     m_creatation_lock_widget{ nullptr }
-{ /*PASS*/ }
+{ /* PASS*/ }
 
 
 // public slots
@@ -18,8 +18,8 @@ void PollutionWidgetGenerator::createDefaultConstructedWidget()
 
     m_creatation_lock_widget = new PollutionWidget(WidgetMode::Create); // create lock widget
     m_creatation_lock_widget->setAttribute(Qt::WA_DeleteOnClose, true);
-    m_creatation_lock_widget->show();
     connectDefaultWidget(m_creatation_lock_widget);
+    m_creatation_lock_widget->show();
 }
 
 void PollutionWidgetGenerator::createFilledWidget(int source_index) const
@@ -37,8 +37,8 @@ void PollutionWidgetGenerator::createFilledWidget(int source_index) const
     else {
         widget->setSource(std::get<DiffusionSource>(source), matters);
     }
-    widget->show();
     connectFilledWidget(widget);
+    widget->show();
 }
 
 
@@ -53,6 +53,11 @@ void PollutionWidgetGenerator::connectDefaultWidget(const PollutionWidget *widge
 
     connect(widget, SIGNAL(destroyed(QObject*)),
             this, SLOT(defaulWidgetCreationEnd(QObject *)));
+
+    connect(widget, SIGNAL(loadMattersDataFromFile(const int /*page_number*/, const int /*page_size*/,
+                                                        QVector<FileMatterInformation> &/*where*/, ReadingState &/*state*/)), // [5]
+            this, SLOT(catchPollutionWidgetDataLoadingCall(const int, const int,
+                                                           QVector<FileMatterInformation> &, ReadingState &)));
 }
 
 void PollutionWidgetGenerator::connectFilledWidget(const PollutionWidget *widget) const
@@ -62,4 +67,9 @@ void PollutionWidgetGenerator::connectFilledWidget(const PollutionWidget *widget
 
     connect(widget, SIGNAL(sourceUpdated(int, const DiffusionSource &, const QVector<PollutionMatter> &)), // [4]
             this, SLOT(sourceUpdatedEmitter(int, const DiffusionSource &, const QVector<PollutionMatter> &)));
+
+    connect(widget, SIGNAL(loadMattersDataFromFile(const int /*page_number*/, const int /*page_size*/,
+                                                        QVector<FileMatterInformation> &/*where*/, ReadingState &/*state*/)), // [5]
+            this, SLOT(catchPollutionWidgetDataLoadingCall(const int, const int,
+                                                           QVector<FileMatterInformation> &, ReadingState &)));
 }

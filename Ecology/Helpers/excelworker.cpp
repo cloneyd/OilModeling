@@ -370,6 +370,64 @@ void ExcelWorker::acceptYProjections(const QVector<QVector<double>> &projections
     writeToFile(m_output_doc, 1, 1, OutputDocSheetIndexes::yspeed_projections_page);
 }
 
+void ExcelWorker::loadMattersInformation(const int page_number, const int page_size,
+                                         QVector<FileMatterInformation> &where,
+                                         ReadingState &state) const
+{
+
+    bool convertion_flag{};
+    QXlsx::Document matters_doc(R"(:/text/TextInformation/Matters)");
+    auto vec_size{ 0 };
+    if(auto size{ matters_doc.read(1, 4) }; size.toString().isEmpty()) {
+        Q_ASSERT(false);
+        QMessageBox::warning(nullptr, "Ошибка чтения", "Не удалось считать информацию о веществах,\nтак как файл"
+                                      " недоступен или поврежден");
+        state = ReadingState::FileCorrupted;
+        return;
+    }
+    else {
+        vec_size = size.toInt(&convertion_flag);
+        Q_ASSERT(convertion_flag);
+        if(!convertion_flag) {
+            QMessageBox::warning(nullptr, "Ошибка чтения", "Не удалось считать информацию о веществах,\nтак как файл"
+                                          " недоступен или поврежден");
+            state = ReadingState::ConvertionFailed;
+            return;
+        }
+    }
+    // nnotes - number of unread notes
+    if(auto nnotes{ vec_size - (page_number + 1) * page_size }; nnotes <= 0) {
+        state = ReadingState::NotEnoughData;  // silenced
+        return;
+    }
+    else {
+        vec_size = page_size <= nnotes ? page_size : nnotes; // read one page or remain info
+    }
+
+    QVector<FileMatterInformation> reader(vec_size, FileMatterInformation{{}, -1., {}});
+    for(int row_index{ 1 }; row_index <= vec_size; ++row_index) {
+        reader[row_index - 1].m_name = matters_doc.read(page_number * page_size + row_index, 1).toString();
+        auto tmp{ matters_doc.read(page_number * page_size + row_index, 2).toString() };
+        if(tmp.front() == '-') {
+            reader[row_index - 1].m_mpc = -1.;
+            convertion_flag = true;
+        }
+        else {
+            tmp.replace(',', '.');
+            reader[row_index - 1].m_mpc = tmp.toDouble(&convertion_flag);
+        }
+        Q_ASSERT(convertion_flag);
+        if(!convertion_flag) {
+            QMessageBox::warning(nullptr, "Ошибка чтения", "Не удалось считать информацию о веществах,\nтак как файл"
+                                          " недоступен или поврежден");
+            state = ReadingState::ConvertionFailed;
+            return;
+        }
+        reader[row_index - 1].m_group = matters_doc.read(page_number * page_size +row_index, 3).toString();
+    }
+    state = ReadingState::Ok;
+    where = std::move(reader);
+}
 
 // private functions
 void ExcelWorker::writeToFile(QXlsx::Document &where,
@@ -548,4 +606,73 @@ void ExcelWorker::recreateOutputFile()
    m_output_doc.addSheet("Поле течений (по оси y)");
    m_output_doc.addSheet("Поле течений");
    m_output_doc.addSheet("Поле концентраций");
+}
+
+
+// nonmember functions
+WrittingState addNewNoteToDatabase(const FileMatterInformation& info)
+{
+    QXlsx::Document matters_doc(R"(:/text/TextInformation/Matters)");
+
+    bool is_converted{};
+    const auto nnotes{ matters_doc.read(1, 4).toInt(&is_converted) };
+    if(!is_converted) {
+        return WrittingState::FileCorrupted;
+    }
+
+    QVector<FileMatterInformation> matters_info(nnotes + 1);
+    matters_info[nnotes] = info;
+
+    for(int index{1}; index <= nnotes; ++index) {
+        const auto name{ matters_doc.read(index, 1).toString() };
+        const auto mpc{ matters_doc.read(index, 2) };
+        const auto group{ matters_doc.read(index, 3).toString() };
+        if(mpc.toString() != "-") {
+            matters_info[index - 1] = {name, mpc.toDouble(), group };
+        }
+        else {
+            matters_info[index - 1] = {name, -1., group };
+        }
+    }
+
+    for(int note_index{ nnotes - 1 }; note_index >= 0; --note_index) {
+        if(matters_info[note_index].m_name > info.m_name) {
+            std::swap(matters_info[note_index], matters_info[note_index + 1]);
+        }
+        else {
+            break; // position is find
+        }
+    }
+
+    for(int index{}, new_nnotes{ nnotes + 1 }; index < new_nnotes; ++index) {
+        if(!matters_doc.write(index + 1, 1, matters_info[index].m_name)) {
+            return WrittingState::WrittingError;
+        }
+
+        if(matters_info[index].m_mpc < 0.) {
+            if(!matters_doc.write(index + 1, 2, "-")) {
+                return WrittingState::WrittingError;
+            }
+        }
+        else {
+            if(!matters_doc.write(index + 1, 2, matters_info[index].m_mpc)) {
+                return WrittingState::WrittingError;
+            }
+        }
+
+        if(!matters_doc.write(index + 1, 3, matters_info[index].m_group)) {
+            return WrittingState::WrittingError;
+        }
+    }
+
+    if(!matters_doc.write(1, 4, nnotes + 1)) {
+        return WrittingState::WrittingError;
+    }
+
+    // FIXME: does not work cause of relative path
+    if(!matters_doc.save()) {
+        return WrittingState::FileNotSaved;
+    }
+
+    return WrittingState::Ok;
 }

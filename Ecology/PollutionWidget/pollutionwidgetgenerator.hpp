@@ -16,7 +16,6 @@ class PollutionWidgetGenerator : public QObject
 private: // data
     PollutionWidget *m_creatation_lock_widget; // if non - nullptr - new sources creation locks
 
-
 public:
     explicit PollutionWidgetGenerator(QObject *parent = nullptr);
 
@@ -41,6 +40,10 @@ private slots:
      * signal - destroyed(QObject*)
      * unlock createDefaultConstructedWidget */
     inline void defaulWidgetCreationEnd(QObject *unused) noexcept { (void)unused; m_creatation_lock_widget = nullptr; }
+
+    inline void catchPollutionWidgetDataLoadingCall(const int page_number, const int page_size,
+                                                    QVector<FileMatterInformation> &where, ReadingState &state)
+                                                    { emit transferInfromationLoading(page_number, page_size, where, state); }
 signals:
     void sourceCreated(const PointSource &source, const QVector<PollutionMatter> &matters) const; // [1]
     void sourceUpdated(int source_index, const PointSource &source, const QVector<PollutionMatter> &matters) const; // [2]
@@ -49,6 +52,8 @@ signals:
     void sourceUpdated(int source_index, const DiffusionSource &source, const QVector<PollutionMatter> &matters) const; // [4]
 
     void getSourceInfo(int source_index, std::variant<PointSource, DiffusionSource> &source, QVector<PollutionMatter> &matters) const; // [5]
+    void transferInfromationLoading(const int page_number, const int page_size,
+                                    QVector<FileMatterInformation> &where, ReadingState &state); // [6]; transfers PollutionWidget call
 
 // helpers
 private:
