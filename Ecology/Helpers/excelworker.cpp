@@ -374,9 +374,14 @@ void ExcelWorker::loadMattersInformation(const int page_number, const int page_s
                                          QVector<FileMatterInformation> &where,
                                          ReadingState &state) const
 {
+    QString filepath{ R"(:/text/TextInformation/Matters)" };
+
+    if(QFile::exists("MattersBase")) {
+        filepath = "MattersBase";
+    }
 
     bool convertion_flag{};
-    QXlsx::Document matters_doc(R"(:/text/TextInformation/Matters)");
+    QXlsx::Document matters_doc(filepath);
     auto vec_size{ 0 };
     if(auto size{ matters_doc.read(1, 4) }; size.toString().isEmpty()) {
         Q_ASSERT(false);
@@ -608,11 +613,17 @@ void ExcelWorker::recreateOutputFile()
    m_output_doc.addSheet("Поле концентраций");
 }
 
-
+#include <QDebug>
 // nonmember functions
 WrittingState addNewNoteToDatabase(const FileMatterInformation& info)
 {
-    QXlsx::Document matters_doc(R"(:/text/TextInformation/Matters)");
+    QString filepath{ R"(:/text/TextInformation/Matters)" };
+
+    if(QFile::exists("MattersBase")) {
+        filepath = "MattersBase";
+    }
+
+    QXlsx::Document matters_doc(filepath);
 
     bool is_converted{};
     const auto nnotes{ matters_doc.read(1, 4).toInt(&is_converted) };
@@ -669,8 +680,8 @@ WrittingState addNewNoteToDatabase(const FileMatterInformation& info)
         return WrittingState::WrittingError;
     }
 
-    // FIXME: does not work cause of relative path
-    if(!matters_doc.save()) {
+    // always must be saved like this
+    if(!matters_doc.saveAs("MattersBase")) {
         return WrittingState::FileNotSaved;
     }
 

@@ -2,6 +2,7 @@
 #define EXCELWORKER_HPP
 // QT
 #include <QObject>
+#include <QFile>
 
 // current project
 #include "GridHandlerFiles/grid_handler_utilities.hpp"
